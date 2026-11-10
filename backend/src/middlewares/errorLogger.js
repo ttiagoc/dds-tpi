@@ -1,15 +1,11 @@
-function codigoDe(error) {
-  if (Number.isInteger(error?.statusCode)) return error.statusCode;
-  if (Number.isInteger(error?.status)) return error.status;
-  return 500;
-}
+import { normalizarError } from "../errors/normalizarError.js";
 
 export function crearErrorLogger({ nodeEnv = process.env.NODE_ENV, consola = console } = {}) {
   return (error, req, _res, next) => {
     if (nodeEnv !== "test") {
-      const codigo = codigoDe(error);
-      const linea = `${codigo} ${req.method} ${req.originalUrl} - ${error?.message}`;
-      if (codigo >= 500) consola.error(linea, error?.stack);
+      const { statusCode } = normalizarError(error);
+      const linea = `${statusCode} ${req.method} ${req.originalUrl} - ${error?.message}`;
+      if (statusCode >= 500) consola.error(linea, error?.stack);
       else consola.warn(linea);
     }
     next(error);

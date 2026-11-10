@@ -344,9 +344,12 @@ describe("Compra", () => {
       expect(compra.diasRestantes(enDias(3))).toBe(0);
     });
 
-    it.each([PENDIENTE, UTILIZADA, CANCELADA, REEMBOLSADA])("devuelve null si está %s", (estado) => {
-      expect(crearCompra({ estado }).diasRestantes(AHORA)).toBeNull();
-    });
+    it.each([PENDIENTE, UTILIZADA, CANCELADA, REEMBOLSADA])(
+      "devuelve null si está %s",
+      (estado) => {
+        expect(crearCompra({ estado }).diasRestantes(AHORA)).toBeNull();
+      },
+    );
   });
 
   describe("participantes y chat", () => {

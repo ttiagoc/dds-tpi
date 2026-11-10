@@ -43,6 +43,18 @@ export default [
     },
   },
   {
+    files: ["backend/src/**/*.js", "frontend/src/**/*.{js,jsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{js,jsx}"],
+    rules: {
+      complexity: ["error", 8],
+      "max-depth": ["error", 3],
+      "max-lines-per-function": ["error", { max: 40, skipBlankLines: true, skipComments: true }],
+      "max-params": ["error", 4],
+      "no-duplicate-imports": "error",
+      eqeqeq: ["error", "smart"],
+    },
+  },
+  {
     files: ["e2e/**/*.js"],
     ...js.configs.recommended,
     languageOptions: { ecmaVersion: "latest", sourceType: "module", globals: { ...globals.node, ...globals.mocha, cy: "readonly", Cypress: "readonly" } },

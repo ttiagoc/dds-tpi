@@ -1,16 +1,16 @@
 import { Rol } from "./Rol.js";
-import { exigir, esTextoNoVacio } from "./validaciones.js";
+import { exigir, esTextoNoVacio, textoRequerido } from "./validaciones.js";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class Usuario {
   constructor({ id = null, nombre, apellido = "", email, passwordHash, rol, favoritos = [] }) {
-    exigir(esTextoNoVacio(nombre), "El usuario necesita un nombre");
+    const nombreLimpio = textoRequerido(nombre, "El usuario necesita un nombre");
     exigir(typeof email === "string" && EMAIL.test(email), "El email no es válido");
     exigir(esTextoNoVacio(passwordHash), "El usuario necesita una contraseña");
     exigir(Object.values(Rol).includes(rol), "El rol no es válido");
     this.id = id;
-    this.nombre = nombre.trim();
+    this.nombre = nombreLimpio;
     this.apellido = (apellido ?? "").trim();
     this.email = email.toLowerCase();
     this.passwordHash = passwordHash;

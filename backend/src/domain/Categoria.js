@@ -1,10 +1,9 @@
-import { exigir, esTextoNoVacio } from "./validaciones.js";
+import { textoRequerido } from "./validaciones.js";
 
 export class Categoria {
   constructor({ id = null, nombre, descripcion = "" }) {
-    exigir(esTextoNoVacio(nombre), "La categoría necesita un nombre");
     this.id = id;
-    this.nombre = nombre.trim();
+    this.nombre = textoRequerido(nombre, "La categoría necesita un nombre");
     this.descripcion = descripcion;
   }
 }

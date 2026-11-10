@@ -1,7 +1,7 @@
 import { EstadoCompra, TRANSICIONES } from "./EstadoCompra.js";
 import { CambioEstadoCompra } from "./CambioEstadoCompra.js";
 import { Mensaje } from "./Mensaje.js";
-import { exigir, fechaValida } from "./validaciones.js";
+import { exigir, esEnteroPositivo, fechaValida } from "./validaciones.js";
 
 const DIA_EN_MS = 24 * 60 * 60 * 1000;
 const { PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA } = EstadoCompra;
@@ -23,10 +23,7 @@ export class Compra {
   }) {
     exigir(comprador, "La compra necesita un comprador");
     exigir(evento, "La compra necesita un evento");
-    exigir(
-      Number.isInteger(cantidad) && cantidad >= 1,
-      "La cantidad tiene que ser un entero mayor a 0",
-    );
+    exigir(esEnteroPositivo(cantidad), "La cantidad tiene que ser un entero mayor a 0");
     exigir(Object.values(EstadoCompra).includes(estado), "El estado de la compra no es válido");
     const tipo = evento.tipoEntrada(tipoEntradaId);
 

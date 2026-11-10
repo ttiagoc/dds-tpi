@@ -15,6 +15,7 @@ Plazo: ~3 semanas desde 2026-11-10. Cada feature: `escribir-spec` → `feature/<
 Specs: `01-backend-base`, `02-dominio`, `03-repos-y-seed`, `04-auth`.
 - [x] `chore/backend-base`: package.json ESM, express 5, app/server, errores, middlewares, healthcheck, Jest ESM, reloj, contenedor.
 - [x] `feature/dominio`: todas las clases de `planes/02` + tests unitarios (TRANSICIONES, cupo, días restantes, reseñas).
+- [x] `chore/calidad-codigo`: skill `revisar-calidad`, `npm run calidad` (ESLint de complejidad/tamaño + Prettier + jscpd), integrada a `cerrar-feature`; primera pasada sobre lo mergeado.
 - [ ] `feature/repos-y-seed`: `InMemoryRepository`, repos, `datos.js`, `sembrar.js`, `/test/reset`.
 - [ ] `feature/auth`: login JWT, `autenticar`, `autorizar`, `/auth/yo`.
 
