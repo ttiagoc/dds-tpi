@@ -8,6 +8,7 @@ import { ReseniaRepository } from "./repositories/ReseniaRepository.js";
 import { AuthService } from "./services/AuthService.js";
 import { EventoService } from "./services/EventoService.js";
 import { CategoriaService } from "./services/CategoriaService.js";
+import { CompraService } from "./services/CompraService.js";
 import { sembrar } from "./seeds/sembrar.js";
 
 export function crearContenedor({ reloj = relojSistema, entorno = leerEntorno() } = {}) {
@@ -33,6 +34,13 @@ export function crearContenedor({ reloj = relojSistema, entorno = leerEntorno() 
       reloj,
     }),
     categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),
+    compraService: new CompraService({
+      compraRepository: repos.compraRepository,
+      eventoRepository: repos.eventoRepository,
+      usuarioRepository: repos.usuarioRepository,
+      reseniaRepository: repos.reseniaRepository,
+      reloj,
+    }),
   };
 
   async function resetear() {
