@@ -22,3 +22,19 @@ export function formatearFecha(fecha, { zonaHoraria } = {}) {
 }
 
 export const formatearPrecio = (monto) => precio.format(monto);
+
+const puntaje = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
+
+export const formatearPuntaje = (valor) => puntaje.format(valor);
+
+export function formatearDia(fecha, { zonaHoraria } = {}) {
+  return new Intl.DateTimeFormat(LOCALE, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: zonaHoraria,
+  })
+    .format(new Date(fecha))
+    .replaceAll(".", "")
+    .replaceAll(" de ", " ");
+}

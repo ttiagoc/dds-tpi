@@ -20,7 +20,15 @@ describe("useCargar", () => {
     const { result } = await renderHook(() => useCargar(cargar));
     await waitFor(() => expect(result.current.cargando).toBe(false));
     expect(result.current.error).toBe("No existe el evento");
+    expect(result.current.codigoError).toBe(404);
     expect(result.current.datos).toBeNull();
+  });
+
+  it("sin respuesta del servidor no hay código de error", async () => {
+    const cargar = jest.fn().mockRejectedValue(new Error("red"));
+    const { result } = await renderHook(() => useCargar(cargar));
+    await waitFor(() => expect(result.current.cargando).toBe(false));
+    expect(result.current.codigoError).toBeNull();
   });
 
   it("con una función estable carga una sola vez aunque se vuelva a renderizar", async () => {

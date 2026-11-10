@@ -12,7 +12,11 @@ export function useCargar(cargar) {
     };
     cargar().then(
       (datos) => terminar({ datos }),
-      (error) => terminar({ error: mensajeDeError(error) }),
+      (error) =>
+        terminar({
+          error: mensajeDeError(error),
+          codigoError: error?.response?.status ?? null,
+        }),
     );
     return () => {
       vigente = false;
@@ -25,6 +29,7 @@ export function useCargar(cargar) {
     datos: resultado.datos,
     cargando,
     error: cargando ? null : resultado.error,
+    codigoError: cargando ? null : (resultado.codigoError ?? null),
     recargar,
   };
 }
