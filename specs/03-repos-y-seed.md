@@ -1,6 +1,6 @@
 # Spec 03 — Repositorios en memoria, seed y reset
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/repos-y-seed`
 - **Casos de uso:** — (soporte de todos; datos para la demo y los e2e)
 - **Iteración:** It1
@@ -94,3 +94,4 @@ Escenario: reset fuera de test
 ## Notas de IA
 - El usuario eligió fechas relativas, un solo seed y vendidas derivadas de las compras; las tres eran las opciones que recomendó la IA.
 - `planes/05` mencionaba `sembrarMinimo()`. Se reemplazó por el seed único y `planes/05` ya está actualizado.
+- `revisar-calidad` encontró 2 hallazgos en la rama: el patrón guardar y `fromEntries` repetido en el seed, y búsquedas de los repos que no convertían el id a número. Los dos se aplicaron con aprobación del usuario.

@@ -6,6 +6,7 @@ import { crearApp } from "./app.js";
 
 const entorno = leerEntorno();
 const contenedor = crearContenedor();
+await contenedor.resetear();
 const app = crearApp(contenedor, { nodeEnv: entorno.nodeEnv });
 const servidor = http.createServer(app);
 
