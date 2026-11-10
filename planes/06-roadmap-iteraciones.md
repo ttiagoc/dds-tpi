@@ -13,7 +13,7 @@ Plazo: ~3 semanas desde 2026-11-10. Cada feature: `escribir-spec` → `feature/<
 
 ## It1 — Backend base (11-14/11)
 Specs: `01-backend-base`, `02-auth`.
-- [ ] `chore/backend-base`: package.json ESM, express 5, app/server, errores, middlewares, healthcheck, Jest ESM, reloj, contenedor.
+- [x] `chore/backend-base`: package.json ESM, express 5, app/server, errores, middlewares, healthcheck, Jest ESM, reloj, contenedor.
 - [ ] `feature/dominio`: todas las clases de `planes/02` + tests unitarios (TRANSICIONES, cupo, días restantes, reseñas).
 - [ ] `feature/repos-y-seed`: `InMemoryRepository`, repos, `datos.js`, `sembrar.js`, `/test/reset`.
 - [ ] `feature/auth`: login JWT, `autenticar`, `autorizar`, `/auth/yo`.
