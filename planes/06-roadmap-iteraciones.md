@@ -23,7 +23,7 @@ Specs: `01-backend-base`, `02-dominio`, `03-repos-y-seed`, `04-auth`.
 
 ## It2 — API (14-18/11)
 Specs: `05-eventos-consulta`, `05b-eventos-organizador`, `06-compras`, `07-resenias-favoritos`.
-- [ ] `feature/eventos-consulta`: `GET /categorias`, `GET /eventos` (q, categoria, precio, orden, paginado), `GET /eventos/:id`.
+- [x] `feature/eventos-consulta`: `GET /categorias`, `GET /eventos` (q, categoria, precio, orden, paginado), `GET /eventos/:id`.
 - [ ] `feature/eventos-organizador`: `POST /eventos` (categoría inexistente → 422), `GET /organizadores/yo/eventos`.
 - [ ] `feature/compras`: crear, listar mías con `diasRestantes` y `acciones`, detalle con historial, pago, cancelación/reembolso, uso, `GET /eventos/:id/compras` con disponibilidad.
 - [ ] `feature/resenias-favoritos`: reseñas, puntaje promedio, ordenar por puntaje, favoritos.

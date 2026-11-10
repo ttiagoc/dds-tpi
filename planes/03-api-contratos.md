@@ -70,7 +70,7 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
 | GET | `/eventos` | 🔓 | query abajo | 200 lista paginada de EventoResumen | 400 query inválida |
-| GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 404 |
+| GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 400, 404 |
 | POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 422 (incluye categoría inexistente: "La categoría no existe") |
 | GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, recaudado], ... }` — `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA | |
 | GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` | 403, 404 |

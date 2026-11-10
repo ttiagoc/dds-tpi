@@ -1,6 +1,6 @@
 # Spec 05 — Consulta de eventos (categorías, búsqueda, orden y detalle)
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/eventos-consulta`
 - **Casos de uso:** CU3, CU11, CU10 (parcial: puntaje del organizador en el listado y el detalle)
 - **Iteración:** It2
@@ -22,13 +22,14 @@ Aplican R6 (puntaje del organizador) y R10 (por defecto, solo eventos no ocurrid
   - `categoria`: id de categoría. Si no existe → 200 con lista vacía.
   - `precioMin` / `precioMax`: `evento.tuPrecioEstaEntre(min, max)`, es decir, algún tipo con precio en el rango (bordes incluidos). Se puede mandar uno solo.
   - `incluirPasados` (`"true"` | `"false"`, por defecto `false`): sin él, se excluyen los eventos con `yaOcurrio(ahora)` (R10).
+  - Los parámetros numéricos (`categoria`, `precioMin`, `precioMax`, `page`, `limit`) que llegan vacíos o con solo espacios se ignoran, igual que `q` vacío.
 - **E3** Orden:
   - `ordenarPor=fecha` (por defecto) → por `fecha`; `precio` → por `precioMinimo()`; `puntaje` → por el `puntajePromedio` del organizador.
   - `orden` por defecto `asc` (y `desc` si `ordenarPor=puntaje`).
   - Con `puntaje`, los organizadores sin reseñas van **siempre al final**, cualquiera sea el `orden`.
   - Desempate estable: `fecha` asc y después `id` asc.
 - **E4** Paginado: `page` ≥ 1 (por defecto 1), `limit` 1-50 (por defecto 20). Respuesta `{ eventos, total, page, totalPages }` con `totalPages = Math.ceil(total / limit)` (0 si no hay resultados). Una página más allá de la última → 200 con `eventos: []`.
-- **E5** Query inválida → 400 "Parámetros de consulta inválidos" con `details`. Por ejemplo: `limit` > 50, `ordenarPor`/`orden` fuera de los valores, `incluirPasados` que no es `true`/`false`, precios negativos, `q` de más de 100 caracteres, o `precioMin > precioMax` (detalle en el campo `precioMin`: "precioMin no puede ser mayor que precioMax"). Los parámetros desconocidos también dan 400 (`.strict()`).
+- **E5** Query inválida → 400 "Parámetros de consulta inválidos" con `details`. Por ejemplo: `limit` > 50, `ordenarPor`/`orden` fuera de los valores, `incluirPasados` que no es `true`/`false`, precios negativos, `q` de más de 100 caracteres (contados después de recortarlo), `categoria` que no es un entero positivo (`abc`, `0`), o `precioMin > precioMax` (detalle en el campo `precioMin`: "precioMin no puede ser mayor que precioMax"). Los parámetros desconocidos también dan 400 (`.strict()`).
 - **E6** Puntaje (R6): el service arma un `Map organizadorId → promedio` **una sola vez por request** a partir de las reseñas (`Resenia.promedio`, 1 decimal, `null` si no tiene).
 - **E7** `EventoResumen` (planes/03): `precioDesde = precioMinimo()`, `imagen = multimedia[0] ?? null`, `organizador = { id, nombre: nombreCompleto(), puntajePromedio }`, y `esFavorito` es `true` solo si hay sesión de COMPRADOR y el evento está en sus favoritos (si no, `false`).
 - **E8** `GET /eventos/:id` devuelve `EventoDetalle` aunque el evento ya haya ocurrido (R10 aplica solo a la búsqueda). `tiposEntrada: [{ id, nombre, descripcion, precio, cupo, disponibles }]`. Si no existe → 404 "No existe el evento"; si el id no es un entero positivo → 400 "El id debe ser un entero positivo".
@@ -108,3 +109,4 @@ Escenario: detalle
 - El usuario eligió que `precioMin > precioMax` dé 400 y que una categoría inexistente en el filtro devuelva una lista vacía (en `POST /eventos` es 422, spec 05b). En los dos casos eligió la opción que recomendó la IA.
 - La IA señaló que `z.coerce.boolean()` convierte `"false"` en `true`; por eso `incluirPasados` se valida como enum `"true"`/`"false"`.
 - Decisiones tomadas por la IA sin preguntar (revisables): desempate por fecha e id, `totalPages = 0` sin resultados, y página fuera de rango → lista vacía.
+- En la revisión de cierre (revisar-calidad y revisor-reglas-negocio), el usuario aprobó estos cambios: ignorar los parámetros numéricos vacíos (antes `precioMax=` filtraba como 0), aplicar el límite de `q` después del trim, documentar `categoria=0` como 400 y cubrir con tests los tokens vencidos y de usuarios borrados.
