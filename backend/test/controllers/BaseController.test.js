@@ -12,7 +12,20 @@ describe("BaseController", () => {
       expect(controller.parsearId("7")).toBe(7);
     });
 
-    it.each(["0", "-1", "abc", "1.5", "", undefined])("rechaza %p", (valor) => {
+    it.each([
+      "0",
+      "-1",
+      "abc",
+      "1.5",
+      "",
+      undefined,
+      " 4",
+      "4.0",
+      "1e0",
+      "+4",
+      "0x10",
+      "99999999999999999999",
+    ])("rechaza %p", (valor) => {
       expect(() => controller.parsearId(valor)).toThrow(BadRequestError);
       expect(() => controller.parsearId(valor)).toThrow("El id debe ser un entero positivo");
     });
