@@ -17,7 +17,7 @@ Evento ──▶ * TipoEntrada
 Compra ──▶ Usuario (comprador), Evento, TipoEntrada, EstadoCompra
 Compra ──▶ * Mensaje ──▶ Usuario
 Compra ──▶ * CambioEstadoCompra (Δ: historial embebido en la compra)
-Resenia ──▶ Usuario (comprador), Evento, Compra (Δ)
+Resenia ──▶ Usuario (comprador), Evento, Compra (Δ, por compraId)
 ```
 
 ### Usuario
@@ -108,11 +108,13 @@ Métodos:
 - `puedeReseniarse()` → `estado === UTILIZADA`
 - `diasRestantes(ahora)` → solo si CONFIRMADA: `Math.ceil((evento.fecha - ahora) / DIA)`, mínimo 0; si no, `null`.
 - `participa(usuarioId)` → es el comprador o el organizador del evento (para chat).
+- `puedePagarse(ahora)`, `puedeMarcarseUtilizada()`.
+- `accionesPara(usuarioId, ahora)` → `{ puedePagar, puedeCancelar, puedeMarcarUtilizada, puedeReseniar }` según rol en la compra (alimenta `acciones` de `CompraResumen`).
 - `agregarMensaje(usuario, texto, ahora)`.
 
 ### Resenia
-`id, comprador, evento, compra (Δ), puntuacion (int 1-5), detalle (string 1-500), fecha`.
-**(Δ) `compra`**: permite garantizar "una reseña por compra" y que la compra esté UTILIZADA.
+`id, comprador, evento, compraId (Δ), puntuacion (int 1-5), detalle (string 1-500), fecha`. `Resenia.crear({ compra, ... }, ahora)` exige compra UTILIZADA; `Resenia.promedio(resenias)` implementa R6.
+**(Δ) `compraId`**: permite garantizar "una reseña por compra" y que la compra esté UTILIZADA.
 
 ## Máquina de estados de la compra
 
