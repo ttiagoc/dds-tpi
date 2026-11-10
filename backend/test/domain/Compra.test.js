@@ -387,8 +387,8 @@ describe("Compra", () => {
       expect(compra.mensajes).toHaveLength(2);
     });
 
-    it("permite escribir en cualquier estado (R7)", () => {
-      const compra = crearCompra({ estado: REEMBOLSADA });
+    it.each(Object.values(EstadoCompra))("permite escribir en una compra %s (R7)", (estado) => {
+      const compra = crearCompra({ estado });
       expect(() => compra.agregarMensaje(crearComprador(), "Hola", AHORA)).not.toThrow();
     });
 

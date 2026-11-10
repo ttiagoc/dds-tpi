@@ -1,6 +1,6 @@
 # Spec 08 — Chat de la compra (REST)
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/chat-rest`
 - **Casos de uso:** CU5 (el comprador envía mensajes de una compra), CU6 (el organizador responde)
 - **Iteración:** It3

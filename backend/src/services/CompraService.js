@@ -3,7 +3,7 @@ import { Compra } from "../domain/Compra.js";
 import { relojSistema } from "../config/reloj.js";
 import { MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
 import { paginar } from "./paginacion.js";
-import { buscarCompra, exigirPermiso } from "./compras.js";
+import { buscarCompra, buscarCompraDelParticipante, exigirPermiso } from "./compras.js";
 
 function ordenarParaElComprador(compras, ahora) {
   const clave = (compra) => {
@@ -79,8 +79,7 @@ export class CompraService {
   }
 
   async obtener(id, usuario) {
-    const compra = await this.buscar(id);
-    exigirPermiso(compra.participa(usuario.id));
+    const compra = await buscarCompraDelParticipante(this.compraRepository, id, usuario.id);
     return this.detalleConResenia(compra, usuario, this.reloj.ahora());
   }
 
