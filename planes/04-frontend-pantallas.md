@@ -35,7 +35,7 @@ Stack compartido (encima de los tabs):
 | Chat | CU5, CU6 | lista de burbujas (propias a la derecha), input + enviar, recibe en vivo por socket, indicador de conexión | `GET/POST /compras/:id/mensajes` + socket | `chat-input`, `chat-enviar`, `mensaje-<id>` |
 | Reseñar | CU9 | `Estrellas` (1-5 tocables), comentario multilínea, Enviar | `POST /compras/:id/resenia` | `estrella-<n>`, `resenia-detalle`, `resenia-enviar` |
 | Favoritos | extra | lista de `TarjetaEvento` | `GET /usuarios/yo/favoritos` | |
-| Perfil | — | nombre, email, rol, cerrar sesión | `GET /auth/yo` (al arrancar) | `perfil-nombre`, `perfil-rol`, `cerrar-sesion` |
+| Perfil | — | nombre, email, rol, cerrar sesión. Ruta `(comprador)/perfil` y `(organizador)/cuenta` (dos `/perfil` en grupos distintos chocan); el tab es `tab-perfil` en los dos roles | `GET /auth/yo` (al arrancar) | `perfil-nombre`, `perfil-email`, `perfil-rol`, `cerrar-sesion` |
 | MisEventos | CU2 | lista de eventos propios con vendidas/cupo, FAB "Nuevo evento" | `GET /organizadores/yo/eventos` | `fab-nuevo-evento` |
 | CrearEvento | CU4 | nombre, descripción, categoría (`Menu`), fecha y hora, lugar, URL de imagen, sección dinámica de tipos (agregar/quitar: nombre, precio, cupo), validación local + errores del back | `GET /categorias`, `POST /eventos` | `evento-nombre`, `tipo-agregar`, `evento-guardar` |
 | ComprasDelEvento | CU2 | tarjetas de disponibilidad por tipo (`ProgressBar` vendidas/cupo + "quedan N"), filtro por estado, lista de compras con `ChipEstado` | `GET /eventos/:id/compras` | `disponibilidad-<tipoId>` |
@@ -52,7 +52,7 @@ Stack compartido (encima de los tabs):
 | `ErrorCarga` | `HelperText`/`Banner` + Reintentar |
 | `Cargando` | `ActivityIndicator` centrado |
 | `LineaDeTiempo` | historial de estados |
-| `Pantalla` | `SafeAreaView` + scroll + ancho máximo en web |
+| `Pantalla` | `SafeAreaView` (bordes configurables) + scroll + ancho máximo en web |
 
 ## Estados obligatorios por pantalla
 

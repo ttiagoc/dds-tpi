@@ -41,7 +41,7 @@ Specs: `08-chat-rest`, `08b-chat-socket`.
 
 ## It4 — App Expo (19-26/11)
 Specs: `09-front-base` (incluye login), `10-pantallas-comprador`, `11-pantallas-organizador`, `12-chat-front`.
-- [ ] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo y pantalla Login (absorbe `feature/login`).
+- [x] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo y pantalla Login (absorbe `feature/login`).
 - [ ] `feature/explorar-eventos` (CU3, CU11) + DetalleEvento (CU10)
 - [ ] `feature/comprar` (CU12)
 - [ ] `feature/mis-compras` (CU1) + DetalleCompra + acciones (CU7, CU8)
@@ -52,7 +52,7 @@ Specs: `09-front-base` (incluye login), `10-pantallas-comprador`, `11-pantallas-
 **Aceptación:** todos los CU recorribles en Expo Go en el celular; tests RNTL de Explorar, Comprar, MisCompras, DetalleCompra.
 
 ## It5 — Calidad (26-29/11)
-- [ ] `chore/e2e-cypress`: setup + 3 flujos.
+- [ ] `chore/e2e-cypress`: setup + 3 flujos. Cypress 16 quitó `Cypress.env()`: migrar `cy.resetDatos()` (`e2e/cypress/support/commands.js`) a `Cypress.expose()`.
 - [ ] `chore/docker-back`: Dockerfile + `.dockerignore`.
 - [ ] `fix/pulido-ui`: revisión con `sistema-diseno`, modo oscuro, accesibilidad.
 - [ ] Revisión con subagente `revisor-reglas-negocio` y `/code-review`.
