@@ -1,6 +1,10 @@
 import { describe, it, expect } from "@jest/globals";
 import { crearContenedor } from "../src/contenedor.js";
 import { relojSistema } from "../src/config/reloj.js";
+import { InMemoryRepository } from "../src/repositories/InMemoryRepository.js";
+import { AHORA } from "./helpers/domainFactories.js";
+
+const relojFijo = { ahora: () => AHORA };
 
 describe("crearContenedor", () => {
   it("usa el reloj del sistema por defecto", () => {
@@ -8,18 +12,41 @@ describe("crearContenedor", () => {
   });
 
   it("respeta el reloj inyectado", () => {
-    const reloj = { ahora: () => new Date("2026-11-15T12:00:00Z") };
-    expect(crearContenedor({ reloj }).reloj).toBe(reloj);
+    expect(crearContenedor({ reloj: relojFijo }).reloj).toBe(relojFijo);
   });
 
-  it("expone repos, servicios y un resetear async", async () => {
-    const contenedor = crearContenedor();
-    expect(contenedor.repos).toEqual({});
-    expect(contenedor.servicios).toEqual({});
-    await expect(contenedor.resetear()).resolves.toBeUndefined();
+  it("crea los cinco repos en memoria", () => {
+    const { repos } = crearContenedor();
+    expect(Object.keys(repos).sort()).toEqual([
+      "categoriaRepository",
+      "compraRepository",
+      "eventoRepository",
+      "reseniaRepository",
+      "usuarioRepository",
+    ]);
+    for (const repo of Object.values(repos)) {
+      expect(repo).toBeInstanceOf(InMemoryRepository);
+    }
   });
 
-  it("cada llamada arma un contenedor independiente", () => {
-    expect(crearContenedor().repos).not.toBe(crearContenedor().repos);
+  it("cada llamada arma repos independientes", () => {
+    expect(crearContenedor().repos.compraRepository).not.toBe(
+      crearContenedor().repos.compraRepository,
+    );
+  });
+
+  it("resetear dos veces deja los mismos ids y cantidades", async () => {
+    const contenedor = crearContenedor({ reloj: relojFijo });
+    const foto = async () =>
+      Promise.all(
+        Object.values(contenedor.repos).map(async (repo) =>
+          (await repo.findAll()).map((e) => e.id),
+        ),
+      );
+    await contenedor.resetear();
+    const primera = await foto();
+    await contenedor.resetear();
+    expect(await foto()).toEqual(primera);
+    expect(primera.every((ids) => ids.length > 0 && ids[0] === 1)).toBe(true);
   });
 });

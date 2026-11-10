@@ -24,7 +24,7 @@
 - `import { describe, it, expect, jest, beforeEach } from "@jest/globals";`
 - Factories: `test/helpers/domainFactories.js` → `crearUsuario(overrides)`, `crearEvento(overrides)`, `crearCompra(overrides)`.
 - Reloj fijo: `const reloj = { ahora: () => new Date("2026-11-15T12:00:00Z") }`.
-- Integración: `crearApp(crearContenedor({ reloj }))` + `sembrarMinimo()`; token con helper `loginComo(app, email)`.
+- Integración: `crearContenedor({ reloj })` + `await contenedor.resetear()` (mismo seed que la demo, `seeds/datos.js`) + `crearApp(contenedor, { nodeEnv: "test" })`; token con helper `loginComo(app, email)`.
 - Cobertura ≥ 80% en `domain/` y `services/`, **forzada** con `coverageThreshold` en la config de Jest (`npm run test:cov` falla si baja).
 - Auth (middlewares + integración): sin header → 401; header sin `Bearer` → 401; token mal formado → 401; token vencido → 401; rol incorrecto → 403; `autenticarOpcional` con token inválido → sigue anónimo.
 - Arranque: `config/entorno.js` sin `JWT_SECRET` fuera de test → error.
