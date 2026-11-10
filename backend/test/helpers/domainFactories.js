@@ -2,6 +2,7 @@ import { Usuario } from "../../src/domain/Usuario.js";
 import { Categoria } from "../../src/domain/Categoria.js";
 import { TipoEntrada } from "../../src/domain/TipoEntrada.js";
 import { Evento } from "../../src/domain/Evento.js";
+import { Resenia } from "../../src/domain/Resenia.js";
 import { Compra } from "../../src/domain/Compra.js";
 import { Rol } from "../../src/domain/Rol.js";
 import { EstadoCompra } from "../../src/domain/EstadoCompra.js";
@@ -108,4 +109,22 @@ export function crearCompra({
     compra[paso](quien, AHORA);
   }
   return compra;
+}
+
+export function crearResenia({
+  compra,
+  id = 1,
+  puntuacion = 5,
+  detalle = "Muy bueno",
+  fecha = AHORA,
+}) {
+  return new Resenia({
+    id,
+    comprador: compra.comprador,
+    evento: compra.evento,
+    compraId: compra.id,
+    puntuacion,
+    detalle,
+    fecha,
+  });
 }

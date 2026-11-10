@@ -1,9 +1,9 @@
 import { describe, it, expect } from "@jest/globals";
-import { organizadorEventosQueryValidation } from "../../src/validations/organizadorEventosQueryValidation.js";
+import { paginacionQueryValidation } from "../../src/validations/paginacionQueryValidation.js";
 
-const parsear = (query) => organizadorEventosQueryValidation.safeParse(query);
+const parsear = (query) => paginacionQueryValidation.safeParse(query);
 
-describe("organizadorEventosQueryValidation", () => {
+describe("paginacionQueryValidation", () => {
   it("aplica page 1 y limit 20 por defecto", () => {
     expect(parsear({}).data).toEqual({ page: 1, limit: 20 });
   });

@@ -27,7 +27,7 @@ Specs: `05-eventos-consulta`, `05b-eventos-organizador`, `06-compras-comprador`,
 - [x] `feature/eventos-organizador`: `POST /eventos` (categoría inexistente → 422), `GET /organizadores/yo/eventos`.
 - [x] `feature/compras-comprador`: crear (cantidad 1-10), listar mías (próximas primero) con `diasRestantes` y `acciones`, detalle con historial, pago, cancelación/reembolso.
 - [x] `feature/compras-organizador`: marcar utilizada, `GET /eventos/:id/compras` con disponibilidad.
-- [ ] `feature/resenias-favoritos`: reseñas, puntaje promedio, ordenar por puntaje, favoritos.
+- [x] `feature/resenias-favoritos`: reseñas, puntaje promedio, ordenar por puntaje, favoritos.
 - [ ] `docs/swagger`: OpenAPI modular.
 
 **Aceptación:** colección de integración cubre cada endpoint de `planes/03`; Swagger muestra todos.

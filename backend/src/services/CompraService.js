@@ -1,12 +1,9 @@
-import { ForbiddenError, NotFoundError } from "../errors/AppError.js";
+import { NotFoundError } from "../errors/AppError.js";
 import { Compra } from "../domain/Compra.js";
 import { relojSistema } from "../config/reloj.js";
-import {
-  MENSAJE_COMPRA_INEXISTENTE,
-  MENSAJE_EVENTO_INEXISTENTE,
-  MENSAJE_SIN_PERMISO,
-} from "../errors/mensajes.js";
+import { MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
 import { paginar } from "./paginacion.js";
+import { buscarCompra, exigirPermiso } from "./compras.js";
 
 function ordenarParaElComprador(compras, ahora) {
   const clave = (compra) => {
@@ -83,7 +80,7 @@ export class CompraService {
 
   async obtener(id, usuario) {
     const compra = await this.buscar(id);
-    if (!compra.participa(usuario.id)) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
+    exigirPermiso(compra.participa(usuario.id));
     return this.detalleConResenia(compra, usuario, this.reloj.ahora());
   }
 
@@ -100,7 +97,7 @@ export class CompraService {
   async listarDelEvento(eventoId, usuario, { estado, ...paginacion }) {
     const evento = await this.eventoRepository.findById(eventoId);
     if (!evento) throw new NotFoundError(MENSAJE_EVENTO_INEXISTENTE);
-    if (!evento.esDe(usuario.id)) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
+    exigirPermiso(evento.esDe(usuario.id));
     const ahora = this.reloj.ahora();
     const todas = await this.compraRepository.findByEvento(evento.id);
     const filtradas = todas.filter((compra) => estado == null || compra.estado === estado);
@@ -128,7 +125,7 @@ export class CompraService {
 
   async accion(id, usuario, tienePermiso, ejecutar) {
     const compra = await this.buscar(id);
-    if (!tienePermiso(compra)) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
+    exigirPermiso(tienePermiso(compra));
     const ahora = this.reloj.ahora();
     ejecutar(compra, ahora);
     await this.guardar(compra);
@@ -141,9 +138,7 @@ export class CompraService {
   }
 
   async buscar(id) {
-    const compra = await this.compraRepository.findById(id);
-    if (!compra) throw new NotFoundError(MENSAJE_COMPRA_INEXISTENTE);
-    return compra;
+    return buscarCompra(this.compraRepository, id);
   }
 
   async detalleConResenia(compra, usuario, ahora) {

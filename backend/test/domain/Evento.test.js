@@ -144,6 +144,18 @@ describe("Evento", () => {
     });
   });
 
+  describe("compararPorFecha", () => {
+    it("ordena por fecha asc y desempata por id asc", () => {
+      const eventos = [
+        crearEvento({ id: 3, fecha: enDias(5) }),
+        crearEvento({ id: 2, fecha: enDias(5) }),
+        crearEvento({ id: 1, fecha: enDias(9) }),
+        crearEvento({ id: 4, fecha: enDias(-1) }),
+      ];
+      expect(eventos.sort(Evento.compararPorFecha).map((e) => e.id)).toEqual([4, 2, 3, 1]);
+    });
+  });
+
   describe("consultas", () => {
     it("yaOcurrio es true desde la fecha del evento", () => {
       const evento = crearEvento({ fecha: AHORA });

@@ -1,6 +1,6 @@
 # Spec 07 — Reseñas y favoritos
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/resenias-favoritos`
 - **Casos de uso:** CU9 (reseñar una compra utilizada), CU10 (reseñas del organizador), extra Favoritos
 - **Iteración:** It2

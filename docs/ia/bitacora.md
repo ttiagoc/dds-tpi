@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 7 |
-| Features cerradas | 8 (It1 cerrada; It2 en curso) |
+| Features cerradas | 9 (It1 cerrada; It2 en curso) |
 | Correcciones relevantes a la IA | 4 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -135,7 +135,17 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
     - errores completos de `POST /compras/:id/uso` en `planes/03`;
     - un test que asegura que marcar utilizada no altera el cupo.
     Los clones detectados por jscpd volvieron casi al nivel previo. Integración en `develop` con 611 tests en verde.
-  - Spec 07 (reseñas y favoritos) escrita, propagada a `planes/03` y aprobada.
+  - Spec 07 (reseñas y favoritos) escrita, propagada a `planes/03`, aprobada e implementada con TDD:
+    - alta de reseñas con el orden de chequeos fijado (404, 403, 409, 422);
+    - listado público de reseñas por organizador, con promedio y cantidad calculados sobre el total;
+    - favoritos del comprador, que reutilizan el armado de resúmenes de eventos con el puntaje calculado una vez por pedido.
+  - Revisión de cierre de la 07 (calidad: 4 hallazgos; reglas: 4, todos de severidad baja). Se aplicaron los siete recomendados:
+    - búsqueda de compra y chequeo de permiso compartidos entre servicios;
+    - orden de eventos por fecha llevado al dominio;
+    - validación de paginación unificada;
+    - eliminación de una regla no pedida (descartar favoritos de eventos inexistentes);
+    - un test que fija el 409 antes que el 422.
+    Quedan 683 tests en verde.
 - **Decisiones:**
   - Se descartaron dos hallazgos de la revisión: blindar el orden del listado contra cambios del seed, que ya lo cubre el test unitario, y evitar guardar el evento al marcar utilizada, porque guardar siempre compra y evento es más simple y consistente — recomendación de la IA, aceptada.
   - Spec 07 — opciones recomendadas por la IA y elegidas por mí:

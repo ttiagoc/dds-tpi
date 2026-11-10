@@ -88,6 +88,10 @@ export class Evento {
     return this.fecha.getTime() <= ahora.getTime();
   }
 
+  static compararPorFecha(a, b) {
+    return a.fecha.getTime() - b.fecha.getTime() || a.id - b.id;
+  }
+
   esDe(usuarioId) {
     return this.organizador.id === usuarioId;
   }
