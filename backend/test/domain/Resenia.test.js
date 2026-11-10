@@ -34,9 +34,9 @@ describe("Resenia", () => {
     });
 
     it.each([0, 6, 3.5, "4"])("rechaza la puntuación %p", (puntuacion) => {
-      expect(() => Resenia.crear({ compra: utilizada(), puntuacion, detalle: "Bien" }, AHORA)).toThrow(
-        "La puntuación tiene que ser un entero de 1 a 5",
-      );
+      expect(() =>
+        Resenia.crear({ compra: utilizada(), puntuacion, detalle: "Bien" }, AHORA),
+      ).toThrow("La puntuación tiene que ser un entero de 1 a 5");
     });
 
     it.each(["", "   ", "x".repeat(501), undefined])("rechaza el detalle %p", (detalle) => {

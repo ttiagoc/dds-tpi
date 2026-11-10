@@ -40,7 +40,10 @@ describe("Evento", () => {
 
     it.each([
       [{ nombre: "AB" }, "El nombre del evento tiene que tener entre 3 y 100 caracteres"],
-      [{ nombre: "x".repeat(101) }, "El nombre del evento tiene que tener entre 3 y 100 caracteres"],
+      [
+        { nombre: "x".repeat(101) },
+        "El nombre del evento tiene que tener entre 3 y 100 caracteres",
+      ],
       [{ descripcion: "" }, "El evento necesita una descripción"],
       [{ categoria: null }, "El evento necesita una categoría"],
       [{ fecha: "no es fecha" }, "La fecha del evento no es válida"],
@@ -48,7 +51,10 @@ describe("Evento", () => {
       [{ lugar: " " }, "El evento necesita un lugar"],
       [{ tiposEntrada: [] }, "El evento necesita al menos un tipo de entrada"],
       [{ tiposEntrada: undefined }, "El evento necesita al menos un tipo de entrada"],
-      [{ organizador: crearComprador() }, "El organizador del evento tiene que tener rol ORGANIZADOR"],
+      [
+        { organizador: crearComprador() },
+        "El organizador del evento tiene que tener rol ORGANIZADOR",
+      ],
       [{ organizador: undefined }, "El organizador del evento tiene que tener rol ORGANIZADOR"],
     ])("rechaza %p", (cambio, mensaje) => {
       expect(() => crearEvento(cambio)).toThrow(UnprocessableEntityError);

@@ -15,7 +15,8 @@ Respondé en castellano rioplatense. Antes de escribir código, usá la skill qu
 | Colores, tema, componente compartido | `sistema-diseno` |
 | Chat / Socket.io | `tiempo-real-socket` |
 | Tests (unit, integración, RNTL, Cypress) | `escribir-tests` |
-| Terminar una feature / commitear | `cerrar-feature` |
+| Revisar repetición, capas y modularización | `revisar-calidad` |
+| Terminar una feature / commitear | `cerrar-feature` (incluye `revisar-calidad`) |
 | Fin de sesión | `bitacora-ia` |
 
 Para APIs de Expo / React Native usar además las skills de los plugins `expo`, `building-react-native-apps` y `testing-react-native-apps`, y seguir `frontend/AGENTS.md` (Expo SDK 58: no confiar en conocimiento previo, instalar paquetes con `npx expo install`).
@@ -34,6 +35,8 @@ cd backend && npm test           # unit + integración
 cd frontend && npx expo start    # QR para Expo Go
 cd frontend && npx expo start --web
 cd frontend && npm test
+# calidad (raíz): eslint + duplicados
+npm run calidad
 # e2e (con back y web levantados)
 npm run e2e
 ```

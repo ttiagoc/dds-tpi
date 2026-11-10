@@ -1,11 +1,9 @@
 import { UnprocessableEntityError } from "../errors/AppError.js";
-import { exigir, esTextoNoVacio } from "./validaciones.js";
-
-const esEnteroPositivo = (valor) => Number.isInteger(valor) && valor >= 1;
+import { exigir, esEnteroPositivo, textoRequerido } from "./validaciones.js";
 
 export class TipoEntrada {
   constructor({ id = null, nombre, descripcion = "", precio, cupo, vendidas = 0 }) {
-    exigir(esTextoNoVacio(nombre), "El tipo de entrada necesita un nombre");
+    const nombreLimpio = textoRequerido(nombre, "El tipo de entrada necesita un nombre");
     exigir(Number.isFinite(precio), "El precio no es válido");
     exigir(precio >= 0, "El precio no puede ser negativo");
     exigir(esEnteroPositivo(cupo), "El cupo tiene que ser un entero mayor a 0");
@@ -14,7 +12,7 @@ export class TipoEntrada {
       "Las entradas vendidas tienen que estar entre 0 y el cupo",
     );
     this.id = id;
-    this.nombre = nombre.trim();
+    this.nombre = nombreLimpio;
     this.descripcion = descripcion;
     this.precio = precio;
     this.cupo = cupo;

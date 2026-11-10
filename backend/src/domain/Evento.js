@@ -1,13 +1,9 @@
 import { NotFoundError } from "../errors/AppError.js";
 import { Rol } from "./Rol.js";
 import { TipoEntrada } from "./TipoEntrada.js";
-import { exigir, esTextoNoVacio, textoEntre, fechaValida } from "./validaciones.js";
+import { exigir, esTextoNoVacio, textoEntre, textoRequerido, fechaValida } from "./validaciones.js";
 
-const normalizar = (texto) =>
-  texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+const normalizar = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 function armarTipos(tiposEntrada) {
   exigir(
@@ -61,13 +57,11 @@ export class Evento {
       100,
       "El nombre del evento tiene que tener entre 3 y 100 caracteres",
     );
-    exigir(esTextoNoVacio(descripcion), "El evento necesita una descripción");
-    this.descripcion = descripcion.trim();
+    this.descripcion = textoRequerido(descripcion, "El evento necesita una descripción");
     exigir(categoria, "El evento necesita una categoría");
     this.categoria = categoria;
     this.fecha = fechaValida(fecha, "La fecha del evento no es válida");
-    exigir(esTextoNoVacio(lugar), "El evento necesita un lugar");
-    this.lugar = lugar.trim();
+    this.lugar = textoRequerido(lugar, "El evento necesita un lugar");
     this.tiposEntrada = armarTipos(tiposEntrada);
     this.multimedia = armarMultimedia(multimedia);
     exigir(

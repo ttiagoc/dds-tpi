@@ -1,0 +1,10 @@
+{
+  "path": ["backend/src", "backend/test", "frontend/src"],
+  "format": ["javascript", "jsx"],
+  "minTokens": 40,
+  "minLines": 5,
+  "threshold": 3,
+  "reporters": ["console"],
+  "ignore": ["**/node_modules/**", "**/coverage/**"],
+  "noColors": true
+}

@@ -9,38 +9,16 @@ export class AppError extends Error {
   }
 }
 
-export class BadRequestError extends AppError {
-  constructor(message, details) {
-    super(message, 400, details);
-  }
-}
+const conCodigo = (statusCode) =>
+  class extends AppError {
+    constructor(message, details) {
+      super(message, statusCode, details);
+    }
+  };
 
-export class UnauthorizedError extends AppError {
-  constructor(message, details) {
-    super(message, 401, details);
-  }
-}
-
-export class ForbiddenError extends AppError {
-  constructor(message, details) {
-    super(message, 403, details);
-  }
-}
-
-export class NotFoundError extends AppError {
-  constructor(message, details) {
-    super(message, 404, details);
-  }
-}
-
-export class ConflictError extends AppError {
-  constructor(message, details) {
-    super(message, 409, details);
-  }
-}
-
-export class UnprocessableEntityError extends AppError {
-  constructor(message, details) {
-    super(message, 422, details);
-  }
-}
+export class BadRequestError extends conCodigo(400) {}
+export class UnauthorizedError extends conCodigo(401) {}
+export class ForbiddenError extends conCodigo(403) {}
+export class NotFoundError extends conCodigo(404) {}
+export class ConflictError extends conCodigo(409) {}
+export class UnprocessableEntityError extends conCodigo(422) {}

@@ -118,7 +118,7 @@ Nombres de tests en castellano: `it("rechaza cancelar una compra utilizada")`. F
 ## Definición de terminado
 
 - [ ] Spec de la feature con criterios de aceptación cumplidos.
-- [ ] Tests nuevos + suite completa en verde; lint sin errores.
+- [ ] Tests nuevos + suite completa en verde; `npm run calidad` sin errores (lint + duplicados) y revisión con `revisar-calidad`.
 - [ ] Swagger actualizado si cambió la API.
 - [ ] Pantalla probada en Expo Go (y web si tiene e2e).
 - [ ] Entrada en `docs/ia/bitacora.md`; ADR si hubo una decisión.
