@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 7 |
-| Features cerradas | 10 (It1 e It2 cerradas; It3 en curso) |
+| Sesiones | 8 |
+| Features cerradas | 12 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 4 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -18,6 +18,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 4. Código que se aparta de la spec sin actualizarla (un método no previsto) y manejo de errores demasiado amplio (descartar cualquier error en lugar de solo los de autenticación).
 5. Casos borde de la librería de validación que los tests no cubren: la conversión de un parámetro vacío a número da 0 y filtraba resultados sin aviso; lo detectó el subagente revisor, no los tests escritos por la misma IA.
 6. Specs que contradicen una convención del propio repo (pedir que el controlador valide el cuerpo cuando la validación vive en el middleware de la ruta) y tests de integración que no verifican el orden de los middlewares de autorización y validación.
+7. Diseños escritos en la spec que fallan en una configuración que los tests no ejercitan: el servidor de Socket.io se integró con Express de una forma que solo funcionaba por websocket, y los tests se conectaban únicamente por ese transporte.
 
 ---
 
@@ -166,3 +167,26 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Spec 07: la IA fijó por su cuenta que el conflicto (409) se informa antes que la compra no utilizada (422), y el texto del mensaje de conflicto. Quedó señalado en la spec como revisable.
   - Swagger se escribe a mano y no se genera desde zod, para seguir el formato del TP grupal y no sumar dependencias. Como contrapartida, ningún test contrasta las descripciones con el comportamiento real; esa verificación queda a cargo de la revisión — propuesta de la IA, aceptada.
 - **Aprendizaje:** la métrica de duplicación pasaba holgada (1,3 % contra un umbral de 3 %), pero los clones en tests se habían quintuplicado. Revisar la tendencia respecto de `develop`, y no solo el umbral, mostró que los fakes y helpers de prueba tenían que compartirse. En Swagger, la revisión contra el código encontró tres errores de negocio no documentados y ejemplos con ids que no existían en el seed, copiados de `planes/03`: un documento escrito a mano puede ser consistente consigo mismo y aun así no coincidir con la implementación.
+
+## Sesión 8 — 2026-11-10 — Chat de la compra (It3) y cierre de la iteración
+
+- **Objetivo:** especificar e implementar el chat de la compra (CU5 y CU6) en sus dos ramas, REST y tiempo real, y cerrar la It3.
+- **Avances:**
+  - Specs 08 (chat por REST) y 08b (Socket.io), separadas porque juntas superaban los ocho escenarios. Se propagaron a `planes/03` los errores, el orden de los mensajes, los errores del ack y la regla del estado final.
+  - Spec 08 implementada con TDD: `GET` y `POST /compras/:id/mensajes`, solo para los participantes y en cualquier estado de la compra (R7), con Swagger.
+  - Spec 08b implementada con TDD:
+    - autenticación JWT en el handshake y rooms por compra;
+    - `mensaje:nuevo` después de cada mensaje persistido;
+    - `compra:estado` después de pagar, cancelar o marcar utilizada.
+    - Se aplicó el patrón "REST para escribir, socket para notificar" (ADR-005) mediante un notificador inyectable, de modo que los tests de servicio no necesitan sockets.
+    - La aceptación de la iteración se verificó con dos clientes `socket.io-client` contra el servidor en un puerto efímero.
+  - Cierre de cada rama con la skill de calidad y el subagente de reglas de negocio:
+    - En la primera rama se aplicaron 6 hallazgos de 10; en la segunda, 7 de 9.
+    - Entre los aplicados están el resguardo para que una falla al emitir no altere la respuesta REST, el caso de token vencido y la normalización del id al salir de un room.
+  - Iteración 3 cerrada (`main` + tag `it3`), con 799 tests en verde.
+- **Decisiones:**
+  - Un único `compra:estado` con el estado final: cancelar una compra confirmada emite REEMBOLSADA y no CANCELADA — evita estados intermedios en el cliente — propuesta de la IA, aceptada.
+  - `mensaje:nuevo` se emite a todo el room, incluido el autor, y el cliente deduplica por id — el endpoint REST no conoce el socket del emisor — propuesta de la IA, aceptada.
+  - El chat no se pagina — los chats de una compra son cortos y así lo fija el contrato — propuesta de la IA, aceptada.
+  - Servicio de mensajes separado del de compras y extracción de `parsearId` para compartirlo entre los controladores y el socket — decisión de la IA, señalada como revisable en la spec.
+- **Aprendizaje:** la suite completa pasaba, pero el servidor real se caía con la primera conexión de un cliente por defecto. El diseño que la IA había escrito en la spec registraba Express después de Socket.io. Por eso Express respondía 404 a las peticiones de long-polling, y los tests no lo detectaban porque solo usaban websocket. Lo encontró una prueba manual del `server.js` antes de cerrar la rama. Se corrigió con un test de regresión que fuerza ese transporte. Que los tests pasen no prueba que el sistema funcione si los tests no ejercitan la configuración real; levantar el proceso real antes de cerrar una rama sigue siendo necesario.
