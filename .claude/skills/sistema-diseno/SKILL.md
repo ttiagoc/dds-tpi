@@ -42,9 +42,10 @@ export const temaClaro = {
 
 | Componente | Props | Notas |
 |---|---|---|
-| `Pantalla` | `children, scroll?, refreshing?, onRefresh?` | SafeArea, padding `lg`, `maxWidth: 480` centrado en web |
+| `Pantalla` | `children, scroll?, refreshing?, onRefresh?, bordes?` | `SafeAreaView` con `edges={bordes}` (`["top", "bottom"]` en pantallas sin header, como Login), `keyboardShouldPersistTaps="handled"` con scroll, padding `lg`, `maxWidth: 480` centrado en web |
 | `Cargando` | — | `ActivityIndicator` centrado |
 | `ErrorCarga` | `mensaje, onReintentar` | ícono + texto + botón |
+| `Aviso` | `icono, texto, color?, accion?, testID?` | base interna de `EstadoVacio` y `ErrorCarga`; no usar directo en pantallas |
 | `EstadoVacio` | `icono, texto, accion?` | |
 | `ChipEstado` | `estado` | color + ícono + texto desde `theme.estados` |
 | `TarjetaEvento` | `evento, onPress` | `Card` con imagen, nombre, fecha formateada, lugar, "Desde $X", estrellas organizador, `testID="tarjeta-evento-<id>"` |
@@ -53,7 +54,7 @@ export const temaClaro = {
 | `LineaDeTiempo` | `historial` | estado + quién + fecha |
 | `Precio` | `monto` | `Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" })` |
 
-Formateo de fechas centralizado en `src/utils/fechas.js` (`es-AR`, ej. "sáb 20 dic · 20:00").
+Formateo de fechas y precios centralizado en `src/utils/formato.js` (`formatearFecha`, `formatearPrecio`) (`es-AR`, ej. "sáb 20 dic · 20:00").
 
 ## Cuándo crear un componente nuevo
 

@@ -1,6 +1,6 @@
 # Spec 09 — Base del front: sesión, navegación por rol y login
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `chore/front-base` (absorbe `feature/login`)
 - **Casos de uso:** ninguno directo; habilita todos los de It4. Login es requisito de la consigna ("usuarios ya registrados").
 - **Iteración:** It4
@@ -33,8 +33,7 @@ El back está completo; el front es un esqueleto con una sola pantalla. Esta spe
 - **RB5 Navegación por rol:**
   - COMPRADOR → tabs Explorar, Mis compras, Favoritos, Perfil;
   - ORGANIZADOR → tabs Mis eventos, Perfil;
-  - un usuario no puede entrar al grupo del otro rol (el layout del grupo redirige a `index`);
-  - las rutas de los grupos exigen sesión (sin sesión → login).
+  - un usuario no puede entrar al grupo del otro rol y las rutas de los grupos exigen sesión: el layout raíz envuelve cada grupo en `Stack.Protected` con un guard por rol, y un guard que falla vuelve a `index`, que redirige según la sesión.
 - **RB6 Tabs provisorios.** Cada tab muestra `EstadoVacio` "Próximamente" hasta que llegue su feature. Perfil es real: nombre completo, email, rol y "Cerrar sesión" (borra la sesión y va a login).
 - **RB7 Tema.** Paper MD3 claro/oscuro según el sistema, primario violeta "escenario", tokens de estado de compra (`theme.estados`) con color + ícono, espaciado y radios en `src/tema/`. Ningún hex fuera de `tema.js`.
 
@@ -43,10 +42,10 @@ Sin cambios. Usa `POST /auth/login` y `GET /auth/yo` tal cual están en `planes/
 
 ## Pantallas
 - **Login** (`(auth)/login`): `login-email`, `login-password`, `login-ver-password`, `login-ingresar`, `login-error`, `login-demo-<email>`.
-- **Perfil** (`(comprador)/perfil`, `(organizador)/perfil`, una sola pantalla en `src/pantallas/perfil/`): `perfil-nombre`, `perfil-rol`, `cerrar-sesion`.
+- **Perfil** (`(comprador)/perfil` y `(organizador)/cuenta`, una sola pantalla en `src/pantallas/perfil/`; dos `/perfil` en grupos distintos chocan): tab `tab-perfil` en los dos roles, `perfil-nombre`, `perfil-email`, `perfil-rol`, `cerrar-sesion`.
 - **Tabs provisorios**: `EstadoVacio` con `testID="proximamente"`.
 
-Componentes transversales (`src/components/`): `Pantalla`, `Cargando`, `ErrorCarga`, `EstadoVacio`, `ChipEstado`. Hook `useCargar(fn, deps)` → `{ datos, cargando, error, recargar }`. Utils `formatearFecha` y `formatearPrecio` (`es-AR`, ARS).
+Componentes transversales (`src/components/`): `Pantalla`, `Cargando`, `ErrorCarga`, `EstadoVacio`, `ChipEstado`. Hook `useCargar(fn)` → `{ datos, cargando, error, recargar }`, con `fn` memoizada por la pantalla (`useCallback`). `Pantalla` acepta `bordes` (safe area) y con scroll deja tocar con el teclado abierto. Utils `formatearFecha` y `formatearPrecio` (`es-AR`, ARS).
 
 ## Criterios de aceptación
 ```gherkin
@@ -121,4 +120,8 @@ Escenario: un rol no entra a las rutas del otro
   - chips de usuarios demo solo con `__DEV__`;
   - redirección cuando un rol entra al grupo del otro;
   - clave de storage `sesion` y testIDs `login-ver-password`, `login-error`, `login-demo-<email>`, `perfil-*`, `proximamente`.
+- Cambios en la implementación y la revisión (`qa-mobile`):
+  - Perfil del organizador en `/cuenta` con el mismo testID de tab que el comprador;
+  - `useCargar(fn)` sin `deps`: las reglas nuevas de `react-hooks` marcan error con dependencias dinámicas y con `setState` sincrónico en el effect, así que el estado de carga se deriva del pedido vigente;
+  - safe area y teclado en `Pantalla`, tema de navegación adaptado de Paper (modo oscuro), Enter envía el login, `ChipEstado` tolera estados desconocidos, `perfil-email`.
 - Antes de codear: leer la documentación de Expo SDK 58 (expo-router tabs y redirects, secure-store), como pide `frontend/AGENTS.md`.
