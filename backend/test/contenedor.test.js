@@ -3,6 +3,8 @@ import { crearContenedor } from "../src/contenedor.js";
 import { relojSistema } from "../src/config/reloj.js";
 import { InMemoryRepository } from "../src/repositories/InMemoryRepository.js";
 import { AuthService } from "../src/services/AuthService.js";
+import { EventoService } from "../src/services/EventoService.js";
+import { CategoriaService } from "../src/services/CategoriaService.js";
 import { AHORA } from "./helpers/domainFactories.js";
 
 const relojFijo = { ahora: () => AHORA };
@@ -37,6 +39,17 @@ describe("crearContenedor", () => {
     expect(servicios.authService.usuarioRepository).toBe(repos.usuarioRepository);
     expect(servicios.authService.jwtSecret).toBe("s");
     expect(servicios.authService.jwtExpiresIn).toBe("1h");
+  });
+
+  it("expone eventoService y categoriaService con los repos únicos y el reloj", () => {
+    const { servicios, repos } = crearContenedor({ reloj: relojFijo });
+    expect(servicios.eventoService).toBeInstanceOf(EventoService);
+    expect(servicios.eventoService.eventoRepository).toBe(repos.eventoRepository);
+    expect(servicios.eventoService.reseniaRepository).toBe(repos.reseniaRepository);
+    expect(servicios.eventoService.usuarioRepository).toBe(repos.usuarioRepository);
+    expect(servicios.eventoService.reloj).toBe(relojFijo);
+    expect(servicios.categoriaService).toBeInstanceOf(CategoriaService);
+    expect(servicios.categoriaService.categoriaRepository).toBe(repos.categoriaRepository);
   });
 
   it("cada llamada arma repos independientes", () => {

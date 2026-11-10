@@ -74,6 +74,7 @@ Métodos:
 - `yaOcurrio(ahora)` → `fecha <= ahora`.
 - `esDe(usuarioId)` → es el organizador.
 - `coincideCon(texto)` → nombre o descripción, sin mayúsculas ni acentos.
+- `cupoTotal()` → suma de los cupos de sus tipos (MisEventos, spec 05b).
 
 ### EstadoCompra
 `PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA`.
@@ -106,6 +107,7 @@ Métodos:
 - `marcarUtilizada(quien, ahora)`
 - `puedeCancelarse(ahora)` → `estado ∈ {PENDIENTE, CONFIRMADA} && !evento.yaOcurrio(ahora)`
 - `puedeReseniarse()` → `estado === UTILIZADA`
+- `sumaAlRecaudado()` → `true` si está CONFIRMADA o UTILIZADA (cuenta para `recaudado`, spec 05b).
 - `diasRestantes(ahora)` → solo si CONFIRMADA: `Math.ceil((evento.fecha - ahora) / DIA)`, mínimo 0; si no, `null`.
 - `participa(usuarioId)` → es el comprador o el organizador del evento (para chat).
 - `puedePagarse(ahora)`, `puedeMarcarseUtilizada()`.
@@ -173,7 +175,7 @@ Reglas:
 - Una compra CANCELADA desde PENDIENTE no puede pasar a REEMBOLSADA (R2b).
 - `liberar` nunca deja `vendidas` < 0.
 - `coincideCon` ignora mayúsculas y acentos ("teatro" encuentra "Teátro").
-- Tipos de entrada con nombre repetido sin distinguir mayúsculas ("VIP" y "vip") → 422.
+- Tipos de entrada con nombre repetido sin distinguir mayúsculas ni acentos ("VIP" y "vip", "Platea" y "Pláteá") → 422.
 - `Evento.crear` con fecha pasada → 422; el constructor con fecha pasada (rehidratar) → ok.
 - R3: pagar compra de evento ocurrido → 422.
 - R4: marcar utilizada siendo otro organizador → 403.

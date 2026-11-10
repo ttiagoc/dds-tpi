@@ -6,23 +6,64 @@ import { EventoRepository } from "./repositories/EventoRepository.js";
 import { CompraRepository } from "./repositories/CompraRepository.js";
 import { ReseniaRepository } from "./repositories/ReseniaRepository.js";
 import { AuthService } from "./services/AuthService.js";
+import { EventoService } from "./services/EventoService.js";
+import { CategoriaService } from "./services/CategoriaService.js";
+import { CompraService } from "./services/CompraService.js";
+import { ReseniaService } from "./services/ReseniaService.js";
+import { FavoritoService } from "./services/FavoritoService.js";
 import { sembrar } from "./seeds/sembrar.js";
 
-export function crearContenedor({ reloj = relojSistema, entorno = leerEntorno() } = {}) {
-  const repos = {
+function crearRepos() {
+  return {
     usuarioRepository: new UsuarioRepository(),
     categoriaRepository: new CategoriaRepository(),
     eventoRepository: new EventoRepository(),
     compraRepository: new CompraRepository(),
     reseniaRepository: new ReseniaRepository(),
   };
+}
+
+function crearServicios(repos, { reloj, entorno }) {
   const servicios = {
     authService: new AuthService({
       usuarioRepository: repos.usuarioRepository,
       jwtSecret: entorno.jwtSecret,
       jwtExpiresIn: entorno.jwtExpiresIn,
     }),
+    eventoService: new EventoService({
+      eventoRepository: repos.eventoRepository,
+      reseniaRepository: repos.reseniaRepository,
+      usuarioRepository: repos.usuarioRepository,
+      categoriaRepository: repos.categoriaRepository,
+      compraRepository: repos.compraRepository,
+      reloj,
+    }),
+    categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),
+    compraService: new CompraService({
+      compraRepository: repos.compraRepository,
+      eventoRepository: repos.eventoRepository,
+      usuarioRepository: repos.usuarioRepository,
+      reseniaRepository: repos.reseniaRepository,
+      reloj,
+    }),
+    reseniaService: new ReseniaService({
+      compraRepository: repos.compraRepository,
+      reseniaRepository: repos.reseniaRepository,
+      usuarioRepository: repos.usuarioRepository,
+      reloj,
+    }),
   };
+  servicios.favoritoService = new FavoritoService({
+    usuarioRepository: repos.usuarioRepository,
+    eventoRepository: repos.eventoRepository,
+    eventoService: servicios.eventoService,
+  });
+  return servicios;
+}
+
+export function crearContenedor({ reloj = relojSistema, entorno = leerEntorno() } = {}) {
+  const repos = crearRepos();
+  const servicios = crearServicios(repos, { reloj, entorno });
 
   async function resetear() {
     await Promise.all(Object.values(repos).map((repo) => repo.clear()));

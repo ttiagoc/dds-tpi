@@ -2,6 +2,7 @@ import { Usuario } from "../../src/domain/Usuario.js";
 import { Categoria } from "../../src/domain/Categoria.js";
 import { TipoEntrada } from "../../src/domain/TipoEntrada.js";
 import { Evento } from "../../src/domain/Evento.js";
+import { Resenia } from "../../src/domain/Resenia.js";
 import { Compra } from "../../src/domain/Compra.js";
 import { Rol } from "../../src/domain/Rol.js";
 import { EstadoCompra } from "../../src/domain/EstadoCompra.js";
@@ -62,6 +63,29 @@ export function crearEvento(overrides = {}) {
   return new Evento(datosEvento(overrides));
 }
 
+export const tipoEntradaBody = (overrides = {}) => ({
+  nombre: "General",
+  precio: 15000,
+  cupo: 200,
+  ...overrides,
+});
+
+export function bodyEvento(overrides = {}) {
+  return {
+    nombre: "Stand-up en el Konex",
+    descripcion: "Cuatro comediantes, una noche",
+    categoriaId: 6,
+    fecha: enDias(20).toISOString(),
+    lugar: "Ciudad Cultural Konex",
+    multimedia: ["https://img/standup.jpg"],
+    tiposEntrada: [
+      tipoEntradaBody({ descripcion: "De pie" }),
+      tipoEntradaBody({ nombre: "VIP", precio: 30000, cupo: 20 }),
+    ],
+    ...overrides,
+  };
+}
+
 const PASOS = {
   [EstadoCompra.PENDIENTE]: [],
   [EstadoCompra.CONFIRMADA]: ["pagar"],
@@ -85,4 +109,22 @@ export function crearCompra({
     compra[paso](quien, AHORA);
   }
   return compra;
+}
+
+export function crearResenia({
+  compra,
+  id = 1,
+  puntuacion = 5,
+  detalle = "Muy bueno",
+  fecha = AHORA,
+}) {
+  return new Resenia({
+    id,
+    comprador: compra.comprador,
+    evento: compra.evento,
+    compraId: compra.id,
+    puntuacion,
+    detalle,
+    fecha,
+  });
 }

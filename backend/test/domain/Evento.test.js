@@ -93,6 +93,16 @@ describe("Evento", () => {
       ];
       expect(() => crearEvento({ tiposEntrada })).toThrow("Ya hay un tipo de entrada llamado vip");
     });
+
+    it("rechaza nombres de tipo repetidos sin distinguir acentos", () => {
+      const tiposEntrada = [
+        { nombre: "Platea", precio: 1, cupo: 1 },
+        { nombre: "Pláteá", precio: 2, cupo: 1 },
+      ];
+      expect(() => crearEvento({ tiposEntrada })).toThrow(
+        "Ya hay un tipo de entrada llamado Pláteá",
+      );
+    });
   });
 
   describe("crear", () => {
@@ -131,6 +141,18 @@ describe("Evento", () => {
       expect(() => crearEvento().tipoEntrada(99)).toThrow(
         "No existe el tipo de entrada 99 en este evento",
       );
+    });
+  });
+
+  describe("compararPorFecha", () => {
+    it("ordena por fecha asc y desempata por id asc", () => {
+      const eventos = [
+        crearEvento({ id: 3, fecha: enDias(5) }),
+        crearEvento({ id: 2, fecha: enDias(5) }),
+        crearEvento({ id: 1, fecha: enDias(9) }),
+        crearEvento({ id: 4, fecha: enDias(-1) }),
+      ];
+      expect(eventos.sort(Evento.compararPorFecha).map((e) => e.id)).toEqual([4, 2, 3, 1]);
     });
   });
 
@@ -185,6 +207,12 @@ describe("Evento", () => {
       evento.tipoEntrada(1).reservar(3);
       evento.tipoEntrada(2).reservar(2);
       expect(evento.totalVendidas()).toBe(5);
+    });
+
+    it("cupoTotal suma los cupos de todos los tipos sin importar lo vendido", () => {
+      const evento = crearEvento();
+      evento.tipoEntrada(1).reservar(3);
+      expect(evento.cupoTotal()).toBe(15);
     });
   });
 });

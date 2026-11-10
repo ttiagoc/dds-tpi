@@ -14,7 +14,7 @@ function armarTipos(tiposEntrada) {
 
   const vistos = new Set();
   for (const tipo of tipos) {
-    const clave = tipo.nombre.toLowerCase();
+    const clave = normalizar(tipo.nombre);
     exigir(!vistos.has(clave), `Ya hay un tipo de entrada llamado ${tipo.nombre}`);
     vistos.add(clave);
   }
@@ -88,6 +88,10 @@ export class Evento {
     return this.fecha.getTime() <= ahora.getTime();
   }
 
+  static compararPorFecha(a, b) {
+    return a.fecha.getTime() - b.fecha.getTime() || a.id - b.id;
+  }
+
   esDe(usuarioId) {
     return this.organizador.id === usuarioId;
   }
@@ -109,5 +113,9 @@ export class Evento {
 
   totalVendidas() {
     return this.tiposEntrada.reduce((total, t) => total + t.vendidas, 0);
+  }
+
+  cupoTotal() {
+    return this.tiposEntrada.reduce((total, t) => total + t.cupo, 0);
   }
 }

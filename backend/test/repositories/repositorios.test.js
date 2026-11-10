@@ -59,6 +59,39 @@ describe("repositorios", () => {
     expect(await repo.findByEvento(2)).toEqual([deBruno]);
   });
 
+  it("ReseniaRepository busca por comprador", async () => {
+    const repo = new ReseniaRepository();
+    const deAna = await repo.save(
+      Resenia.crear(
+        { compra: crearCompra({ estado: EstadoCompra.UTILIZADA }), puntuacion: 5, detalle: "Bien" },
+        AHORA,
+      ),
+    );
+    const bruno = crearComprador({ id: 4, email: "bruno@aiticket.com" });
+    await repo.save(
+      Resenia.crear(
+        {
+          compra: crearCompra({ estado: EstadoCompra.UTILIZADA, comprador: bruno, id: 8 }),
+          puntuacion: 3,
+          detalle: "Regular",
+        },
+        AHORA,
+      ),
+    );
+    expect(await repo.findByComprador(3)).toEqual([deAna]);
+    expect(await repo.findByComprador("3")).toEqual([deAna]);
+  });
+
+  it("CompraRepository busca por organizador del evento", async () => {
+    const repo = new CompraRepository();
+    const deFenix = await repo.save(crearCompra({ id: null }));
+    const otro = crearEvento({ id: 2, organizador: crearOrganizador({ id: 9 }) });
+    await repo.save(crearCompra({ id: null, evento: otro }));
+    expect(await repo.findByOrganizador(2)).toEqual([deFenix]);
+    expect(await repo.findByOrganizador("2")).toEqual([deFenix]);
+    expect(await repo.findByOrganizador(5)).toEqual([]);
+  });
+
   it("las búsquedas por id aceptan el id como string, igual que findById", async () => {
     const eventos = new EventoRepository();
     const evento = await eventos.save(crearEvento({ id: null }));

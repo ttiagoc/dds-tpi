@@ -5,6 +5,10 @@ export class ReseniaRepository extends InMemoryRepository {
     return this.findOneWhere((resenia) => resenia.compraId === Number(compraId));
   }
 
+  async findByComprador(compradorId) {
+    return this.findWhere((resenia) => resenia.comprador.id === Number(compradorId));
+  }
+
   async findByEvento(eventoId) {
     return this.findWhere((resenia) => resenia.evento.id === Number(eventoId));
   }

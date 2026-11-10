@@ -22,7 +22,7 @@ Leyenda: 🔓 público · 🔐 logueado · 🅒 solo COMPRADOR · 🅞 solo ORGA
   "id": 1, "nombre": "Los Piojos en River", "fecha": "2026-12-20T23:00:00.000Z", "lugar": "Estadio River Plate",
   "categoria": { "id": 1, "nombre": "Recitales" },
   "precioDesde": 45000, "imagen": "https://...",
-  "organizador": { "id": 2, "nombre": "Fénix Producciones", "puntajePromedio": 4.5 },
+  "organizador": { "id": 3, "nombre": "Fénix Producciones", "puntajePromedio": 4.5 },
   "esFavorito": false
 }
 ```
@@ -38,11 +38,11 @@ EventoResumen + `descripcion`, `multimedia: string[]`, `tiposEntrada: [{ id, nom
   "diasRestantes": 12,
   "evento": { "id": 1, "nombre": "...", "fecha": "...", "lugar": "...", "imagen": "..." },
   "tipoEntrada": { "id": 1, "nombre": "Campo", "precio": 45000 },
-  "comprador": { "id": 3, "nombre": "Ana Pérez" },
+  "comprador": { "id": 1, "nombre": "Ana Pérez" },
   "acciones": { "puedePagar": false, "puedeCancelar": true, "puedeMarcarUtilizada": false, "puedeReseniar": false }
 }
 ```
-`acciones` se calcula para el usuario que pide (el front no reimplementa reglas).
+`acciones` se calcula para el usuario que pide (el front no reimplementa reglas). `puedeReseniar` es `false` si la compra ya tiene reseña.
 
 ### CompraDetalle
 CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `resenia: { puntuacion, detalle } | null`.
@@ -54,6 +54,7 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 |---|---|---|---|
 | GET | `/healthcheck` | 🔓 | 200 `{ status: "ok" }` |
 | GET | `/api-docs` | 🔓 | Swagger UI |
+| GET | `/api-docs.json` | 🔓 | 200 documento OpenAPI 3.0.3. Detalle en `specs/07b-swagger.md` |
 | POST | `/test/reset` | 🔓 solo `NODE_ENV=test` | 204 — vacía repos y re-siembra (Cypress) |
 
 ### Auth
@@ -70,11 +71,11 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
 | GET | `/eventos` | 🔓 | query abajo | 200 lista paginada de EventoResumen | 400 query inválida |
-| GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 404 |
-| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 422 |
-| GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, recaudado], ... }` | |
-| GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` | 403, 404 |
-| GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [{ id, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }], total, page, totalPages }` | 404 |
+| GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 400, 404 |
+| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 401, 403, 422 (incluye categoría inexistente: "La categoría no existe") |
+| GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, cupo, recaudado], total, page, totalPages }` — todos sus eventos (incluye pasados), por fecha asc; `vendidas` = cupo ocupado, `cupo` = suma de cupos, `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA. Detalle en `specs/05b-eventos-organizador.md` | 400, 401, 403 |
+| GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` — compras por `fechaCompra` desc, id desc; `disponibilidad` no se filtra por estado. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404 |
+| GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [Resenia], total, page, totalPages }` — reseñas por `fecha` desc, id desc; promedio y cantidad sobre todas; sin reseñas → `[]` y `puntajePromedio: null`. Detalle en `specs/07-resenias-favoritos.md` | 400, 404 "No existe el organizador" (inexistente o no ORGANIZADOR) |
 
 Query `GET /eventos`:
 | Param | Tipo | Default |
@@ -87,7 +88,7 @@ Query `GET /eventos`:
 | `incluirPasados` | boolean | `false` |
 | `page`, `limit` | int | 1, 20 (máx 50) |
 
-Ordenar por puntaje: organizadores sin reseñas van al final.
+Ordenar por puntaje: organizadores sin reseñas van al final (en `asc` y en `desc`). `precioMin > precioMax` → 400. `categoria` inexistente → 200 con lista vacía. `incluirPasados` acepta solo `"true"`/`"false"`. Detalle en `specs/05-eventos-consulta.md`.
 
 Body `POST /eventos`:
 ```json
@@ -102,13 +103,13 @@ Body `POST /eventos`:
 ### Compras
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
-| POST | `/compras` | 🅒 | `{ eventoId, tipoEntradaId, cantidad }` | 201 CompraDetalle | 400, 404, 422 sin cupo / evento pasado |
-| GET | `/compras` | 🅒 | `estado?, page, limit` | 200 `{ compras: [CompraResumen], total, page, totalPages }` (orden: fecha de evento asc) | |
-| GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 403, 404 |
-| POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 403, 422 transición inválida |
-| POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 403, 422 |
-| POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle | 403, 422 |
-| POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle }` | 201 reseña | 403, 409 ya reseñada, 422 no utilizada |
+| POST | `/compras` | 🅒 | `{ eventoId, tipoEntradaId, cantidad }` (cantidad entera 1-10) | 201 CompraDetalle | 400, 401, 403, 404, 422 sin cupo / evento pasado. Detalle en `specs/06-compras-comprador.md` |
+| GET | `/compras` | 🅒 | `estado?, page, limit` | 200 `{ compras: [CompraResumen], total, page, totalPages }` (orden: primero eventos no ocurridos por fecha asc, después los ocurridos por fecha desc; desempate id asc) | 400, 401, 403 |
+| GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 400, 401, 403, 404 |
+| POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 400, 401, 403, 404, 422 transición inválida o evento ocurrido |
+| POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 400, 401, 403, 404, 422 |
+| POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle con las acciones del organizador. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404, 422 |
+| POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle: 1-500 }` `.strict()` | 201 `Resenia` = `{ id, compraId, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }`. Detalle en `specs/07-resenias-favoritos.md` | 400, 401, 403, 404, 409 "Ya reseñaste esta compra", 422 "Solo podés reseñar una compra utilizada" (409 antes que 422) |
 
 ### Mensajes (chat)
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
@@ -121,9 +122,11 @@ El envío es por REST (valida, persiste, devuelve). Después de persistir, el se
 ### Favoritos
 | Método | Ruta | Auth | Respuesta |
 |---|---|---|---|
-| GET | `/usuarios/yo/favoritos` | 🅒 | 200 `[EventoResumen]` |
-| PUT | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 (idempotente) · 404 evento |
-| DELETE | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 |
+| GET | `/usuarios/yo/favoritos` | 🅒 | 200 `[EventoResumen]` sin paginar, incluye pasados, por fecha del evento asc e id asc · 401, 403 |
+| PUT | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 (idempotente, admite eventos pasados) · 400, 401, 403, 404 "No existe el evento" |
+| DELETE | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 (idempotente, aunque no sea favorito o el evento no exista) · 400, 401, 403 |
+
+Detalle en `specs/07-resenias-favoritos.md`.
 
 ## Socket.io
 
