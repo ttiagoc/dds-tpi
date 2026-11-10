@@ -1,6 +1,6 @@
 # Spec 06b — Compras del organizador (marcar utilizada y compras de un evento)
 
-- **Estado:** borrador
+- **Estado:** aprobada
 - **Rama:** `feature/compras-organizador`
 - **Casos de uso:** CU2 (compras de un evento con estado y disponibles por tipo), CU9 (parcial: marcar la entrada utilizada habilita la reseña)
 - **Iteración:** It2

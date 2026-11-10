@@ -1,6 +1,6 @@
 # Spec 06 — Compras del comprador (comprar, mis compras, detalle, pago y cancelación)
 
-- **Estado:** borrador
+- **Estado:** aprobada
 - **Rama:** `feature/compras-comprador`
 - **Casos de uso:** CU12 (comprar), CU1 (mis compras con estado y días restantes), CU7 y CU8 (cancelar con reembolso)
 - **Iteración:** It2
