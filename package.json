@@ -1,0 +1,14 @@
+{
+  "name": "ai-ticket-it",
+  "private": true,
+  "description": "TP individual DDS 2C 2026 - plataforma de venta de entradas",
+  "scripts": {
+    "dev": "concurrently -n back,front -c blue,magenta \"npm run dev --prefix backend\" \"npx --prefix frontend expo start --web\"",
+    "test": "npm test --prefix backend && npm test --prefix frontend",
+    "e2e": "cypress run --project e2e",
+    "e2e:open": "cypress open --project e2e",
+    "lint": "eslint .",
+    "format": "prettier . --write"
+  },
+  "devDependencies": {}
+}
