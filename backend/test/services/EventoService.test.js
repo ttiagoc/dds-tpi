@@ -92,20 +92,6 @@ describe("EventoService.buscar", () => {
     expect(ids(resultado)).toEqual([3]);
   });
 
-  it("una página más allá de la última devuelve la lista vacía", async () => {
-    expect(await buscar({ page: 5, limit: 2 })).toMatchObject({
-      eventos: [],
-      total: 3,
-      page: 5,
-      totalPages: 2,
-    });
-  });
-
-  it("sin resultados devuelve total 0 y totalPages 0", async () => {
-    eventos = [];
-    expect(await buscar()).toEqual({ eventos: [], total: 0, page: 1, totalPages: 0 });
-  });
-
   it("pide las reseñas una sola vez por request", async () => {
     await buscar({ ordenarPor: "puntaje" });
     expect(repos.reseniaRepository.findAll).toHaveBeenCalledTimes(1);

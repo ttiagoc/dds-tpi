@@ -71,8 +71,8 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 |---|---|---|---|---|---|
 | GET | `/eventos` | 🔓 | query abajo | 200 lista paginada de EventoResumen | 400 query inválida |
 | GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 400, 404 |
-| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 422 (incluye categoría inexistente: "La categoría no existe") |
-| GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, recaudado], ... }` — `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA | |
+| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 401, 403, 422 (incluye categoría inexistente: "La categoría no existe") |
+| GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, cupo, recaudado], total, page, totalPages }` — todos sus eventos (incluye pasados), por fecha asc; `vendidas` = cupo ocupado, `cupo` = suma de cupos, `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA. Detalle en `specs/05b-eventos-organizador.md` | 400, 401, 403 |
 | GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` | 403, 404 |
 | GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [{ id, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }], total, page, totalPages }` | 404 |
 

@@ -8,4 +8,8 @@ export class CompraRepository extends InMemoryRepository {
   async findByEvento(eventoId) {
     return this.findWhere((compra) => compra.evento.id === Number(eventoId));
   }
+
+  async findByOrganizador(organizadorId) {
+    return this.findWhere((compra) => compra.evento.esDe(Number(organizadorId)));
+  }
 }

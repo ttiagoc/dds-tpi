@@ -114,6 +114,10 @@ export class Compra {
     return this.estado === UTILIZADA;
   }
 
+  sumaAlRecaudado() {
+    return [CONFIRMADA, UTILIZADA].includes(this.estado);
+  }
+
   accionesPara(usuarioId, ahora) {
     const esComprador = this.esDe(usuarioId);
     return {

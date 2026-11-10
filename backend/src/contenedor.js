@@ -28,6 +28,8 @@ export function crearContenedor({ reloj = relojSistema, entorno = leerEntorno() 
       eventoRepository: repos.eventoRepository,
       reseniaRepository: repos.reseniaRepository,
       usuarioRepository: repos.usuarioRepository,
+      categoriaRepository: repos.categoriaRepository,
+      compraRepository: repos.compraRepository,
       reloj,
     }),
     categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),

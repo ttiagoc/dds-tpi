@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 4 |
-| Features cerradas | 5 (It1 cerrada) |
+| Sesiones | 5 |
+| Features cerradas | 6 (It1 cerrada; It2 en curso) |
 | Correcciones relevantes a la IA | 4 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -16,6 +16,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 2. Invariantes incompletos al reconstruir entidades (ids repetidos, fechas sin validar, estado modificable desde afuera), detectados por la revisión con un subagente.
 3. Repetición conceptual que ni las métricas ni la revisión de reglas detectaban, hasta que se incorporó una revisión de calidad específica.
 4. Código que se aparta de la spec sin actualizarla (un método no previsto) y manejo de errores demasiado amplio (descartar cualquier error en lugar de solo los de autenticación).
+5. Casos borde de la librería de validación que los tests no cubren: la conversión de un parámetro vacío a número da 0 y filtraba resultados sin aviso; lo detectó el subagente revisor, no los tests escritos por la misma IA.
 
 ---
 
@@ -79,3 +80,18 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Partición de la spec de eventos en consulta (05) y gestión del organizador (05b) — la spec original superaba los ocho escenarios — propuesta de la IA, aceptada; se actualizó el roadmap.
   - Recaudación de un evento como suma de las compras pagadas; rango de precios inválido como error 400; categoría inexistente como lista vacía en la búsqueda y como error 422 al crear un evento — opciones recomendadas por la IA, elegidas por mí.
 - **Aprendizaje:** el subagente revisor detectó un problema de seguridad sutil (filtración por tiempo de respuesta) y desvíos respecto de la spec que los tests no podían mostrar, porque tests y código se escribieron a partir de la misma interpretación.
+
+## Sesión 5 — 2026-11-10 — Consulta de eventos y especificación de eventos del organizador
+
+- **Objetivo:** implementar la consulta de eventos según la spec 05, cerrarla con revisión y especificar la gestión de eventos del organizador (spec 05b).
+- **Avances:**
+  - Consulta de categorías y eventos desarrollada con TDD: búsqueda por texto, filtros por categoría, precio y eventos pasados, orden por fecha, precio y puntaje del organizador, paginado, favoritos según la sesión y detalle con disponibilidad (spec 05). El filtrado vive en el repositorio y el orden y el paginado, en el servicio; el puntaje de los organizadores se calcula una sola vez por pedido.
+  - Revisión de cierre con la skill de calidad y el subagente de reglas de negocio: sin hallazgos graves; se aprobaron y aplicaron los siete hallazgos, uno de ellos en una rama de corrección aparte (validación estricta de ids, código de la Iteración 1).
+  - Integración en `develop`: 422 tests en verde y chequeo de calidad sin errores ni duplicados.
+  - Spec 05b (crear evento y "mis eventos") en borrador, con los planes de API y de dominio actualizados.
+- **Decisiones:**
+  - Los parámetros numéricos vacíos en la consulta se ignoran en lugar de interpretarse como 0, y el límite del texto de búsqueda se aplica después de recortarlo — hallazgos del subagente revisor, aplicados con mi aprobación; se documentaron en la spec 05.
+  - Validación repartida entre capas al crear eventos: el esquema de entrada controla solo forma y tipos (400) y el dominio, los rangos y reglas de negocio (422), para que cada regla tenga un único lugar — propuesta de la IA, aceptada (spec 05b).
+  - "Mis eventos" incluye los eventos pasados, ordenados por fecha, y agrega el cupo total al contrato para que la pantalla pueda mostrar vendidas sobre cupo; las vendidas cuentan el cupo ocupado y lo recaudado, solo las compras pagadas — opciones recomendadas por la IA, elegidas por mí; se actualizó `planes/03`.
+  - Límites de entrada al crear eventos (hasta 5 imágenes con URL http o https, de 1 a 10 tipos de entrada, descripción de hasta 2000 caracteres) — propuesta de la IA, aceptada.
+- **Aprendizaje:** escribir los tests antes del código no alcanza cuando la misma IA escribe los dos: el caso del parámetro vacío no estaba previsto en ninguno de los dos. La revisión independiente sigue siendo la que encuentra esos huecos.
