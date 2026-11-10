@@ -22,7 +22,7 @@ Leyenda: 🔓 público · 🔐 logueado · 🅒 solo COMPRADOR · 🅞 solo ORGA
   "id": 1, "nombre": "Los Piojos en River", "fecha": "2026-12-20T23:00:00.000Z", "lugar": "Estadio River Plate",
   "categoria": { "id": 1, "nombre": "Recitales" },
   "precioDesde": 45000, "imagen": "https://...",
-  "organizador": { "id": 2, "nombre": "Fénix Producciones", "puntajePromedio": 4.5 },
+  "organizador": { "id": 3, "nombre": "Fénix Producciones", "puntajePromedio": 4.5 },
   "esFavorito": false
 }
 ```
@@ -38,7 +38,7 @@ EventoResumen + `descripcion`, `multimedia: string[]`, `tiposEntrada: [{ id, nom
   "diasRestantes": 12,
   "evento": { "id": 1, "nombre": "...", "fecha": "...", "lugar": "...", "imagen": "..." },
   "tipoEntrada": { "id": 1, "nombre": "Campo", "precio": 45000 },
-  "comprador": { "id": 3, "nombre": "Ana Pérez" },
+  "comprador": { "id": 1, "nombre": "Ana Pérez" },
   "acciones": { "puedePagar": false, "puedeCancelar": true, "puedeMarcarUtilizada": false, "puedeReseniar": false }
 }
 ```
@@ -54,6 +54,7 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 |---|---|---|---|
 | GET | `/healthcheck` | 🔓 | 200 `{ status: "ok" }` |
 | GET | `/api-docs` | 🔓 | Swagger UI |
+| GET | `/api-docs.json` | 🔓 | 200 documento OpenAPI 3.0.3. Detalle en `specs/07b-swagger.md` |
 | POST | `/test/reset` | 🔓 solo `NODE_ENV=test` | 204 — vacía repos y re-siembra (Cypress) |
 
 ### Auth
