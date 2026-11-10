@@ -42,7 +42,7 @@ EventoResumen + `descripcion`, `multimedia: string[]`, `tiposEntrada: [{ id, nom
   "acciones": { "puedePagar": false, "puedeCancelar": true, "puedeMarcarUtilizada": false, "puedeReseniar": false }
 }
 ```
-`acciones` se calcula para el usuario que pide (el front no reimplementa reglas).
+`acciones` se calcula para el usuario que pide (el front no reimplementa reglas). `puedeReseniar` es `false` si la compra ya tiene reseña.
 
 ### CompraDetalle
 CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `resenia: { puntuacion, detalle } | null`.
@@ -73,7 +73,7 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 | GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 400, 404 |
 | POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 401, 403, 422 (incluye categoría inexistente: "La categoría no existe") |
 | GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, cupo, recaudado], total, page, totalPages }` — todos sus eventos (incluye pasados), por fecha asc; `vendidas` = cupo ocupado, `cupo` = suma de cupos, `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA. Detalle en `specs/05b-eventos-organizador.md` | 400, 401, 403 |
-| GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` | 403, 404 |
+| GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` — compras por `fechaCompra` desc, id desc; `disponibilidad` no se filtra por estado. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404 |
 | GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [{ id, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }], total, page, totalPages }` | 404 |
 
 Query `GET /eventos`:
@@ -102,8 +102,8 @@ Body `POST /eventos`:
 ### Compras
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
-| POST | `/compras` | 🅒 | `{ eventoId, tipoEntradaId, cantidad }` | 201 CompraDetalle | 400, 404, 422 sin cupo / evento pasado |
-| GET | `/compras` | 🅒 | `estado?, page, limit` | 200 `{ compras: [CompraResumen], total, page, totalPages }` (orden: fecha de evento asc) | |
+| POST | `/compras` | 🅒 | `{ eventoId, tipoEntradaId, cantidad }` (cantidad entera 1-10) | 201 CompraDetalle | 400, 401, 403, 404, 422 sin cupo / evento pasado. Detalle en `specs/06-compras-comprador.md` |
+| GET | `/compras` | 🅒 | `estado?, page, limit` | 200 `{ compras: [CompraResumen], total, page, totalPages }` (orden: primero eventos no ocurridos por fecha asc, después los ocurridos por fecha desc; desempate id asc) | 400, 401, 403 |
 | GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 403, 404 |
 | POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 403, 422 transición inválida |
 | POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 403, 422 |
