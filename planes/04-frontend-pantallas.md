@@ -26,7 +26,7 @@ Stack compartido (encima de los tabs):
 
 | Pantalla | CU | Contenido | Endpoints | testIDs clave |
 |---|---|---|---|---|
-| Login | — | email, password (con ojo), botón Ingresar, error de credenciales, chips de usuarios demo (solo dev) | `POST /auth/login` | `login-email`, `login-password`, `login-ingresar` |
+| Login | — | email, password (con ojo), botón Ingresar, error de credenciales, chips de usuarios demo (solo dev). Detalle en `specs/09-front-base.md` | `POST /auth/login` | `login-email`, `login-password`, `login-ingresar`, `login-error` |
 | Explorar | CU3, CU11 | `Searchbar` (debounce 300 ms), chips horizontales de categorías, menú de orden (fecha/precio/puntaje + asc/desc), lista de `TarjetaEvento`, scroll infinito o "cargar más", pull-to-refresh | `GET /categorias`, `GET /eventos` | `buscador`, `chip-categoria-<id>`, `orden-menu`, `tarjeta-evento-<id>` |
 | DetalleEvento | CU10, CU12 | imagen, nombre, fecha, lugar, categoría, descripción, organizador + estrellas, lista de tipos con precio y disponibles, botón favorito, botón Comprar, últimas reseñas del organizador | `GET /eventos/:id`, `GET /organizadores/:id/resenias`, favoritos | `evento-comprar`, `evento-favorito` |
 | Comprar | CU12 | `RadioButton` de tipos (deshabilitado si 0 disponibles), `SelectorCantidad` con tope = disponibles, total calculado, Confirmar; éxito → DetalleCompra | `POST /compras` | `tipo-<id>`, `cantidad-mas`, `cantidad-menos`, `comprar-confirmar` |
@@ -35,7 +35,7 @@ Stack compartido (encima de los tabs):
 | Chat | CU5, CU6 | lista de burbujas (propias a la derecha), input + enviar, recibe en vivo por socket, indicador de conexión | `GET/POST /compras/:id/mensajes` + socket | `chat-input`, `chat-enviar`, `mensaje-<id>` |
 | Reseñar | CU9 | `Estrellas` (1-5 tocables), comentario multilínea, Enviar | `POST /compras/:id/resenia` | `estrella-<n>`, `resenia-detalle`, `resenia-enviar` |
 | Favoritos | extra | lista de `TarjetaEvento` | `GET /usuarios/yo/favoritos` | |
-| Perfil | — | nombre, rol, cerrar sesión | — | `cerrar-sesion` |
+| Perfil | — | nombre, email, rol, cerrar sesión | `GET /auth/yo` (al arrancar) | `perfil-nombre`, `perfil-rol`, `cerrar-sesion` |
 | MisEventos | CU2 | lista de eventos propios con vendidas/cupo, FAB "Nuevo evento" | `GET /organizadores/yo/eventos` | `fab-nuevo-evento` |
 | CrearEvento | CU4 | nombre, descripción, categoría (`Menu`), fecha y hora, lugar, URL de imagen, sección dinámica de tipos (agregar/quitar: nombre, precio, cupo), validación local + errores del back | `GET /categorias`, `POST /eventos` | `evento-nombre`, `tipo-agregar`, `evento-guardar` |
 | ComprasDelEvento | CU2 | tarjetas de disponibilidad por tipo (`ProgressBar` vendidas/cupo + "quedan N"), filtro por estado, lista de compras con `ChipEstado` | `GET /eventos/:id/compras` | `disponibilidad-<tipoId>` |

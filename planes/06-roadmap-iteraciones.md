@@ -40,9 +40,8 @@ Specs: `08-chat-rest`, `08b-chat-socket`.
 **Aceptación:** dos clientes de prueba (script o test) reciben el mensaje en vivo.
 
 ## It4 — App Expo (19-26/11)
-Specs: `09-front-base`, `10-pantallas-comprador`, `11-pantallas-organizador`, `12-chat-front`.
-- [ ] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo.
-- [ ] `feature/login`
+Specs: `09-front-base` (incluye login), `10-pantallas-comprador`, `11-pantallas-organizador`, `12-chat-front`.
+- [ ] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo y pantalla Login (absorbe `feature/login`).
 - [ ] `feature/explorar-eventos` (CU3, CU11) + DetalleEvento (CU10)
 - [ ] `feature/comprar` (CU12)
 - [ ] `feature/mis-compras` (CU1) + DetalleCompra + acciones (CU7, CU8)
