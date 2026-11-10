@@ -12,8 +12,6 @@ const CRITERIOS = {
   puntaje: (evento, puntajes) => puntajes.get(evento.organizador.id) ?? null,
 };
 
-const desempate = (a, b) => a.fecha.getTime() - b.fecha.getTime() || a.id - b.id;
-
 function compararValores(a, b, signo) {
   if (a === b) return 0;
   if (a === null) return 1;
@@ -24,7 +22,9 @@ function compararValores(a, b, signo) {
 function ordenar(eventos, { ordenarPor, orden }, puntajes) {
   const valor = (evento) => CRITERIOS[ordenarPor](evento, puntajes);
   const signo = orden === "desc" ? -1 : 1;
-  return [...eventos].sort((a, b) => compararValores(valor(a), valor(b), signo) || desempate(a, b));
+  return [...eventos].sort(
+    (a, b) => compararValores(valor(a), valor(b), signo) || Evento.compararPorFecha(a, b),
+  );
 }
 
 function agruparPorOrganizador(resenias) {
@@ -65,15 +65,19 @@ export class EventoService {
   async buscar(query, usuario) {
     const eventos = await this.eventoRepository.buscar(query, this.reloj.ahora());
     const puntajes = await this.puntajesPorOrganizador();
-    const esFavorito = await this.favoritosDe(usuario);
     const { items, ...pagina } = paginar(ordenar(eventos, query, puntajes), query);
-    const resumenes = items.map((evento) =>
+    return { eventos: await this.resumenes(items, usuario, puntajes), ...pagina };
+  }
+
+  async resumenes(eventos, usuario, puntajes = null) {
+    const porOrganizador = puntajes ?? (await this.puntajesPorOrganizador());
+    const esFavorito = await this.favoritosDe(usuario);
+    return eventos.map((evento) =>
       this.toResumen(evento, {
-        puntajePromedio: puntajes.get(evento.organizador.id) ?? null,
+        puntajePromedio: porOrganizador.get(evento.organizador.id) ?? null,
         esFavorito: esFavorito(evento.id),
       }),
     );
-    return { eventos: resumenes, ...pagina };
   }
 
   async obtener(id, usuario) {
@@ -102,7 +106,7 @@ export class EventoService {
     const eventos = await this.eventoRepository.findByOrganizador(usuario.id);
     const recaudado = recaudadoPorEvento(await this.compraRepository.findByOrganizador(usuario.id));
     const puntajePromedio = await this.puntajeDe(usuario.id);
-    const { items, ...pagina } = paginar([...eventos].sort(desempate), paginacion);
+    const { items, ...pagina } = paginar([...eventos].sort(Evento.compararPorFecha), paginacion);
     const resumenes = items.map((evento) => ({
       ...this.toResumen(evento, { puntajePromedio, esFavorito: false }),
       vendidas: evento.totalVendidas(),

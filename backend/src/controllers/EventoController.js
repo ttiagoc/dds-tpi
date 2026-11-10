@@ -1,6 +1,6 @@
 import { BaseController } from "./BaseController.js";
 import { eventosQueryValidation } from "../validations/eventosQueryValidation.js";
-import { organizadorEventosQueryValidation } from "../validations/organizadorEventosQueryValidation.js";
+import { paginacionQueryValidation } from "../validations/paginacionQueryValidation.js";
 
 export class EventoController extends BaseController {
   constructor(eventoService) {
@@ -39,7 +39,7 @@ export class EventoController extends BaseController {
 
   listarDelOrganizador = async (req, res, next) => {
     try {
-      const paginacion = this.extraerYValidarQuery(req.query, organizadorEventosQueryValidation);
+      const paginacion = this.extraerYValidarQuery(req.query, paginacionQueryValidation);
       const pagina = await this.eventoService.listarDelOrganizador(req.usuario, paginacion);
       return res.status(200).json(pagina);
     } catch (error) {

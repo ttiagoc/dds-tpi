@@ -128,6 +128,18 @@ describe("EventoService.buscar", () => {
   });
 });
 
+describe("EventoService.resumenes", () => {
+  it("arma los resúmenes en el orden recibido, con puntaje y esFavorito, leyendo las reseñas una vez", async () => {
+    const lista = [eventos[2], eventos[1]];
+    const resultado = await service.resumenes(lista, { id: ana.id, rol: Rol.COMPRADOR });
+    expect(resultado.map((e) => [e.id, e.esFavorito, e.organizador.puntajePromedio])).toEqual([
+      [3, false, null],
+      [2, true, 3],
+    ]);
+    expect(repos.reseniaRepository.findAll).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("EventoService.obtener", () => {
   it("devuelve el detalle de un evento pasado con disponibles y puntaje", async () => {
     const pasado = crearEvento({ id: 10, fecha: enDias(-5) });

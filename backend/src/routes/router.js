@@ -5,6 +5,7 @@ import { crearCategoriaRoutes } from "./CategoriaRoutes.js";
 import { crearEventoRoutes } from "./EventoRoutes.js";
 import { crearOrganizadorRoutes } from "./OrganizadorRoutes.js";
 import { crearCompraRoutes } from "./CompraRoutes.js";
+import { crearUsuarioRoutes } from "./UsuarioRoutes.js";
 import { crearAutenticar, crearAutenticarOpcional } from "../middlewares/autenticar.js";
 
 export function crearRouter(contenedor, { nodeEnv }) {
@@ -20,6 +21,7 @@ export function crearRouter(contenedor, { nodeEnv }) {
   router.use("/eventos", crearEventoRoutes(contenedor.servicios, auth));
   router.use("/organizadores", crearOrganizadorRoutes(contenedor.servicios, auth));
   router.use("/compras", crearCompraRoutes(contenedor.servicios, auth));
+  router.use("/usuarios", crearUsuarioRoutes(contenedor.servicios, auth));
   if (nodeEnv === "test") router.use("/test", crearTestRoutes(contenedor));
   return router;
 }
