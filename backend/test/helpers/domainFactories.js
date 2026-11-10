@@ -62,6 +62,29 @@ export function crearEvento(overrides = {}) {
   return new Evento(datosEvento(overrides));
 }
 
+export const tipoEntradaBody = (overrides = {}) => ({
+  nombre: "General",
+  precio: 15000,
+  cupo: 200,
+  ...overrides,
+});
+
+export function bodyEvento(overrides = {}) {
+  return {
+    nombre: "Stand-up en el Konex",
+    descripcion: "Cuatro comediantes, una noche",
+    categoriaId: 6,
+    fecha: enDias(20).toISOString(),
+    lugar: "Ciudad Cultural Konex",
+    multimedia: ["https://img/standup.jpg"],
+    tiposEntrada: [
+      tipoEntradaBody({ descripcion: "De pie" }),
+      tipoEntradaBody({ nombre: "VIP", precio: 30000, cupo: 20 }),
+    ],
+    ...overrides,
+  };
+}
+
 const PASOS = {
   [EstadoCompra.PENDIENTE]: [],
   [EstadoCompra.CONFIRMADA]: ["pagar"],

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "@jest/globals";
 import request from "supertest";
 import jwt from "jsonwebtoken";
 import { SECRET_DE_TEST } from "../../src/config/entorno.js";
-import { crearAppDePrueba, loginComo } from "../helpers/appDePrueba.js";
+import { crearAppDePrueba, loginComo, conToken } from "../helpers/appDePrueba.js";
 import { AHORA, enDias } from "../helpers/domainFactories.js";
 import { Usuario } from "../../src/domain/Usuario.js";
 import { Evento } from "../../src/domain/Evento.js";
@@ -17,10 +17,7 @@ beforeEach(async () => {
   ({ app, contenedor } = await crearAppDePrueba());
 });
 
-const get = (ruta, token) => {
-  const pedido = request(app).get(ruta);
-  return token ? pedido.set("Authorization", `Bearer ${token}`) : pedido;
-};
+const get = (ruta, token) => conToken(request(app).get(ruta), token);
 const nombres = (res) => res.body.eventos.map((e) => e.nombre);
 
 async function idDelEvento(nombre) {

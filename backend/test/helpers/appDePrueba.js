@@ -21,3 +21,6 @@ export async function loginComo(app, email, password = CONTRASENIA_DEMO) {
   }
   return res.body.token;
 }
+
+export const conToken = (pedido, token) =>
+  token ? pedido.set("Authorization", `Bearer ${token}`) : pedido;

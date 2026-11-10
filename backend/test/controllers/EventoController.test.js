@@ -1,7 +1,11 @@
 import { describe, it, expect, jest } from "@jest/globals";
 import { EventoController } from "../../src/controllers/EventoController.js";
 import { CategoriaController } from "../../src/controllers/CategoriaController.js";
-import { BadRequestError, NotFoundError } from "../../src/errors/AppError.js";
+import {
+  BadRequestError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../../src/errors/AppError.js";
 import { crearRes } from "../helpers/http.js";
 
 const usuario = { id: 3, rol: "COMPRADOR" };
@@ -63,6 +67,63 @@ describe("EventoController", () => {
     const eventoService = { obtener: jest.fn().mockRejectedValue(error) };
     await new EventoController(eventoService).obtener({ params: { id: "9" } }, crearRes(), next);
     expect(next).toHaveBeenCalledWith(error);
+  });
+});
+
+describe("EventoController del organizador", () => {
+  const organizador = { id: 2, rol: "ORGANIZADOR" };
+
+  it("crear delega el body y el usuario y responde 201 con el detalle", async () => {
+    const detalle = { id: 13 };
+    const body = { nombre: "Nuevo" };
+    const eventoService = { crear: jest.fn().mockResolvedValue(detalle) };
+    const res = crearRes();
+    await new EventoController(eventoService).crear({ body, usuario: organizador }, res, jest.fn());
+    expect(eventoService.crear).toHaveBeenCalledWith(body, organizador);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(detalle);
+  });
+
+  it("crear pasa el error del service a next", async () => {
+    const error = new UnprocessableEntityError("La categoría no existe");
+    const next = jest.fn();
+    const eventoService = { crear: jest.fn().mockRejectedValue(error) };
+    await new EventoController(eventoService).crear(
+      { body: {}, usuario: organizador },
+      crearRes(),
+      next,
+    );
+    expect(next).toHaveBeenCalledWith(error);
+  });
+
+  it("listarDelOrganizador valida la query, delega y responde 200", async () => {
+    const pagina = { eventos: [], total: 0, page: 2, totalPages: 0 };
+    const eventoService = { listarDelOrganizador: jest.fn().mockResolvedValue(pagina) };
+    const res = crearRes();
+    await new EventoController(eventoService).listarDelOrganizador(
+      { query: { page: "2" }, usuario: organizador },
+      res,
+      jest.fn(),
+    );
+    expect(eventoService.listarDelOrganizador).toHaveBeenCalledWith(organizador, {
+      page: 2,
+      limit: 20,
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(pagina);
+  });
+
+  it("listarDelOrganizador manda a next un 400 si la query es inválida", async () => {
+    const eventoService = { listarDelOrganizador: jest.fn() };
+    const next = jest.fn();
+    await new EventoController(eventoService).listarDelOrganizador(
+      { query: { q: "rock" }, usuario: organizador },
+      crearRes(),
+      next,
+    );
+    expect(next.mock.calls[0][0]).toBeInstanceOf(BadRequestError);
+    expect(next.mock.calls[0][0].message).toBe("Parámetros de consulta inválidos");
+    expect(eventoService.listarDelOrganizador).not.toHaveBeenCalled();
   });
 });
 

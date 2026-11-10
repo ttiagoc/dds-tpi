@@ -1,9 +1,12 @@
-import { NotFoundError } from "../errors/AppError.js";
+import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
+import { Evento } from "../domain/Evento.js";
 import { Resenia } from "../domain/Resenia.js";
 import { Rol } from "../domain/Rol.js";
 import { relojSistema } from "../config/reloj.js";
+import { paginar } from "./paginacion.js";
 
 export const MENSAJE_EVENTO_INEXISTENTE = "No existe el evento";
+export const MENSAJE_CATEGORIA_INEXISTENTE = "La categoría no existe";
 
 const CRITERIOS = {
   fecha: (evento) => evento.fecha.getTime(),
@@ -26,15 +29,6 @@ function ordenar(eventos, { ordenarPor, orden }, puntajes) {
   return [...eventos].sort((a, b) => compararValores(valor(a), valor(b), signo) || desempate(a, b));
 }
 
-function paginar(lista, { page, limit }) {
-  return {
-    items: lista.slice((page - 1) * limit, page * limit),
-    total: lista.length,
-    page,
-    totalPages: Math.ceil(lista.length / limit),
-  };
-}
-
 function agruparPorOrganizador(resenias) {
   const grupos = new Map();
   for (const resenia of resenias) {
@@ -44,11 +38,29 @@ function agruparPorOrganizador(resenias) {
   return grupos;
 }
 
+function recaudadoPorEvento(compras) {
+  const recaudado = new Map();
+  for (const compra of compras.filter((c) => c.sumaAlRecaudado())) {
+    const id = compra.evento.id;
+    recaudado.set(id, (recaudado.get(id) ?? 0) + compra.total);
+  }
+  return recaudado;
+}
+
 export class EventoService {
-  constructor({ eventoRepository, reseniaRepository, usuarioRepository, reloj = relojSistema }) {
+  constructor({
+    eventoRepository,
+    reseniaRepository,
+    usuarioRepository,
+    categoriaRepository,
+    compraRepository,
+    reloj = relojSistema,
+  }) {
     this.eventoRepository = eventoRepository;
     this.reseniaRepository = reseniaRepository;
     this.usuarioRepository = usuarioRepository;
+    this.categoriaRepository = categoriaRepository;
+    this.compraRepository = compraRepository;
     this.reloj = reloj;
   }
 
@@ -69,12 +81,41 @@ export class EventoService {
   async obtener(id, usuario) {
     const evento = await this.eventoRepository.findById(id);
     if (!evento) throw new NotFoundError(MENSAJE_EVENTO_INEXISTENTE);
-    const resenias = await this.reseniaRepository.findByOrganizador(evento.organizador.id);
     const esFavorito = await this.favoritosDe(usuario);
     return this.toDetalle(evento, {
-      puntajePromedio: Resenia.promedio(resenias),
+      puntajePromedio: await this.puntajeDe(evento.organizador.id),
       esFavorito: esFavorito(evento.id),
     });
+  }
+
+  async crear({ categoriaId, ...datos }, usuario) {
+    const categoria = await this.categoriaRepository.findById(categoriaId);
+    if (!categoria) throw new UnprocessableEntityError(MENSAJE_CATEGORIA_INEXISTENTE);
+    const organizador = await this.usuarioRepository.findById(usuario.id);
+    const evento = Evento.crear({ ...datos, categoria, organizador }, this.reloj.ahora());
+    await this.eventoRepository.save(evento);
+    return this.toDetalle(evento, {
+      puntajePromedio: await this.puntajeDe(organizador.id),
+      esFavorito: false,
+    });
+  }
+
+  async listarDelOrganizador(usuario, paginacion) {
+    const eventos = await this.eventoRepository.findByOrganizador(usuario.id);
+    const recaudado = recaudadoPorEvento(await this.compraRepository.findByOrganizador(usuario.id));
+    const puntajePromedio = await this.puntajeDe(usuario.id);
+    const { items, ...pagina } = paginar([...eventos].sort(desempate), paginacion);
+    const resumenes = items.map((evento) => ({
+      ...this.toResumen(evento, { puntajePromedio, esFavorito: false }),
+      vendidas: evento.totalVendidas(),
+      cupo: evento.cupoTotal(),
+      recaudado: recaudado.get(evento.id) ?? 0,
+    }));
+    return { eventos: resumenes, ...pagina };
+  }
+
+  async puntajeDe(organizadorId) {
+    return Resenia.promedio(await this.reseniaRepository.findByOrganizador(organizadorId));
   }
 
   async puntajesPorOrganizador() {

@@ -175,7 +175,7 @@ Reglas:
 - Una compra CANCELADA desde PENDIENTE no puede pasar a REEMBOLSADA (R2b).
 - `liberar` nunca deja `vendidas` < 0.
 - `coincideCon` ignora mayúsculas y acentos ("teatro" encuentra "Teátro").
-- Tipos de entrada con nombre repetido sin distinguir mayúsculas ("VIP" y "vip") → 422.
+- Tipos de entrada con nombre repetido sin distinguir mayúsculas ni acentos ("VIP" y "vip", "Platea" y "Pláteá") → 422.
 - `Evento.crear` con fecha pasada → 422; el constructor con fecha pasada (rehidratar) → ok.
 - R3: pagar compra de evento ocurrido → 422.
 - R4: marcar utilizada siendo otro organizador → 403.

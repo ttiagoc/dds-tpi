@@ -283,6 +283,16 @@ describe("Compra", () => {
       },
     );
 
+    it.each([
+      [PENDIENTE, false],
+      [CONFIRMADA, true],
+      [UTILIZADA, true],
+      [CANCELADA, false],
+      [REEMBOLSADA, false],
+    ])("%s → sumaAlRecaudado %p", (estado, esperado) => {
+      expect(crearCompra({ estado }).sumaAlRecaudado()).toBe(esperado);
+    });
+
     it("no se puede pagar ni cancelar si el evento ya ocurrió", () => {
       const compra = crearCompra();
       expect(compra.puedePagarse(compra.evento.fecha)).toBe(false);

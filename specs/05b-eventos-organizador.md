@@ -1,6 +1,6 @@
 # Spec 05b — Eventos del organizador (crear evento y mis eventos)
 
-- **Estado:** borrador
+- **Estado:** implementada
 - **Rama:** `feature/eventos-organizador`
 - **Casos de uso:** CU4 (crear evento con tipos de entrada), CU2 (parcial: listado de eventos propios con ventas; el detalle de compras por evento es de la spec 06)
 - **Iteración:** It2
@@ -23,7 +23,7 @@ Aplican R6 (puntaje del organizador) y R8 (crear evento) de `planes/02-dominio.m
   - `multimedia` (opcional, por defecto `[]`): hasta 5 URLs `http`/`https`.
   - `tiposEntrada`: de 1 a 10 objetos `.strict()` `{ nombre: texto, descripcion?: texto ≤ 200, precio: número, cupo: entero }`.
   - Campos de más (por ejemplo `organizadorId` o `vendidas`) → 400.
-- **O3** Los rangos y las reglas de R8 los valida el dominio (`Evento.crear(datos, ahora)` y `TipoEntrada`) → 422 con el mensaje del dominio: fecha no futura ("La fecha del evento tiene que ser futura"), precio negativo ("El precio no puede ser negativo"), cupo < 1 ("El cupo tiene que ser un entero mayor a 0"), tipos con el mismo nombre sin distinguir mayúsculas ("Ya hay un tipo de entrada llamado <nombre>"), nombre de 3 a 100 caracteres y textos vacíos. Ninguna de estas reglas se repite en zod.
+- **O3** Los rangos y las reglas de R8 los valida el dominio (`Evento.crear(datos, ahora)` y `TipoEntrada`) → 422 con el mensaje del dominio: fecha no futura ("La fecha del evento tiene que ser futura"), precio negativo ("El precio no puede ser negativo"), cupo < 1 ("El cupo tiene que ser un entero mayor a 0"), tipos con el mismo nombre sin distinguir mayúsculas ni acentos ("Ya hay un tipo de entrada llamado <nombre>"), nombre de 3 a 100 caracteres y textos vacíos. Ninguna de estas reglas se repite en zod.
 - **O4** `categoriaId` que no existe → 422 "La categoría no existe" (lo chequea el service antes de crear el evento).
 - **O5** El organizador del evento es siempre el usuario del token. `POST /eventos` responde 201 con `EventoDetalle` (spec 05, E7/E8): `disponibles = cupo` en cada tipo, `puntajePromedio` del organizador (R6) y `esFavorito: false`.
 - **O6** `GET /organizadores/yo/eventos` devuelve **todos** los eventos del organizador, incluso los pasados, ordenados por `fecha` asc y después por `id` asc. La query solo acepta `page` y `limit` (mismos límites que E4, `.strict()`; vacíos se ignoran). Respuesta `{ eventos, total, page, totalPages }` con el mismo paginado que la spec 05 (E4).
@@ -92,7 +92,7 @@ Escenario: paginado de mis eventos
 | Unit repo | `CompraRepository.findByOrganizador` |
 | Unit validación | `crearEventoValidation`: body válido, multimedia por defecto, URL no http(s), más de 5 URLs, 0 y 11 tipos, descripción larga, fecha sin formato ISO, cupo no entero, campos de más en el evento y en el tipo; `organizadorEventosQueryValidation` |
 | Unit service | `crear`: categoría inexistente → 422, organizador del token, guarda y devuelve el detalle, errores de dominio propagados, usa el reloj; `listarDelOrganizador`: orden, incluye pasados, vendidas/cupo/recaudado, compras pedidas una vez, paginado |
-| Unit controller | `crear` responde 201 y valida el body; `listarDelOrganizador` valida la query y responde 200; errores a `next` |
+| Unit controller | `crear` responde 201 (el body lo valida `validate(crearEventoValidation)` en la ruta, cubierto por integración); `listarDelOrganizador` valida la query y responde 200; errores a `next` |
 | Integración | los 7 escenarios contra la app con el seed |
 
 ## Fuera de alcance

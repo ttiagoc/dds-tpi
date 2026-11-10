@@ -93,6 +93,16 @@ describe("Evento", () => {
       ];
       expect(() => crearEvento({ tiposEntrada })).toThrow("Ya hay un tipo de entrada llamado vip");
     });
+
+    it("rechaza nombres de tipo repetidos sin distinguir acentos", () => {
+      const tiposEntrada = [
+        { nombre: "Platea", precio: 1, cupo: 1 },
+        { nombre: "Pláteá", precio: 2, cupo: 1 },
+      ];
+      expect(() => crearEvento({ tiposEntrada })).toThrow(
+        "Ya hay un tipo de entrada llamado Pláteá",
+      );
+    });
   });
 
   describe("crear", () => {
@@ -185,6 +195,12 @@ describe("Evento", () => {
       evento.tipoEntrada(1).reservar(3);
       evento.tipoEntrada(2).reservar(2);
       expect(evento.totalVendidas()).toBe(5);
+    });
+
+    it("cupoTotal suma los cupos de todos los tipos sin importar lo vendido", () => {
+      const evento = crearEvento();
+      evento.tipoEntrada(1).reservar(3);
+      expect(evento.cupoTotal()).toBe(15);
     });
   });
 });
