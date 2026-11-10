@@ -7,6 +7,12 @@ export async function buscarCompra(compraRepository, id) {
   return compra;
 }
 
+export async function buscarCompraDelParticipante(compraRepository, id, usuarioId) {
+  const compra = await buscarCompra(compraRepository, id);
+  exigirPermiso(compra.participa(usuarioId));
+  return compra;
+}
+
 export function exigirPermiso(permitido) {
   if (!permitido) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
 }

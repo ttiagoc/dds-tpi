@@ -20,6 +20,8 @@ const OPERACIONES_DE_PLANES_03 = [
   "POST /compras/{id}/cancelacion",
   "POST /compras/{id}/uso",
   "POST /compras/{id}/resenia",
+  "GET /compras/{id}/mensajes",
+  "POST /compras/{id}/mensajes",
   "GET /usuarios/yo/favoritos",
   "PUT /usuarios/yo/favoritos/{eventoId}",
   "DELETE /usuarios/yo/favoritos/{eventoId}",
@@ -75,6 +77,18 @@ describe("Swagger", () => {
   it("documenta exactamente las operaciones implementadas de planes/03", () => {
     const documentadas = operaciones(documento).map((o) => o.clave);
     expect([...documentadas].sort()).toEqual([...OPERACIONES_DE_PLANES_03].sort());
+  });
+
+  it("documenta los eventos de Socket.io en el tag Chat y en las acciones de la compra", () => {
+    const chat = documento.tags.find((tag) => tag.name === "Chat");
+    for (const evento of ["compra:unirse", "compra:salir", "mensaje:nuevo", "compra:estado"]) {
+      expect(chat.description).toContain(evento);
+    }
+    for (const accion of ["pago", "cancelacion", "uso"]) {
+      expect(documento.paths[`/compras/{id}/${accion}`].post.description).toContain(
+        "compra:estado",
+      );
+    }
   });
 
   it("cada $ref apunta a algo que existe", () => {

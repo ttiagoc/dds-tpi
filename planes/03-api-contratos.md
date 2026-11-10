@@ -114,10 +114,10 @@ Body `POST /eventos`:
 ### Mensajes (chat)
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
-| GET | `/compras/:id/mensajes` | 🔐 participante | — | 200 `[{ id, usuario: {id,nombre,rol}, mensaje, enviado }]` (orden cronológico) | 403, 404 |
-| POST | `/compras/:id/mensajes` | 🔐 participante | `{ mensaje }` 1-500 | 201 mensaje | 400, 403, 404 |
+| GET | `/compras/:id/mensajes` | 🔐 participante | — | 200 `[Mensaje]` = `[{ id, usuario: {id,nombre,rol}, mensaje, enviado }]` sin paginar (enviado asc, id asc) | 400, 401, 403, 404 |
+| POST | `/compras/:id/mensajes` | 🔐 participante | `{ mensaje }` 1-500 (trim) `.strict()` | 201 `Mensaje` | 400, 401, 403, 404 (400 de body antes que 404/403) |
 
-El envío es por REST (valida, persiste, devuelve). Después de persistir, el service emite por socket.
+El envío es por REST (valida, persiste, devuelve). Después de persistir, el service emite por socket. Se puede escribir en cualquier estado (R7). Detalle en `specs/08-chat-rest.md`.
 
 ### Favoritos
 | Método | Ruta | Auth | Respuesta |
@@ -135,10 +135,10 @@ Detalle en `specs/07-resenias-favoritos.md`.
 
 | Dirección | Evento | Payload | Notas |
 |---|---|---|---|
-| cliente → server | `compra:unirse` | `{ compraId }` | ack `{ ok: true }` o `{ ok: false, error }` si no participa |
+| cliente → server | `compra:unirse` | `{ compraId }` | ack `{ ok: true }` o `{ ok: false, error }` ("El id debe ser un entero positivo", "No existe la compra", "No tenés permiso para realizar esta acción"; error inesperado: "No se pudo unir al chat") |
 | cliente → server | `compra:salir` | `{ compraId }` | |
-| server → room `compra:<id>` | `mensaje:nuevo` | mensaje (misma forma que REST) | tras `POST /compras/:id/mensajes` |
-| server → room `compra:<id>` | `compra:estado` | `{ compraId, estado }` | extra: refresca detalle al cambiar estado |
+| server → room `compra:<id>` | `mensaje:nuevo` | `Mensaje` (misma forma que REST) | tras `POST /compras/:id/mensajes`, a todo el room incluido el autor |
+| server → room `compra:<id>` | `compra:estado` | `{ compraId, estado }` | tras pago, cancelación o uso; un solo evento con el estado final (cancelar una CONFIRMADA emite REEMBOLSADA). Detalle en `specs/08b-chat-socket.md` |
 
 ## Usuarios de seed (contraseña `Demo1234!`)
 

@@ -1,9 +1,10 @@
 import { NotFoundError } from "../errors/AppError.js";
 import { Compra } from "../domain/Compra.js";
 import { relojSistema } from "../config/reloj.js";
+import { notificadorNulo } from "../sockets/notificador.js";
 import { MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
 import { paginar } from "./paginacion.js";
-import { buscarCompra, exigirPermiso } from "./compras.js";
+import { buscarCompra, buscarCompraDelParticipante, exigirPermiso } from "./compras.js";
 
 function ordenarParaElComprador(compras, ahora) {
   const clave = (compra) => {
@@ -46,12 +47,14 @@ export class CompraService {
     usuarioRepository,
     reseniaRepository,
     reloj = relojSistema,
+    notificador = notificadorNulo,
   }) {
     this.compraRepository = compraRepository;
     this.eventoRepository = eventoRepository;
     this.usuarioRepository = usuarioRepository;
     this.reseniaRepository = reseniaRepository;
     this.reloj = reloj;
+    this.notificador = notificador;
   }
 
   async crear({ eventoId, tipoEntradaId, cantidad }, usuario) {
@@ -79,8 +82,7 @@ export class CompraService {
   }
 
   async obtener(id, usuario) {
-    const compra = await this.buscar(id);
-    exigirPermiso(compra.participa(usuario.id));
+    const compra = await buscarCompraDelParticipante(this.compraRepository, id, usuario.id);
     return this.detalleConResenia(compra, usuario, this.reloj.ahora());
   }
 
@@ -129,6 +131,7 @@ export class CompraService {
     const ahora = this.reloj.ahora();
     ejecutar(compra, ahora);
     await this.guardar(compra);
+    this.notificador.estadoCompra(compra.id, compra.estado);
     return this.detalleConResenia(compra, usuario, ahora);
   }
 

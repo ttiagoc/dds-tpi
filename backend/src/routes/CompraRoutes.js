@@ -3,14 +3,20 @@ import { CompraController } from "../controllers/CompraController.js";
 import { autorizar } from "../middlewares/autorizar.js";
 import { validate } from "../middlewares/validate.js";
 import { ReseniaController } from "../controllers/ReseniaController.js";
+import { MensajeController } from "../controllers/MensajeController.js";
 import { crearCompraValidation } from "../validations/crearCompraValidation.js";
 import { crearReseniaValidation } from "../validations/crearReseniaValidation.js";
+import { crearMensajeValidation } from "../validations/crearMensajeValidation.js";
 import { Rol } from "../domain/Rol.js";
 
-export function crearCompraRoutes({ compraService, reseniaService }, { autenticar }) {
+export function crearCompraRoutes(
+  { compraService, reseniaService, mensajeService },
+  { autenticar },
+) {
   const router = Router();
   const controller = new CompraController(compraService);
   const reseniaController = new ReseniaController(reseniaService);
+  const mensajeController = new MensajeController(mensajeService);
   const comprador = [autenticar, autorizar(Rol.COMPRADOR)];
   const organizador = [autenticar, autorizar(Rol.ORGANIZADOR)];
   router.post("/", ...comprador, validate(crearCompraValidation), controller.crear);
@@ -24,6 +30,13 @@ export function crearCompraRoutes({ compraService, reseniaService }, { autentica
     ...comprador,
     validate(crearReseniaValidation),
     reseniaController.crear,
+  );
+  router.get("/:id/mensajes", autenticar, mensajeController.listar);
+  router.post(
+    "/:id/mensajes",
+    autenticar,
+    validate(crearMensajeValidation),
+    mensajeController.enviar,
   );
   return router;
 }

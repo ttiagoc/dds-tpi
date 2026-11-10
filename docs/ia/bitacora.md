@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 7 |
-| Features cerradas | 10 (It1 cerrada; It2 completa, falta el cierre) |
+| Features cerradas | 10 (It1 e It2 cerradas; It3 en curso) |
 | Correcciones relevantes a la IA | 4 |
 | Skills creadas / mejoradas | 10 / 1 |
 

@@ -33,9 +33,9 @@ Specs: `05-eventos-consulta`, `05b-eventos-organizador`, `06-compras-comprador`,
 **Aceptación:** colección de integración cubre cada endpoint de `planes/03`; Swagger muestra todos.
 
 ## It3 — Chat (18-19/11)
-Spec: `08-chat`.
-- [ ] `feature/chat-rest`: GET/POST mensajes con permisos.
-- [ ] `feature/chat-socket`: socket.io con auth, rooms, emisión `mensaje:nuevo` y `compra:estado`.
+Specs: `08-chat-rest`, `08b-chat-socket`.
+- [x] `feature/chat-rest`: GET/POST mensajes con permisos.
+- [x] `feature/chat-socket`: socket.io con auth, rooms, emisión `mensaje:nuevo` y `compra:estado`.
 
 **Aceptación:** dos clientes de prueba (script o test) reciben el mensaje en vivo.
 

@@ -12,16 +12,28 @@ export const bruno = crearComprador({
 export const fenix = crearOrganizador();
 export const konex = crearOrganizador({ id: 5, nombre: "Konex", email: "konex@aiticket.com" });
 
+export const usuarioRepositoryFake = () => ({
+  findById: jest.fn(async (id) => [ana, bruno, fenix, konex].find((u) => u.id === id) ?? null),
+});
+
 const comoUsuario = (usuario) => ({ id: usuario.id, rol: usuario.rol });
 export const usuarioAna = comoUsuario(ana);
 export const usuarioBruno = comoUsuario(bruno);
 export const usuarioFenix = comoUsuario(fenix);
 export const usuarioKonex = comoUsuario(konex);
 
+export const notificadorFake = () => ({ mensajeNuevo: jest.fn(), estadoCompra: jest.fn() });
+
 export function servicioDeCompras(datos) {
   const repos = reposDeCompras(datos);
   const reloj = { ahora: jest.fn(() => AHORA) };
-  return { repos, reloj, service: new CompraService({ ...repos, reloj }) };
+  const notificador = notificadorFake();
+  return {
+    repos,
+    reloj,
+    notificador,
+    service: new CompraService({ ...repos, reloj, notificador }),
+  };
 }
 
 function reposDeCompras(datos) {
@@ -42,9 +54,7 @@ function reposDeCompras(datos) {
       findById: jest.fn(async (id) => eventos().find((e) => e.id === id) ?? null),
       save: jest.fn(async (evento) => evento),
     },
-    usuarioRepository: {
-      findById: jest.fn(async (id) => [ana, bruno, fenix].find((u) => u.id === id) ?? null),
-    },
+    usuarioRepository: usuarioRepositoryFake(),
     reseniaRepository: {
       findByCompraId: jest.fn(async (id) => resenias().find((r) => r.compraId === id) ?? null),
       findByComprador: jest.fn(async () => [...resenias()]),

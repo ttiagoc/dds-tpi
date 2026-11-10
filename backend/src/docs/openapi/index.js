@@ -7,8 +7,9 @@ import eventos from "./eventos.js";
 import organizadores from "./organizadores.js";
 import compras from "./compras.js";
 import favoritos from "./favoritos.js";
+import mensajes from "./mensajes.js";
 
-const modulos = [sistema, auth, categorias, eventos, organizadores, compras, favoritos];
+const modulos = [sistema, auth, categorias, eventos, organizadores, compras, mensajes, favoritos];
 
 export function unir(partes, clave) {
   const resultado = {};
@@ -21,7 +22,7 @@ export function unir(partes, clave) {
   return resultado;
 }
 
-const DESCRIPCION = `API de AI Ticket It: eventos, compras de entradas, reseñas y favoritos.
+const DESCRIPCION = `API de AI Ticket It: eventos, compras de entradas, chat de la compra, reseñas y favoritos.
 
 Los ids son enteros positivos: un id inválido responde 400; uno que no existe, 404. Los listados se paginan con \`page\` y \`limit\` (20 por defecto, máximo ${LIMITE_POR_PAGINA}) y responden 400 ante un parámetro de query desconocido. Las fechas van en ISO 8601 UTC.
 

@@ -4,3 +4,5 @@ export const MENSAJE_CATEGORIA_INEXISTENTE = "La categoría no existe";
 export const MENSAJE_COMPRA_INEXISTENTE = "No existe la compra";
 export const MENSAJE_ORGANIZADOR_INEXISTENTE = "No existe el organizador";
 export const MENSAJE_COMPRA_RESENIADA = "Ya reseñaste esta compra";
+export const MENSAJE_NO_AUTENTICADO = "No autenticado";
+export const MENSAJE_ERROR_CHAT = "No se pudo unir al chat";

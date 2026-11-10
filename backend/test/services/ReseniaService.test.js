@@ -20,7 +20,14 @@ import {
   crearCompra,
   crearResenia,
 } from "../helpers/domainFactories.js";
-import { ana, bruno, fenix, konex, usuarioAna, usuarioBruno } from "../helpers/comprasFake.js";
+import {
+  ana,
+  fenix,
+  konex,
+  usuarioAna,
+  usuarioBruno,
+  usuarioRepositoryFake,
+} from "../helpers/comprasFake.js";
 
 const { CONFIRMADA, UTILIZADA } = EstadoCompra;
 const BODY = { puntuacion: 4, detalle: "Muy lindo show" };
@@ -49,9 +56,7 @@ beforeEach(() => {
         return resenia;
       }),
     },
-    usuarioRepository: {
-      findById: jest.fn(async (id) => [ana, bruno, fenix, konex].find((u) => u.id === id) ?? null),
-    },
+    usuarioRepository: usuarioRepositoryFake(),
   };
   reloj = { ahora: jest.fn(() => AHORA) };
   service = new ReseniaService({ ...repos, reloj });
