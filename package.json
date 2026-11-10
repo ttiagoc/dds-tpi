@@ -1,0 +1,26 @@
+{
+  "name": "ai-ticket-it",
+  "private": true,
+  "description": "TP individual DDS 2C 2026 - plataforma de venta de entradas",
+  "scripts": {
+    "dev": "concurrently -n back,front -c blue,magenta \"npm run dev --prefix backend\" \"npx --prefix frontend expo start --web\"",
+    "test": "npm test --prefix backend && npm test --prefix frontend",
+    "e2e": "node e2e/correr-cypress.mjs run",
+    "e2e:open": "node e2e/correr-cypress.mjs open",
+    "lint": "eslint .",
+    "format": "prettier . --write"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "concurrently": "^10.0.7",
+    "cypress": "^16.2.1",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10"
+  },
+  "allowScripts": {
+    "cypress@16.2.1": true
+  }
+}
