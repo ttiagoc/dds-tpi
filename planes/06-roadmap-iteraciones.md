@@ -17,7 +17,7 @@ Specs: `01-backend-base`, `02-dominio`, `03-repos-y-seed`, `04-auth`.
 - [x] `feature/dominio`: todas las clases de `planes/02` + tests unitarios (TRANSICIONES, cupo, días restantes, reseñas).
 - [x] `chore/calidad-codigo`: skill `revisar-calidad`, `npm run calidad` (ESLint de complejidad/tamaño + Prettier + jscpd), integrada a `cerrar-feature`; primera pasada sobre lo mergeado.
 - [x] `feature/repos-y-seed`: `InMemoryRepository`, repos, `datos.js`, `sembrar.js`, `/test/reset`.
-- [ ] `feature/auth`: login JWT, `autenticar`, `autorizar`, `/auth/yo`.
+- [x] `feature/auth`: login JWT, `autenticar`, `autorizar`, `/auth/yo`.
 
 **Aceptación:** `npm test` verde; `POST /auth/login` con usuarios seed devuelve token; dominio con cobertura ≥ 80%.
 
