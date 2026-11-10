@@ -11,6 +11,7 @@ import { CategoriaService } from "./services/CategoriaService.js";
 import { CompraService } from "./services/CompraService.js";
 import { ReseniaService } from "./services/ReseniaService.js";
 import { FavoritoService } from "./services/FavoritoService.js";
+import { MensajeService } from "./services/MensajeService.js";
 import { sembrar } from "./seeds/sembrar.js";
 
 function crearRepos() {
@@ -20,6 +21,26 @@ function crearRepos() {
     eventoRepository: new EventoRepository(),
     compraRepository: new CompraRepository(),
     reseniaRepository: new ReseniaRepository(),
+  };
+}
+
+function crearServiciosDeCompras(repos, { reloj }) {
+  const { compraRepository, eventoRepository, usuarioRepository, reseniaRepository } = repos;
+  return {
+    compraService: new CompraService({
+      compraRepository,
+      eventoRepository,
+      usuarioRepository,
+      reseniaRepository,
+      reloj,
+    }),
+    reseniaService: new ReseniaService({
+      compraRepository,
+      reseniaRepository,
+      usuarioRepository,
+      reloj,
+    }),
+    mensajeService: new MensajeService({ compraRepository, usuarioRepository, reloj }),
   };
 }
 
@@ -39,19 +60,7 @@ function crearServicios(repos, { reloj, entorno }) {
       reloj,
     }),
     categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),
-    compraService: new CompraService({
-      compraRepository: repos.compraRepository,
-      eventoRepository: repos.eventoRepository,
-      usuarioRepository: repos.usuarioRepository,
-      reseniaRepository: repos.reseniaRepository,
-      reloj,
-    }),
-    reseniaService: new ReseniaService({
-      compraRepository: repos.compraRepository,
-      reseniaRepository: repos.reseniaRepository,
-      usuarioRepository: repos.usuarioRepository,
-      reloj,
-    }),
+    ...crearServiciosDeCompras(repos, { reloj }),
   };
   servicios.favoritoService = new FavoritoService({
     usuarioRepository: repos.usuarioRepository,
