@@ -5,7 +5,16 @@ const errores = { 400: error("BadRequest"), 404: error("NotFound") };
 
 const DESCRIPCION = `Chat entre el comprador y el organizador del evento de cada compra. Solo participan ellos dos (403 para el resto) y se puede escribir en cualquier estado de la compra.
 
-Se escribe por REST; las novedades en vivo llegan por Socket.io.`;
+Se escribe por REST; las novedades en vivo llegan por Socket.io (OpenAPI no modela sockets, por eso van acá).
+
+**Socket.io** (mismo host y puerto que la API): conectarse con \`io(API_URL, { auth: { token } })\`. Sin token válido, \`connect_error\` con \`message: "No autenticado"\`.
+
+| Dirección | Evento | Payload |
+|---|---|---|
+| cliente → server | \`compra:unirse\` | \`{ compraId }\`, con ack \`{ ok: true }\` o \`{ ok: false, error }\` (id inválido, compra inexistente o no participás) |
+| cliente → server | \`compra:salir\` | \`{ compraId }\` |
+| server → room \`compra:<id>\` | \`mensaje:nuevo\` | \`Mensaje\`, igual que el 201 del POST; llega a todo el room, incluido el autor |
+| server → room \`compra:<id>\` | \`compra:estado\` | \`{ compraId, estado }\` tras pagar, cancelar o marcar utilizada; un solo evento con el estado final |`;
 
 export default {
   tags: [{ name: "Chat", description: DESCRIPCION }],

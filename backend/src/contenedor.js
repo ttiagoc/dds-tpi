@@ -13,6 +13,7 @@ import { ReseniaService } from "./services/ReseniaService.js";
 import { FavoritoService } from "./services/FavoritoService.js";
 import { MensajeService } from "./services/MensajeService.js";
 import { sembrar } from "./seeds/sembrar.js";
+import { notificadorNulo } from "./sockets/notificador.js";
 
 function crearRepos() {
   return {
@@ -24,7 +25,7 @@ function crearRepos() {
   };
 }
 
-function crearServiciosDeCompras(repos, { reloj }) {
+function crearServiciosDeCompras(repos, { reloj, notificador }) {
   const { compraRepository, eventoRepository, usuarioRepository, reseniaRepository } = repos;
   return {
     compraService: new CompraService({
@@ -33,6 +34,7 @@ function crearServiciosDeCompras(repos, { reloj }) {
       usuarioRepository,
       reseniaRepository,
       reloj,
+      notificador,
     }),
     reseniaService: new ReseniaService({
       compraRepository,
@@ -40,11 +42,16 @@ function crearServiciosDeCompras(repos, { reloj }) {
       usuarioRepository,
       reloj,
     }),
-    mensajeService: new MensajeService({ compraRepository, usuarioRepository, reloj }),
+    mensajeService: new MensajeService({
+      compraRepository,
+      usuarioRepository,
+      reloj,
+      notificador,
+    }),
   };
 }
 
-function crearServicios(repos, { reloj, entorno }) {
+function crearServicios(repos, { reloj, entorno, notificador }) {
   const servicios = {
     authService: new AuthService({
       usuarioRepository: repos.usuarioRepository,
@@ -60,7 +67,7 @@ function crearServicios(repos, { reloj, entorno }) {
       reloj,
     }),
     categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),
-    ...crearServiciosDeCompras(repos, { reloj }),
+    ...crearServiciosDeCompras(repos, { reloj, notificador }),
   };
   servicios.favoritoService = new FavoritoService({
     usuarioRepository: repos.usuarioRepository,
@@ -70,9 +77,13 @@ function crearServicios(repos, { reloj, entorno }) {
   return servicios;
 }
 
-export function crearContenedor({ reloj = relojSistema, entorno = leerEntorno() } = {}) {
+export function crearContenedor({
+  reloj = relojSistema,
+  entorno = leerEntorno(),
+  notificador = notificadorNulo,
+} = {}) {
   const repos = crearRepos();
-  const servicios = crearServicios(repos, { reloj, entorno });
+  const servicios = crearServicios(repos, { reloj, entorno, notificador });
 
   async function resetear() {
     await Promise.all(Object.values(repos).map((repo) => repo.clear()));

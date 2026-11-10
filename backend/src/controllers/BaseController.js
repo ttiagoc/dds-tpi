@@ -1,15 +1,10 @@
 import { BadRequestError } from "../errors/AppError.js";
 import { detallesZod } from "../validations/detallesZod.js";
-
-const ENTERO_POSITIVO = /^[1-9]\d*$/;
+import { parsearId } from "../validations/parsearId.js";
 
 export class BaseController {
   parsearId(valor) {
-    const id = Number(valor);
-    if (!ENTERO_POSITIVO.test(String(valor)) || !Number.isSafeInteger(id)) {
-      throw new BadRequestError("El id debe ser un entero positivo");
-    }
-    return id;
+    return parsearId(valor);
   }
 
   extraerYValidarQuery(query, schema) {

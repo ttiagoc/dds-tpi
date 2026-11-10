@@ -22,10 +22,18 @@ export const usuarioBruno = comoUsuario(bruno);
 export const usuarioFenix = comoUsuario(fenix);
 export const usuarioKonex = comoUsuario(konex);
 
+export const notificadorFake = () => ({ mensajeNuevo: jest.fn(), estadoCompra: jest.fn() });
+
 export function servicioDeCompras(datos) {
   const repos = reposDeCompras(datos);
   const reloj = { ahora: jest.fn(() => AHORA) };
-  return { repos, reloj, service: new CompraService({ ...repos, reloj }) };
+  const notificador = notificadorFake();
+  return {
+    repos,
+    reloj,
+    notificador,
+    service: new CompraService({ ...repos, reloj, notificador }),
+  };
 }
 
 function reposDeCompras(datos) {

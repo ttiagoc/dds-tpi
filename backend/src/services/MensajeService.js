@@ -31,6 +31,10 @@ export class MensajeService {
     return mensaje;
   }
 
+  async verificarParticipante(compraId, usuario) {
+    await buscarCompraDelParticipante(this.compraRepository, compraId, usuario.id);
+  }
+
   toResponse({ id, usuario, mensaje, enviado }) {
     return {
       id,

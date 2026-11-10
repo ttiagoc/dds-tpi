@@ -1,6 +1,6 @@
 # Spec 08b — Chat de la compra (Socket.io)
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/chat-socket`
 - **Casos de uso:** CU5, CU6 (en vivo); extra: refresco del estado de la compra
 - **Iteración:** It3
@@ -22,11 +22,12 @@ Aplica R7 de `planes/02-dominio.md`.
   - `compraId` no entero positivo → `{ ok: false, error: "El id debe ser un entero positivo" }`;
   - compra inexistente → `{ ok: false, error: "No existe la compra" }`;
   - no participa → `{ ok: false, error: "No tenés permiso para realizar esta acción" }`;
-  - si no, se une al room `compra:<id>` y `{ ok: true }`. Unirse dos veces no duplica la entrega.
-- **RS4** `compra:salir { compraId }` deja el room; sin ack, sin error si no estaba.
+  - si no, se une al room `compra:<id>` y `{ ok: true }`. Unirse dos veces no duplica la entrega;
+  - cualquier otro error (inesperado) se loguea y responde `{ ok: false, error: "No se pudo unir al chat" }`.
+- **RS4** `compra:salir { compraId }` deja el room (el id se normaliza igual que en `compra:unirse`); sin ack, sin error si no estaba o si el id es inválido.
 - **RS5** `mensaje:nuevo`: después de persistir un `POST /compras/:id/mensajes`, se emite al room `compra:<id>` **completo, incluido el autor** (el front deduplica por `id`). Payload = la misma forma que el 201 del REST.
 - **RS6** `compra:estado { compraId, estado }`: después de persistir pagar, cancelar o marcar utilizada, **un solo evento con el estado final** (cancelar una CONFIRMADA emite `REEMBOLSADA`, no `CANCELADA`). No se emite al crear la compra ni si la acción falla (403, 404, 422).
-- **RS7** La notificación nunca cambia la respuesta REST: si nadie está en el room, el endpoint responde igual.
+- **RS7** La notificación nunca cambia la respuesta REST: si nadie está en el room, el endpoint responde igual, y si el emit falla se loguea sin propagar el error.
 
 ## Contrato (completa `planes/03`, sección Socket.io)
 | Dirección | Evento | Payload | Notas |
@@ -43,7 +44,7 @@ Diseño:
 - `src/sockets/chatSocket.js`: `registrarChat(io, { authService, mensajeService })` con el middleware del handshake y los handlers de RS3/RS4. `mensajeService.verificarParticipante(compraId, usuario)` reutiliza `buscarCompra` + `exigirPermiso`.
 - `CompraService` recibe `notificador` (default `notificadorNulo`) y en `accion()` llama `estadoCompra` después de `guardar`.
 - `crearContenedor({ notificador })` lo inyecta en `CompraService` y `MensajeService`.
-- `src/servidor.js`: `crearServidor({ entorno, reloj })` arma `http.Server` + `io` + contenedor (con `crearNotificadorSocket(io)`) + app (`servidor.on("request", app)`) y registra el chat. Lo usan `server.js` y los tests de socket (puerto efímero con `listen(0)`).
+- `src/servidor.js`: `crearServidor({ entorno, reloj })` arma `http.Server` + `io` + contenedor (con `crearNotificadorSocket(io)`) + app y registra el chat. El handler HTTP se pasa a `http.createServer` y delega en la app: Socket.io tiene que envolverlo al adjuntarse, si no Express atiende `/socket.io/` (polling) con 404. Lo usan `server.js` y los tests de socket (puerto efímero con `listen(0)`).
 
 ## Pantallas
 Ninguna (el hook `useChatCompra` y la pantalla Chat son It4).
@@ -92,6 +93,8 @@ Escenario: salir del room
 - Notificar compras nuevas o reseñas.
 
 ## Notas de IA
+- Error de la IA detectado en la prueba manual del `server.js`: el diseño original (`servidor.on("request", app)` después de crear `io`) dejaba que Express respondiera 404 a `/socket.io/` en long-polling y el server se caía con `ERR_HTTP_HEADERS_SENT`. Los tests no lo vieron porque usaban solo `websocket`. Se agregó un test de regresión con `polling` y se corrigió el diseño.
+- La revisión agregó: notificación que no rompe el REST si el emit falla, el error genérico del ack, `compra:salir` normalizado y los casos de token vencido, salir sin unirse y room vacío.
 - El usuario eligió: un solo `compra:estado` con el estado final; `mensaje:nuevo` a todo el room incluido el autor.
 - La IA agregó sin preguntar (revisable):
   - mensajes de error del ack (reutiliza los del REST);

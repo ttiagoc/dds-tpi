@@ -171,3 +171,20 @@ describe("MensajeService.enviar", () => {
     });
   });
 });
+
+describe("MensajeService.verificarParticipante", () => {
+  it("resuelve si el usuario participa de la compra", async () => {
+    compras = [compraDeAna()];
+    await expect(service.verificarParticipante(7, usuarioFenix)).resolves.toBeUndefined();
+  });
+
+  it("rechaza una compra inexistente con 404 y a quien no participa con 403", async () => {
+    compras = [compraDeAna()];
+    await expect(service.verificarParticipante(999, usuarioAna)).rejects.toThrow(
+      MENSAJE_COMPRA_INEXISTENTE,
+    );
+    await expect(service.verificarParticipante(7, usuarioKonex)).rejects.toThrow(
+      MENSAJE_SIN_PERMISO,
+    );
+  });
+});
