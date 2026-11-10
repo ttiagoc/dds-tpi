@@ -1,7 +1,7 @@
 # ADR-007 — Reglas de transición de estados de la compra
 
 - **Fecha:** 2026-11-10
-- **Estado:** aceptada (revisar al escribir spec 04-compras)
+- **Estado:** aceptada (reglas reconfirmadas por el usuario el 2026-11-10 en spec 02-dominio)
 
 ## Contexto
 La consigna define estados (PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA) pero no cómo se pasa de uno a otro ni hay pasarela de pago.
