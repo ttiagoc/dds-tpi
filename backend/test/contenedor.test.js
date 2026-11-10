@@ -2,6 +2,7 @@ import { describe, it, expect } from "@jest/globals";
 import { crearContenedor } from "../src/contenedor.js";
 import { relojSistema } from "../src/config/reloj.js";
 import { InMemoryRepository } from "../src/repositories/InMemoryRepository.js";
+import { AuthService } from "../src/services/AuthService.js";
 import { AHORA } from "./helpers/domainFactories.js";
 
 const relojFijo = { ahora: () => AHORA };
@@ -27,6 +28,15 @@ describe("crearContenedor", () => {
     for (const repo of Object.values(repos)) {
       expect(repo).toBeInstanceOf(InMemoryRepository);
     }
+  });
+
+  it("expone authService con el repo de usuarios y la config del entorno", () => {
+    const entorno = { jwtSecret: "s", jwtExpiresIn: "1h" };
+    const { servicios, repos } = crearContenedor({ entorno });
+    expect(servicios.authService).toBeInstanceOf(AuthService);
+    expect(servicios.authService.usuarioRepository).toBe(repos.usuarioRepository);
+    expect(servicios.authService.jwtSecret).toBe("s");
+    expect(servicios.authService.jwtExpiresIn).toBe("1h");
   });
 
   it("cada llamada arma repos independientes", () => {

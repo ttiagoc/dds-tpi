@@ -5,7 +5,7 @@ import { crearContenedor } from "./contenedor.js";
 import { crearApp } from "./app.js";
 
 const entorno = leerEntorno();
-const contenedor = crearContenedor();
+const contenedor = crearContenedor({ entorno });
 await contenedor.resetear();
 const app = crearApp(contenedor, { nodeEnv: entorno.nodeEnv });
 const servidor = http.createServer(app);
