@@ -50,7 +50,7 @@ No se usan: `/ship`, `/land-and-deploy`, `/setup-deploy`, `/canary`, `/benchmark
 1. **Spec** (`escribir-spec`): la IA propone, yo valido reglas. Registrar qué preguntas hizo y qué decidí.
 2. **Plan** (si la feature es grande): `superpowers:writing-plans`.
 3. **TDD**: tests primero (`escribir-tests`), después implementación con la skill específica.
-4. **Revisión**: leer el diff completo; `/code-review` o `revisor-reglas-negocio`.
+4. **Revisión**: `revisar-calidad` siempre (repetición, capas, modularización; `npm run calidad` = eslint + jscpd); `revisor-reglas-negocio` o `/code-review` si hay lógica de negocio.
 5. **Verificación**: correr tests, probar en Expo Go.
 6. **Cierre** (`cerrar-feature`) + **bitácora** (`bitacora-ia`).
 

@@ -12,16 +12,17 @@ Plazo: ~3 semanas desde 2026-11-10. Cada feature: `escribir-spec` → `feature/<
 **Aceptación:** cada CU tiene fila en la trazabilidad de `00-indice.md`.
 
 ## It1 — Backend base (11-14/11)
-Specs: `01-backend-base`, `02-auth`.
-- [ ] `chore/backend-base`: package.json ESM, express 5, app/server, errores, middlewares, healthcheck, Jest ESM, reloj, contenedor.
-- [ ] `feature/dominio`: todas las clases de `planes/02` + tests unitarios (TRANSICIONES, cupo, días restantes, reseñas).
-- [ ] `feature/repos-y-seed`: `InMemoryRepository`, repos, `datos.js`, `sembrar.js`, `/test/reset`.
-- [ ] `feature/auth`: login JWT, `autenticar`, `autorizar`, `/auth/yo`.
+Specs: `01-backend-base`, `02-dominio`, `03-repos-y-seed`, `04-auth`.
+- [x] `chore/backend-base`: package.json ESM, express 5, app/server, errores, middlewares, healthcheck, Jest ESM, reloj, contenedor.
+- [x] `feature/dominio`: todas las clases de `planes/02` + tests unitarios (TRANSICIONES, cupo, días restantes, reseñas).
+- [x] `chore/calidad-codigo`: skill `revisar-calidad`, `npm run calidad` (ESLint de complejidad/tamaño + Prettier + jscpd), integrada a `cerrar-feature`; primera pasada sobre lo mergeado.
+- [x] `feature/repos-y-seed`: `InMemoryRepository`, repos, `datos.js`, `sembrar.js`, `/test/reset`.
+- [x] `feature/auth`: login JWT, `autenticar`, `autorizar`, `/auth/yo`.
 
 **Aceptación:** `npm test` verde; `POST /auth/login` con usuarios seed devuelve token; dominio con cobertura ≥ 80%.
 
 ## It2 — API (14-18/11)
-Specs: `03-eventos`, `04-compras`, `05-resenias-favoritos`.
+Specs: `05-eventos`, `06-compras`, `07-resenias-favoritos`.
 - [ ] `feature/categorias-eventos`: `GET /categorias`, `GET /eventos` (q, categoria, precio, orden, paginado), `GET /eventos/:id`, `POST /eventos`, `GET /organizadores/yo/eventos`.
 - [ ] `feature/compras`: crear, listar mías con `diasRestantes` y `acciones`, detalle con historial, pago, cancelación/reembolso, uso, `GET /eventos/:id/compras` con disponibilidad.
 - [ ] `feature/resenias-favoritos`: reseñas, puntaje promedio, ordenar por puntaje, favoritos.
@@ -30,14 +31,14 @@ Specs: `03-eventos`, `04-compras`, `05-resenias-favoritos`.
 **Aceptación:** colección de integración cubre cada endpoint de `planes/03`; Swagger muestra todos.
 
 ## It3 — Chat (18-19/11)
-Spec: `06-chat`.
+Spec: `08-chat`.
 - [ ] `feature/chat-rest`: GET/POST mensajes con permisos.
 - [ ] `feature/chat-socket`: socket.io con auth, rooms, emisión `mensaje:nuevo` y `compra:estado`.
 
 **Aceptación:** dos clientes de prueba (script o test) reciben el mensaje en vivo.
 
 ## It4 — App Expo (19-26/11)
-Specs: `07-front-base`, `08-pantallas-comprador`, `09-pantallas-organizador`, `10-chat-front`.
+Specs: `09-front-base`, `10-pantallas-comprador`, `11-pantallas-organizador`, `12-chat-front`.
 - [ ] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo.
 - [ ] `feature/login`
 - [ ] `feature/explorar-eventos` (CU3, CU11) + DetalleEvento (CU10)

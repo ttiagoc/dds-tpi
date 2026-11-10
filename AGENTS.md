@@ -57,12 +57,13 @@ Estructura `backend/src/`:
 | `controllers/` | `extends BaseController` (`parsearId`, `extraerYValidarQuery`). `try { … } catch (e) { next(e) }`. | `CompraController.js` |
 | `routes/` | `XRoutes.js`, `router.js` monta todo. | `CompraRoutes.js` |
 | `validations/` | Zod `.strict()`; middleware `validate(schema)`. | `compraValidation.js` |
-| `middlewares/` | `errorHandler`, `errorLogger`, `notFoundHandler`, `autenticar`, `autorizar`, `validate`. | |
+| `middlewares/` | `errorHandler`, `errorLogger`, `notFoundHandler`, `autenticar`, `autenticarOpcional`, `autorizar`, `validate`. | |
 | `errors/` | `AppError` + `BadRequest 400`, `Unauthorized 401`, `Forbidden 403`, `NotFound 404`, `Conflict 409`, `UnprocessableEntity 422`. | `AppError.js` |
 | `docs/openapi/` | Swagger modular a mano: `<modulo>.js` exporta `{ tags, paths, schemas }`; `comun.js` helpers. | |
 | `sockets/` | Servidor Socket.io (auth JWT en handshake, rooms `compra:<id>`). | |
 | `seeds/` | `datos.js` + `sembrar.js`. Se siembra al arrancar. | |
-| `config/` | `reloj.js` (`ahora()` inyectable para tests de fechas), env. | |
+| `config/` | `reloj.js` (`ahora()` inyectable para tests de fechas), `entorno.js`. | |
+| `contenedor.js` | `crearContenedor(overrides)`: repos únicos inyectados explícitamente en los services, `resetear()`. | |
 
 Convenciones:
 - Archivos de clase en PascalCase; schemas, validaciones y middlewares en camelCase. Imports con extensión `.js`.
@@ -117,7 +118,7 @@ Nombres de tests en castellano: `it("rechaza cancelar una compra utilizada")`. F
 ## Definición de terminado
 
 - [ ] Spec de la feature con criterios de aceptación cumplidos.
-- [ ] Tests nuevos + suite completa en verde; lint sin errores.
+- [ ] Tests nuevos + suite completa en verde; `npm run calidad` sin errores (lint + duplicados) y revisión con `revisar-calidad`.
 - [ ] Swagger actualizado si cambió la API.
 - [ ] Pantalla probada en Expo Go (y web si tiene e2e).
 - [ ] Entrada en `docs/ia/bitacora.md`; ADR si hubo una decisión.

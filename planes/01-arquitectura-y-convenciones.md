@@ -32,13 +32,15 @@ backend/
     app.js                crearApp({ servicios }) → express app (testeable)
     server.js             dotenv, sembrar, http.createServer(app), socket.io, listen 0.0.0.0
     config/reloj.js       export const reloj = { ahora: () => new Date() }
+    config/entorno.js     lee env; sin JWT_SECRET y NODE_ENV !== "test" → error al arrancar
+    contenedor.js         crearContenedor(overrides) → { repos, servicios, resetear }
     domain/               Usuario, Evento, Categoria, TipoEntrada, Compra, CambioEstadoCompra, Mensaje, Resenia, EstadoCompra, Rol
     repositories/         InMemoryRepository + uno por agregado
     services/             AuthService, EventoService, CompraService, ReseniaService, FavoritoService, CategoriaService
     controllers/          BaseController + uno por recurso
     routes/               router.js + XRoutes.js
     validations/          zod por recurso + paginacionValidation + idValidation
-    middlewares/          errorHandler, errorLogger, notFoundHandler, autenticar, autorizar, validate
+    middlewares/          errorHandler, errorLogger, notFoundHandler, autenticar, autenticarOpcional, autorizar, validate
     errors/AppError.js
     sockets/              chatSocket.js (registrarChat(io, servicios))
     docs/openapi/         index.js, comun.js, <modulo>.js
@@ -62,7 +64,20 @@ export class CompraService {
 }
 ```
 
-`app.js` exporta `crearApp(dependencias)` para que los tests de integración armen la app con repos limpios. Un único `contenedor.js` arma las instancias compartidas (los repos en memoria deben ser **singletons** por proceso, si no cada service ve datos distintos).
+`app.js` exporta `crearApp(contenedor)` para que los tests de integración armen la app con repos limpios.
+
+`contenedor.js` exporta la factory `crearContenedor(overrides = {})`:
+
+```
+crearContenedor({ reloj?, notificador?, ... })
+   ├── crea cada repo UNA vez (Usuario, Categoria, Evento, Compra, Resenia)
+   ├── crea cada service pasándole TODOS sus repos explícitos (nunca depende de los defaults)
+   └── devuelve { repos, servicios, reloj, resetear }   resetear() = clear() de cada repo + sembrar()
+```
+
+- `server.js` llama `crearContenedor()` **una sola vez** por proceso; los repos en memoria son singletons por contenedor (si un service armara los suyos, vería otro `Map`).
+- Los defaults del constructor de cada service existen solo para unit tests aislados; el código de producción no los usa.
+- `POST /test/reset` usa `contenedor.resetear()`. El router se monta solo si `NODE_ENV=test` (si no, 404).
 
 ### Repositorio en memoria
 
@@ -101,7 +116,9 @@ Criterio 400 vs 422: 400 = forma inválida (zod); 422 = forma válida pero viola
 
 - `POST /auth/login` → `{ token, usuario }`. JWT HS256, `sub = id`, payload `{ rol }`, expira según `JWT_EXPIRES_IN` (default `8h`, comodidad para la demo).
 - `autenticar` lee `Authorization: Bearer`, setea `req.usuario = { id, rol }`.
+- `autenticarOpcional`: si hay Bearer válido setea `req.usuario`; si falta o es inválido sigue como anónimo (sin 401). Se usa en `GET /eventos` y `GET /eventos/:id` para calcular `esFavorito`.
 - `autorizar(...roles)` → 403 si el rol no coincide.
+- `JWT_SECRET` obligatorio fuera de `NODE_ENV=test` (en test se usa un secret fijo): `config/entorno.js` tira error al arrancar si falta.
 - Permisos de recurso (ser dueño de la compra / organizador del evento) se chequean en el **service**, que es el que conoce las entidades.
 - Todas las rutas requieren login salvo `POST /auth/login`, `GET /healthcheck`, `GET /categorias`, `GET /eventos`, `GET /eventos/:id`, `GET /organizadores/:id/resenias`, `/api-docs`.
 
@@ -109,7 +126,7 @@ Criterio 400 vs 422: 400 = forma inválida (zod); 422 = forma válida pero viola
 
 - Sin wrapper. Entidad: el objeto. Lista paginada: `{ eventos, total, page, totalPages }`.
 - `toResponse` en el service decide la forma (nunca se expone `passwordHash`).
-- Referencias embebidas como resumen: `organizador: { id, nombre, puntajePromedio }`.
+- Referencias embebidas como resumen: `organizador: { id, nombre, puntajePromedio }`, donde `nombre` = `usuario.nombreCompleto()`.
 
 ### Naming
 

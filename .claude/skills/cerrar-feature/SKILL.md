@@ -12,7 +12,7 @@ No afirmar que algo está terminado sin haber corrido los comandos en esta sesi�
 ```bash
 cd backend && npm test          # si se tocó el back
 cd frontend && npm test         # si se tocó el front
-npm run lint                    # desde la raíz (cuando esté configurado)
+npm run calidad                 # desde la raíz: eslint + jscpd (duplicados)
 npm run e2e                     # si la feature está en un flujo e2e
 git status && git diff --stat
 ```
@@ -33,7 +33,8 @@ Si algo falla → arreglar o reportar tal cual; no seguir.
 
 ## 3. Revisión
 
-Para features con lógica de negocio: lanzar el subagente `revisor-reglas-negocio` sobre el diff, o `/code-review`. Aplicar lo que corresponda y anotar en la bitácora lo que la revisión encontró.
+- **Siempre:** skill `revisar-calidad` (repetición, capas y modularización) sobre el diff de la rama.
+- Para features con lógica de negocio, además: subagente `revisor-reglas-negocio` sobre el diff, o `/code-review`. Aplicar lo que corresponda y anotar en la bitácora lo que la revisión encontró.
 
 ## 4. Commit y merge (solo si el usuario lo pide)
 
