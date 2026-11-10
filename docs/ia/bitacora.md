@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 7 |
-| Features cerradas | 9 (It1 cerrada; It2 en curso) |
+| Features cerradas | 10 (It1 cerrada; It2 completa, falta el cierre) |
 | Correcciones relevantes a la IA | 4 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -146,6 +146,16 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
     - eliminación de una regla no pedida (descartar favoritos de eventos inexistentes);
     - un test que fija el 409 antes que el 422.
     Quedan 683 tests en verde.
+  - Spec 07b (Swagger) escrita, aprobada e implementada:
+    - documento OpenAPI 3.0.3 modular, escrito a mano a partir de `planes/03`, servido en `/api-docs` y `/api-docs.json`;
+    - la autenticación se marca por operación según el rol;
+    - los tests verifican que el documento cubra exactamente los endpoints implementados, que las referencias resuelvan y que la autenticación y los parámetros sean consistentes.
+  - Revisión de cierre de Swagger (calidad: 3 hallazgos; reglas: 12, ninguno grave). Se aplicaron los doce:
+    - errores 422 que el documento omitía (alta de eventos, cancelación, uso);
+    - enumeraciones y límites tomados del dominio y de las validaciones en lugar de copiados;
+    - ejemplos alineados con los ids reales del seed, corregidos también en `planes/03`;
+    - helpers para los schemas que se extienden.
+    Quedan 698 tests en verde. Con esto se completan los ítems de la Iteración 2.
 - **Decisiones:**
   - Se descartaron dos hallazgos de la revisión: blindar el orden del listado contra cambios del seed, que ya lo cubre el test unitario, y evitar guardar el evento al marcar utilizada, porque guardar siempre compra y evento es más simple y consistente — recomendación de la IA, aceptada.
   - Spec 07 — opciones recomendadas por la IA y elegidas por mí:
@@ -154,4 +164,5 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
     - los favoritos se listan por fecha del evento, incluidos los pasados;
     - agregar y quitar favoritos son operaciones idempotentes y permisivas.
   - Spec 07: la IA fijó por su cuenta que el conflicto (409) se informa antes que la compra no utilizada (422), y el texto del mensaje de conflicto. Quedó señalado en la spec como revisable.
-- **Aprendizaje:** la métrica de duplicación pasaba holgada (1,3 % contra un umbral de 3 %), pero los clones en tests se habían quintuplicado. Revisar la tendencia respecto de `develop`, y no solo el umbral, mostró que los fakes y helpers de prueba tenían que compartirse.
+  - Swagger se escribe a mano y no se genera desde zod, para seguir el formato del TP grupal y no sumar dependencias. Como contrapartida, ningún test contrasta las descripciones con el comportamiento real; esa verificación queda a cargo de la revisión — propuesta de la IA, aceptada.
+- **Aprendizaje:** la métrica de duplicación pasaba holgada (1,3 % contra un umbral de 3 %), pero los clones en tests se habían quintuplicado. Revisar la tendencia respecto de `develop`, y no solo el umbral, mostró que los fakes y helpers de prueba tenían que compartirse. En Swagger, la revisión contra el código encontró tres errores de negocio no documentados y ejemplos con ids que no existían en el seed, copiados de `planes/03`: un documento escrito a mano puede ser consistente consigo mismo y aun así no coincidir con la implementación.
