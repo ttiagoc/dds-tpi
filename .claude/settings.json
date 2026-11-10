@@ -1,0 +1,12 @@
+{
+  "extraKnownMarketplaces": {
+    "callstack-agent-skills": {
+      "source": { "source": "github", "repo": "callstackincubator/agent-skills" }
+    }
+  },
+  "enabledPlugins": {
+    "building-react-native-apps@callstack-agent-skills": true,
+    "testing-react-native-apps@callstack-agent-skills": true,
+    "expo@claude-plugins-official": true
+  }
+}

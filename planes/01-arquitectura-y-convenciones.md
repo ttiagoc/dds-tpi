@@ -132,7 +132,7 @@ Expo SDK estable más reciente (template `blank`, JavaScript) + `expo-router`, `
 
 ```
 frontend/
-  app/
+  src/app/                 rutas expo-router (convención SDK 58)
     _layout.jsx              PaperProvider + AuthProvider + Stack
     index.jsx                redirige según sesión y rol
     (auth)/login.jsx
@@ -140,7 +140,7 @@ frontend/
     (organizador)/_layout.jsx Tabs: mis-eventos, perfil
     eventos/[id].jsx  eventos/[id]/comprar.jsx  eventos/[id]/compras.jsx  eventos/nuevo.jsx
     compras/[id].jsx  compras/[id]/chat.jsx  compras/[id]/resenia.jsx
-  src/pantallas/<nombre>/  UI + lógica de cada pantalla (+ test); los archivos de app/ solo la importan
+  src/pantallas/<nombre>/  UI + lógica de cada pantalla (+ test); los archivos de src/app/ solo la importan
   src/api/      cliente.js, authApi.js, eventosApi.js, comprasApi.js, ..., socket.js
   src/auth/     AuthContext.jsx, sesion.js
   src/components/
