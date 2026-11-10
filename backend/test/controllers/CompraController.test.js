@@ -46,7 +46,7 @@ describe("CompraController", () => {
     expect(servicio.listarDelComprador).not.toHaveBeenCalled();
   });
 
-  it.each(["obtener", "pagar", "cancelar"])(
+  it.each(["obtener", "pagar", "cancelar", "marcarUtilizada"])(
     "%s parsea el id, delega con el usuario y responde 200",
     async (metodo) => {
       const { res, servicio } = await llamar(metodo, { params: { id: "7" } });
@@ -56,7 +56,7 @@ describe("CompraController", () => {
     },
   );
 
-  it.each(["obtener", "pagar", "cancelar"])(
+  it.each(["obtener", "pagar", "cancelar", "marcarUtilizada", "listarDelEvento"])(
     "%s manda a next un 400 con un id inválido",
     async (metodo) => {
       const servicio = { [metodo]: jest.fn() };
@@ -66,7 +66,7 @@ describe("CompraController", () => {
     },
   );
 
-  it.each(["crear", "obtener", "pagar", "cancelar"])(
+  it.each(["crear", "obtener", "pagar", "cancelar", "marcarUtilizada", "listarDelEvento"])(
     "%s pasa el error del service a next",
     async (metodo) => {
       const error = new ForbiddenError("No tenés permiso para realizar esta acción");
@@ -75,4 +75,32 @@ describe("CompraController", () => {
       expect(next).toHaveBeenCalledWith(error);
     },
   );
+
+  it("listarDelEvento parsea el id, valida la query, delega con el usuario y responde 200", async () => {
+    const pagina = { evento: { id: 4 }, disponibilidad: [], compras: [], total: 0 };
+    const servicio = { listarDelEvento: jest.fn().mockResolvedValue(pagina) };
+    const { res } = await llamar(
+      "listarDelEvento",
+      { params: { id: "4" }, query: { estado: "CONFIRMADA", page: "2" } },
+      servicio,
+    );
+    expect(servicio.listarDelEvento).toHaveBeenCalledWith(4, usuario, {
+      estado: "CONFIRMADA",
+      page: 2,
+      limit: 20,
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(pagina);
+  });
+
+  it("listarDelEvento manda a next un 400 si la query es inválida", async () => {
+    const servicio = { listarDelEvento: jest.fn() };
+    const { next } = await llamar(
+      "listarDelEvento",
+      { params: { id: "4" }, query: { limit: "51" } },
+      servicio,
+    );
+    expect(next.mock.calls[0][0]).toBeInstanceOf(BadRequestError);
+    expect(servicio.listarDelEvento).not.toHaveBeenCalled();
+  });
 });

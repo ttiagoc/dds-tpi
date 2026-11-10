@@ -1,5 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { CompraService } from "../../src/services/CompraService.js";
+import { describe, it, expect, beforeEach } from "@jest/globals";
 import {
   MENSAJE_COMPRA_INEXISTENTE,
   MENSAJE_EVENTO_INEXISTENTE,
@@ -10,25 +9,17 @@ import {
   UnprocessableEntityError,
 } from "../../src/errors/AppError.js";
 import { EstadoCompra } from "../../src/domain/EstadoCompra.js";
-import { Rol } from "../../src/domain/Rol.js";
+import { AHORA, enDias, crearEvento, crearCompra } from "../helpers/domainFactories.js";
 import {
-  AHORA,
-  enDias,
-  crearComprador,
-  crearOrganizador,
-  crearEvento,
-  crearCompra,
-} from "../helpers/domainFactories.js";
+  ana,
+  usuarioAna,
+  usuarioBruno,
+  usuarioFenix,
+  usuarioKonex,
+  servicioDeCompras,
+} from "../helpers/comprasFake.js";
 
 const { PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA } = EstadoCompra;
-
-const ana = crearComprador();
-const bruno = crearComprador({ id: 4, nombre: "Bruno", apellido: "Gómez", email: "b@x.com" });
-const fenix = crearOrganizador();
-const usuarioAna = { id: ana.id, rol: Rol.COMPRADOR };
-const usuarioBruno = { id: bruno.id, rol: Rol.COMPRADOR };
-const usuarioFenix = { id: fenix.id, rol: Rol.ORGANIZADOR };
-const usuarioKonex = { id: 5, rol: Rol.ORGANIZADOR };
 
 let compras;
 let resenias;
@@ -48,29 +39,7 @@ beforeEach(() => {
   compras = [];
   resenias = [];
   eventos = [crearEvento({ id: 1 }), crearEvento({ id: 2, fecha: enDias(-3) })];
-  repos = {
-    compraRepository: {
-      findById: jest.fn(async (id) => compras.find((c) => c.id === id) ?? null),
-      findByComprador: jest.fn(async (id) => compras.filter((c) => c.esDe(id))),
-      save: jest.fn(async (compra) => {
-        compra.id ??= 99;
-        return compra;
-      }),
-    },
-    eventoRepository: {
-      findById: jest.fn(async (id) => eventos.find((e) => e.id === id) ?? null),
-      save: jest.fn(async (evento) => evento),
-    },
-    usuarioRepository: {
-      findById: jest.fn(async (id) => [ana, bruno, fenix].find((u) => u.id === id) ?? null),
-    },
-    reseniaRepository: {
-      findByCompraId: jest.fn(async (id) => resenias.find((r) => r.compraId === id) ?? null),
-      findByComprador: jest.fn(async () => [...resenias]),
-    },
-  };
-  reloj = { ahora: jest.fn(() => AHORA) };
-  service = new CompraService({ ...repos, reloj });
+  ({ repos, reloj, service } = servicioDeCompras(() => ({ compras, eventos, resenias })));
 });
 
 describe("CompraService.crear", () => {
