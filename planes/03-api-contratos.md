@@ -74,7 +74,7 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 | POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 401, 403, 422 (incluye categoría inexistente: "La categoría no existe") |
 | GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, cupo, recaudado], total, page, totalPages }` — todos sus eventos (incluye pasados), por fecha asc; `vendidas` = cupo ocupado, `cupo` = suma de cupos, `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA. Detalle en `specs/05b-eventos-organizador.md` | 400, 401, 403 |
 | GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` — compras por `fechaCompra` desc, id desc; `disponibilidad` no se filtra por estado. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404 |
-| GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [{ id, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }], total, page, totalPages }` | 404 |
+| GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [Resenia], total, page, totalPages }` — reseñas por `fecha` desc, id desc; promedio y cantidad sobre todas; sin reseñas → `[]` y `puntajePromedio: null`. Detalle en `specs/07-resenias-favoritos.md` | 400, 404 "No existe el organizador" (inexistente o no ORGANIZADOR) |
 
 Query `GET /eventos`:
 | Param | Tipo | Default |
@@ -108,7 +108,7 @@ Body `POST /eventos`:
 | POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 400, 401, 403, 404, 422 transición inválida o evento ocurrido |
 | POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 400, 401, 403, 404, 422 |
 | POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle con las acciones del organizador. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404, 422 |
-| POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle }` | 201 reseña | 403, 409 ya reseñada, 422 no utilizada |
+| POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle: 1-500 }` `.strict()` | 201 `Resenia` = `{ id, compraId, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }`. Detalle en `specs/07-resenias-favoritos.md` | 400, 401, 403, 404, 409 "Ya reseñaste esta compra", 422 "Solo podés reseñar una compra utilizada" (409 antes que 422) |
 
 ### Mensajes (chat)
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
@@ -121,9 +121,11 @@ El envío es por REST (valida, persiste, devuelve). Después de persistir, el se
 ### Favoritos
 | Método | Ruta | Auth | Respuesta |
 |---|---|---|---|
-| GET | `/usuarios/yo/favoritos` | 🅒 | 200 `[EventoResumen]` |
-| PUT | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 (idempotente) · 404 evento |
-| DELETE | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 |
+| GET | `/usuarios/yo/favoritos` | 🅒 | 200 `[EventoResumen]` sin paginar, incluye pasados, por fecha del evento asc e id asc · 401, 403 |
+| PUT | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 (idempotente, admite eventos pasados) · 400, 401, 403, 404 "No existe el evento" |
+| DELETE | `/usuarios/yo/favoritos/:eventoId` | 🅒 | 204 (idempotente, aunque no sea favorito o el evento no exista) · 400, 401, 403 |
+
+Detalle en `specs/07-resenias-favoritos.md`.
 
 ## Socket.io
 

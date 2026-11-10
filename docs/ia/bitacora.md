@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 6 |
-| Features cerradas | 7 (It1 cerrada; It2 en curso) |
+| Sesiones | 7 |
+| Features cerradas | 8 (It1 cerrada; It2 en curso) |
 | Correcciones relevantes a la IA | 4 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -118,3 +118,30 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Al reservar o liberar cupo se guarda también el evento, aunque el repositorio en memoria comparte las instancias, para que el cambio a una base de datos no pierda el cupo — hallazgo del subagente revisor, aplicado con mi aprobación (spec 06, C9).
   - "Mis compras" muestra primero los eventos próximos (el más cercano arriba) y después los pasados, en lugar del orden por fecha ascendente del plan; tope de 10 entradas por compra; las compras de un evento se muestran de la más nueva a la más vieja — opciones recomendadas por la IA, elegidas por mí; se actualizó `planes/03`.
 - **Aprendizaje:** en la spec 06 la IA escribió mal un test de integración: daba por hecho que los ids de tipo de entrada son globales, cuando se numeran por evento. Hubo que corregir el test y la redacción de la spec. Además, la revisión de reglas encontró que la propia spec pedía algo distinto de la convención del repo, y que los tests no probaban el orden entre autorización y validación. Las dos cosas pasaban inadvertidas porque el código funcionaba.
+
+## Sesión 7 — 2026-11-10 — Compras del organizador y especificación de reseñas y favoritos
+
+- **Objetivo:** implementar la spec 06b (marcar una compra como utilizada y listar las compras de un evento), cerrarla con revisión e integrarla, y especificar reseñas y favoritos.
+- **Avances:**
+  - Spec 06b implementada con TDD:
+    - marcar utilizada responde 404 antes que 403 y devuelve el detalle con las acciones del organizador;
+    - el listado de compras de un evento trae la disponibilidad por tipo sin filtrar por estado, con las compras de la más nueva a la más vieja y paginadas;
+    - se reutilizaron el armado de respuestas, el paginado y la validación de la consulta de la spec 06;
+    - la acción con permiso se generalizó para que comprador y organizador compartan el flujo buscar → verificar → aplicar → guardar.
+  - Revisión de cierre con la skill de calidad (4 hallazgos) y el subagente de reglas de negocio (4 hallazgos, todos de severidad baja). Se aplicaron los seis que recomendó la IA:
+    - fakes de repositorios y usuarios de prueba compartidos;
+    - pruebas de permisos tabuladas para los dos endpoints;
+    - orden más claro de los parámetros del servicio;
+    - errores completos de `POST /compras/:id/uso` en `planes/03`;
+    - un test que asegura que marcar utilizada no altera el cupo.
+    Los clones detectados por jscpd volvieron casi al nivel previo. Integración en `develop` con 611 tests en verde.
+  - Spec 07 (reseñas y favoritos) escrita, propagada a `planes/03` y aprobada.
+- **Decisiones:**
+  - Se descartaron dos hallazgos de la revisión: blindar el orden del listado contra cambios del seed, que ya lo cubre el test unitario, y evitar guardar el evento al marcar utilizada, porque guardar siempre compra y evento es más simple y consistente — recomendación de la IA, aceptada.
+  - Spec 07 — opciones recomendadas por la IA y elegidas por mí:
+    - el alta de una reseña devuelve la reseña con la misma forma que el listado;
+    - las reseñas del organizador van de la más nueva a la más vieja, con 404 si el id no corresponde a un organizador;
+    - los favoritos se listan por fecha del evento, incluidos los pasados;
+    - agregar y quitar favoritos son operaciones idempotentes y permisivas.
+  - Spec 07: la IA fijó por su cuenta que el conflicto (409) se informa antes que la compra no utilizada (422), y el texto del mensaje de conflicto. Quedó señalado en la spec como revisable.
+- **Aprendizaje:** la métrica de duplicación pasaba holgada (1,3 % contra un umbral de 3 %), pero los clones en tests se habían quintuplicado. Revisar la tendencia respecto de `develop`, y no solo el umbral, mostró que los fakes y helpers de prueba tenían que compartirse.
