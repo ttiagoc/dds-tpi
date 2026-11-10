@@ -71,8 +71,8 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 |---|---|---|---|---|---|
 | GET | `/eventos` | 🔓 | query abajo | 200 lista paginada de EventoResumen | 400 query inválida |
 | GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 404 |
-| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 422 |
-| GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, recaudado], ... }` | |
+| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 422 (incluye categoría inexistente: "La categoría no existe") |
+| GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, recaudado], ... }` — `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA | |
 | GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` | 403, 404 |
 | GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [{ id, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }], total, page, totalPages }` | 404 |
 
@@ -87,7 +87,7 @@ Query `GET /eventos`:
 | `incluirPasados` | boolean | `false` |
 | `page`, `limit` | int | 1, 20 (máx 50) |
 
-Ordenar por puntaje: organizadores sin reseñas van al final.
+Ordenar por puntaje: organizadores sin reseñas van al final (en `asc` y en `desc`). `precioMin > precioMax` → 400. `categoria` inexistente → 200 con lista vacía. `incluirPasados` acepta solo `"true"`/`"false"`. Detalle en `specs/05-eventos-consulta.md`.
 
 Body `POST /eventos`:
 ```json
