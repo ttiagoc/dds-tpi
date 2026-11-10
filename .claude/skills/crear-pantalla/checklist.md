@@ -1,7 +1,7 @@
 # Checklist de pantalla (mobile)
 
 ## Estructura
-- [ ] Ruta en `app/` fina; lógica y UI en `src/pantallas/<nombre>/` o componentes.
+- [ ] Ruta en `src/app/` fina; lógica y UI en `src/pantallas/<nombre>/` o componentes.
 - [ ] Llamadas al back solo vía `src/api/<recurso>Api.js`.
 - [ ] Usuario desde `useAuth()`; acciones según `acciones` del back.
 - [ ] Reutiliza `src/components/` antes de crear algo nuevo.

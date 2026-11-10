@@ -18,6 +18,10 @@ Respondé en castellano rioplatense. Antes de escribir código, usá la skill qu
 | Terminar una feature / commitear | `cerrar-feature` |
 | Fin de sesión | `bitacora-ia` |
 
+Para APIs de Expo / React Native usar además las skills de los plugins `expo`, `building-react-native-apps` y `testing-react-native-apps`, y seguir `frontend/AGENTS.md` (Expo SDK 58: no confiar en conocimiento previo, instalar paquetes con `npx expo install`).
+
+gstack: solo las skills y momentos de la tabla "gstack: uso selectivo" de `planes/07-ia-skills-y-evidencia.md`. Nunca `/ship` ni `/land-and-deploy`.
+
 Subagentes del proyecto: `revisor-reglas-negocio` (verifica código contra `planes/02-dominio.md`) y `qa-mobile` (corre tests y checklist de pantallas).
 
 ## Comandos

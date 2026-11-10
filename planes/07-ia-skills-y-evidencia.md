@@ -8,19 +8,11 @@ La consigna evalúa **criterio** en el uso de IA: usarla intensivamente pero sab
 |---|---|---|
 | Claude Code (VS Code) | Agente principal: planificación, back, front, tests | plan del usuario |
 | Skills del proyecto (`.claude/skills/`) | Estandarizar cómo la IA hace cada tipo de tarea | sí |
-| Skills externas: `expo/skills`, `callstackincubator/agent-skills` (`react-native-best-practices`) | Conocimiento actualizado de Expo/RN | sí |
+| Skills externas (plugins habilitados en `.claude/settings.json`): `expo` (oficial de Expo), `building-react-native-apps` y `testing-react-native-apps` (Callstack) | Conocimiento actualizado de Expo SDK 58, buenas prácticas y testing de React Native | sí |
 | superpowers (brainstorming, writing-plans, TDD, verification) | Proceso | sí |
 | Opcional para comparar: v0 / Google Antigravity / Copilot free | Prototipar 1 pantalla y comparar con Claude Code | sí |
 
-Instalación de skills externas (una vez, en Claude Code):
-
-```
-/plugin install expo@claude-plugins-official     # según docs.expo.dev/skills
-# alternativa: /plugin marketplace add expo/skills  y elegir el plugin desde /plugin
-npx skills add callstackincubator/agent-skills --skill react-native-best-practices
-```
-
-Leer el `SKILL.md` de cada skill externa antes de instalarla (son instrucciones que la IA va a seguir).
+Antes de incorporar una skill externa se revisa su `SKILL.md`, porque sus instrucciones condicionan el comportamiento del agente.
 
 ## Skills del proyecto
 
@@ -37,6 +29,21 @@ Leer el `SKILL.md` de cada skill externa antes de instalarla (son instrucciones 
 | `bitacora-ia` | fin de sesión | entrada en bitácora |
 
 Subagentes: `revisor-reglas-negocio` (auditoría de reglas, solo lectura) y `qa-mobile` (tests + checklist).
+
+## gstack: uso selectivo
+
+gstack se usa como herramienta de revisión y QA en momentos puntuales, no como método de desarrollo general: el flujo principal lo definen las skills del proyecto, y varias skills de gstack asumen un proceso (PRs, versionado, deploy) que este proyecto no tiene.
+
+| Momento | Skill | Propósito |
+|---|---|---|
+| Antes de It1 y de It4 | `/plan-eng-review` | Revisión crítica de arquitectura y planes |
+| Bug no trivial | `/investigate` | Análisis de causa raíz antes de corregir |
+| Antes de mergear una feature con lógica de negocio | `/review` | Revisión del diff, complementaria a `revisor-reglas-negocio` |
+| Fin de It2 | `/cso` | Auditoría de seguridad de autenticación y permisos |
+| Cierre de pantallas, It4-It5 | `/qa`, `/qa-only`, `/browse` | Recorrido de la app en Expo Web con navegador real |
+| Pulido de UI, It5 | `/design-review` | Revisión visual de consistencia y jerarquía |
+
+No se usan: `/ship`, `/land-and-deploy`, `/setup-deploy`, `/canary`, `/benchmark`, `ios-*`.
 
 ## Flujo de trabajo con IA por feature
 

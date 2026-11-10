@@ -77,12 +77,12 @@ Convenciones:
 Estructura `frontend/`:
 
 ```
-app/                 expo-router (rutas = archivos)
+src/app/             expo-router (rutas = archivos)
   (auth)/login.jsx
   (comprador)/       tabs del comprador
   (organizador)/     tabs del organizador
   eventos/[id].jsx  compras/[id].jsx  compras/[id]/chat.jsx ...
-src/pantallas/       UI y lógica de cada pantalla + su test (app/ solo importa)
+src/pantallas/       UI y lógica de cada pantalla + su test (src/app/ solo importa)
 src/api/             cliente.js (axios + token + mensajeDeError), <recurso>Api.js, socket.js
 src/auth/            AuthContext (useAuth), almacenamiento de sesión
 src/components/      componentes compartidos

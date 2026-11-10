@@ -6,8 +6,8 @@ Plazo: ~3 semanas desde 2026-11-10. Cada feature: `escribir-spec` → `feature/<
 - [x] Planes, AGENTS.md, CLAUDE.md, GITFLOW, README
 - [x] Skills y subagentes del proyecto
 - [x] ADRs iniciales, bitácora
-- [ ] Instalar skills externas (`expo/skills`, `react-native-best-practices`) — usuario
-- [ ] `chore/tooling`: root devDeps (eslint, prettier, concurrently, cypress), `eslint.config.mjs`
+- [x] Skills externas: Expo y Callstack (React Native)
+- [x] `chore/tooling`: dependencias de raíz, back y front; ESLint, Prettier, Cypress; scaffold Expo SDK 58 con expo-router y Paper
 
 **Aceptación:** cada CU tiene fila en la trazabilidad de `00-indice.md`.
 

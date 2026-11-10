@@ -16,7 +16,7 @@ Responder en castellano rioplatense. Código sin comentarios obvios, nombres en 
 
 ## 2. Proponer y esperar OK
 
-Plan corto: ruta del archivo en `app/`, funciones de API (`src/api/<recurso>Api.js`), componentes nuevos/reutilizados, estados, testIDs, tests.
+Plan corto: ruta del archivo en `src/app/`, funciones de API (`src/api/<recurso>Api.js`), componentes nuevos/reutilizados, estados, testIDs, tests.
 
 ## 3. Implementar
 
@@ -57,7 +57,7 @@ Plan corto: ruta del archivo en `app/`, funciones de API (`src/api/<recurso>Api.
 - Área táctil ≥ 44 px. No depender solo del color (estado = color + ícono + texto).
 
 ### Tamaño
-Partir en componentes si la pantalla pasa ~150 líneas, si algo se repite o tiene estado propio. Compartido → `src/components/`; propio → junto a la pantalla en `src/pantallas/<nombre>/` (las rutas de `app/` quedan finas y solo importan).
+Partir en componentes si la pantalla pasa ~150 líneas, si algo se repite o tiene estado propio. Compartido → `src/components/`; propio → junto a la pantalla en `src/pantallas/<nombre>/` (las rutas de `src/app/` quedan finas y solo importan).
 
 ## 4. Tests
 

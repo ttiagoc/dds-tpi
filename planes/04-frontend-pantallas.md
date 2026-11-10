@@ -5,7 +5,7 @@ Expo + expo-router + React Native Paper (MD3). Mobile first (360-414 px de ancho
 ## Navegación
 
 ```
-app/index.jsx  ── sin sesión ──▶ (auth)/login
+src/app/index.jsx ─ sin sesión ──▶ (auth)/login
                ── COMPRADOR ───▶ (comprador) Tabs
                ── ORGANIZADOR ─▶ (organizador) Tabs
 
