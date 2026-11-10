@@ -26,12 +26,15 @@ const errores = {
   422: error("UnprocessableEntity"),
 };
 
+const AVISO_SOCKET =
+  "Después de guardar, emite `compra:estado` `{ compraId, estado }` con el estado final al room `compra:<id>` de Socket.io (ver tag Chat).";
+
 const accion = ({ summary, description }, rol) =>
   conAuth(
     {
       tags: ["Compras"],
       summary,
-      description,
+      description: `${description} ${AVISO_SOCKET}`,
       responses: { 200: ok("Compra actualizada", ref("CompraDetalle")), ...errores },
     },
     { rol },

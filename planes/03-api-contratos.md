@@ -135,7 +135,7 @@ Detalle en `specs/07-resenias-favoritos.md`.
 
 | Dirección | Evento | Payload | Notas |
 |---|---|---|---|
-| cliente → server | `compra:unirse` | `{ compraId }` | ack `{ ok: true }` o `{ ok: false, error }` ("El id debe ser un entero positivo", "No existe la compra", "No tenés permiso para realizar esta acción") |
+| cliente → server | `compra:unirse` | `{ compraId }` | ack `{ ok: true }` o `{ ok: false, error }` ("El id debe ser un entero positivo", "No existe la compra", "No tenés permiso para realizar esta acción"; error inesperado: "No se pudo unir al chat") |
 | cliente → server | `compra:salir` | `{ compraId }` | |
 | server → room `compra:<id>` | `mensaje:nuevo` | `Mensaje` (misma forma que REST) | tras `POST /compras/:id/mensajes`, a todo el room incluido el autor |
 | server → room `compra:<id>` | `compra:estado` | `{ compraId, estado }` | tras pago, cancelación o uso; un solo evento con el estado final (cancelar una CONFIRMADA emite REEMBOLSADA). Detalle en `specs/08b-chat-socket.md` |
