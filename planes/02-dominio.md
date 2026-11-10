@@ -74,6 +74,7 @@ Métodos:
 - `yaOcurrio(ahora)` → `fecha <= ahora`.
 - `esDe(usuarioId)` → es el organizador.
 - `coincideCon(texto)` → nombre o descripción, sin mayúsculas ni acentos.
+- `cupoTotal()` → suma de los cupos de sus tipos (MisEventos, spec 05b).
 
 ### EstadoCompra
 `PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA`.
@@ -106,6 +107,7 @@ Métodos:
 - `marcarUtilizada(quien, ahora)`
 - `puedeCancelarse(ahora)` → `estado ∈ {PENDIENTE, CONFIRMADA} && !evento.yaOcurrio(ahora)`
 - `puedeReseniarse()` → `estado === UTILIZADA`
+- `sumaAlRecaudado()` → `true` si está CONFIRMADA o UTILIZADA (cuenta para `recaudado`, spec 05b).
 - `diasRestantes(ahora)` → solo si CONFIRMADA: `Math.ceil((evento.fecha - ahora) / DIA)`, mínimo 0; si no, `null`.
 - `participa(usuarioId)` → es el comprador o el organizador del evento (para chat).
 - `puedePagarse(ahora)`, `puedeMarcarseUtilizada()`.
