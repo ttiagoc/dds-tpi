@@ -4,9 +4,7 @@ import { Resenia } from "../domain/Resenia.js";
 import { Rol } from "../domain/Rol.js";
 import { relojSistema } from "../config/reloj.js";
 import { paginar } from "./paginacion.js";
-
-export const MENSAJE_EVENTO_INEXISTENTE = "No existe el evento";
-export const MENSAJE_CATEGORIA_INEXISTENTE = "La categoría no existe";
+import { MENSAJE_CATEGORIA_INEXISTENTE, MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
 
 const CRITERIOS = {
   fecha: (evento) => evento.fecha.getTime(),

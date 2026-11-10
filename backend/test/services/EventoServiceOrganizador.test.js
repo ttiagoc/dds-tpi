@@ -1,5 +1,6 @@
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
-import { EventoService, MENSAJE_CATEGORIA_INEXISTENTE } from "../../src/services/EventoService.js";
+import { EventoService } from "../../src/services/EventoService.js";
+import { MENSAJE_CATEGORIA_INEXISTENTE } from "../../src/errors/mensajes.js";
 import { UnprocessableEntityError } from "../../src/errors/AppError.js";
 import { Rol } from "../../src/domain/Rol.js";
 import { EstadoCompra } from "../../src/domain/EstadoCompra.js";

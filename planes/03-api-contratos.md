@@ -104,9 +104,9 @@ Body `POST /eventos`:
 |---|---|---|---|---|---|
 | POST | `/compras` | 🅒 | `{ eventoId, tipoEntradaId, cantidad }` (cantidad entera 1-10) | 201 CompraDetalle | 400, 401, 403, 404, 422 sin cupo / evento pasado. Detalle en `specs/06-compras-comprador.md` |
 | GET | `/compras` | 🅒 | `estado?, page, limit` | 200 `{ compras: [CompraResumen], total, page, totalPages }` (orden: primero eventos no ocurridos por fecha asc, después los ocurridos por fecha desc; desempate id asc) | 400, 401, 403 |
-| GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 403, 404 |
-| POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 403, 422 transición inválida |
-| POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 403, 422 |
+| GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 400, 401, 403, 404 |
+| POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 400, 401, 403, 404, 422 transición inválida o evento ocurrido |
+| POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 400, 401, 403, 404, 422 |
 | POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle | 403, 422 |
 | POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle }` | 201 reseña | 403, 409 ya reseñada, 422 no utilizada |
 

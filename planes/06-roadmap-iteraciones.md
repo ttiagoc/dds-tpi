@@ -25,7 +25,7 @@ Specs: `01-backend-base`, `02-dominio`, `03-repos-y-seed`, `04-auth`.
 Specs: `05-eventos-consulta`, `05b-eventos-organizador`, `06-compras-comprador`, `06b-compras-organizador`, `07-resenias-favoritos`.
 - [x] `feature/eventos-consulta`: `GET /categorias`, `GET /eventos` (q, categoria, precio, orden, paginado), `GET /eventos/:id`.
 - [x] `feature/eventos-organizador`: `POST /eventos` (categoría inexistente → 422), `GET /organizadores/yo/eventos`.
-- [ ] `feature/compras-comprador`: crear (cantidad 1-10), listar mías (próximas primero) con `diasRestantes` y `acciones`, detalle con historial, pago, cancelación/reembolso.
+- [x] `feature/compras-comprador`: crear (cantidad 1-10), listar mías (próximas primero) con `diasRestantes` y `acciones`, detalle con historial, pago, cancelación/reembolso.
 - [ ] `feature/compras-organizador`: marcar utilizada, `GET /eventos/:id/compras` con disponibilidad.
 - [ ] `feature/resenias-favoritos`: reseñas, puntaje promedio, ordenar por puntaje, favoritos.
 - [ ] `docs/swagger`: OpenAPI modular.

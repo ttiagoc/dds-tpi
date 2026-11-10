@@ -1,6 +1,6 @@
 # Spec 06 — Compras del comprador (comprar, mis compras, detalle, pago y cancelación)
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/compras-comprador`
 - **Casos de uso:** CU12 (comprar), CU1 (mis compras con estado y días restantes), CU7 y CU8 (cancelar con reembolso)
 - **Iteración:** It2
@@ -48,7 +48,9 @@ Aplican R1, R2, R2b y R3 de `planes/02-dominio.md`.
   - En los dos casos libera el cupo.
   - Errores 422: "No podés cancelar una compra utilizada", "La compra ya está cancelada", "No podés cancelar una compra de un evento que ya ocurrió".
   - Responde 200 con `CompraDetalle`.
-- **C9** Al leer el detalle, al pagar y al cancelar, los repos se consultan una vez por request: compra, reseña de la compra y los usuarios del historial.
+- **C9** Al leer el detalle, al pagar y al cancelar se hace una sola consulta por request a cada repo (compra y reseña de la compra) y el reloj se lee una sola vez, así la acción y las `acciones` devueltas usan el mismo instante.
+  - Los nombres del historial salen de los participantes de la compra (comprador y organizador), los únicos que pueden cambiar su estado; no hace falta consultar el repo de usuarios.
+  - Cuando cambia el cupo se guardan la compra **y** el evento, para no depender de que el repo en memoria comparta referencias (pensando en Mongo).
 
 ## Contrato de API (cambia `planes/03`)
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
@@ -86,7 +88,7 @@ Escenario: comprar
 Escenario: errores al comprar
   Cuando hago POST /compras con cantidad 11 o 0, o con un campo de más → 400 "Datos inválidos"
   Y con un evento inexistente → 404 "No existe el evento"
-  Y con un tipo de otro evento → 404 "No existe el tipo de entrada <id> en este evento"
+  Y con un tipo que el evento no tiene (los ids de tipo son por evento) → 404 "No existe el tipo de entrada <id> en este evento"
   Y con "Rock en el Parque" (ya ocurrió) → 422 "No podés comprar entradas de un evento que ya ocurrió"
   Y con 3 VIP de "Festival Primavera Sonora" (quedan 2) → 422 "No hay cupo suficiente para VIP"
   Y sin token → 401, y como Fénix → 403

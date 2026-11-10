@@ -1,5 +1,6 @@
 import { describe, it, expect, jest } from "@jest/globals";
-import { autorizar, MENSAJE_SIN_PERMISO } from "../../src/middlewares/autorizar.js";
+import { autorizar } from "../../src/middlewares/autorizar.js";
+import { MENSAJE_SIN_PERMISO } from "../../src/errors/mensajes.js";
 import { MENSAJE_SIN_SESION } from "../../src/middlewares/autenticar.js";
 import { ForbiddenError, UnauthorizedError } from "../../src/errors/AppError.js";
 import { Rol } from "../../src/domain/Rol.js";

@@ -1,7 +1,6 @@
 import { ForbiddenError, UnauthorizedError } from "../errors/AppError.js";
 import { MENSAJE_SIN_SESION } from "./autenticar.js";
-
-export const MENSAJE_SIN_PERMISO = "No tenés permiso para realizar esta acción";
+import { MENSAJE_SIN_PERMISO } from "../errors/mensajes.js";
 
 export function autorizar(...roles) {
   return (req, _res, next) => {
