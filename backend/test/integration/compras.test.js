@@ -1,13 +1,17 @@
 import { describe, it, expect, beforeEach } from "@jest/globals";
 import request from "supertest";
-import { crearAppDePrueba, loginComo, conToken } from "../helpers/appDePrueba.js";
+import {
+  crearAppDePrueba,
+  pedirComo,
+  eventoDelSeed,
+  idDeCompraDelSeed,
+  ANA,
+  BRUNO,
+  FENIX,
+  KONEX,
+} from "../helpers/appDePrueba.js";
 import { enDias } from "../helpers/domainFactories.js";
-
-const ANA = "ana@aiticket.com";
-const BRUNO = "bruno@aiticket.com";
-const FENIX = "fenix@aiticket.com";
-const KONEX = "konex@aiticket.com";
-const SIN_PERMISO = "No tenés permiso para realizar esta acción";
+import { MENSAJE_SIN_PERMISO as SIN_PERMISO } from "../../src/errors/mensajes.js";
 
 let app;
 let contenedor;
@@ -16,26 +20,16 @@ beforeEach(async () => {
   ({ app, contenedor } = await crearAppDePrueba());
 });
 
-const comoUsuario = async (email) => email && loginComo(app, email);
-const comprar = async (body, email = ANA) =>
-  conToken(request(app).post("/compras").send(body), await comoUsuario(email));
-const listar = async (query = {}, email = ANA) =>
-  conToken(request(app).get("/compras").query(query), await comoUsuario(email));
-const obtener = async (id, email = ANA) =>
-  conToken(request(app).get(`/compras/${id}`), await comoUsuario(email));
-const accion = async (id, ruta, email = ANA) =>
-  conToken(request(app).post(`/compras/${id}/${ruta}`), await comoUsuario(email));
+const comprar = (body, email = ANA) =>
+  pedirComo(app, request(app).post("/compras").send(body), email);
+const listar = (query = {}, email = ANA) =>
+  pedirComo(app, request(app).get("/compras").query(query), email);
+const obtener = (id, email = ANA) => pedirComo(app, request(app).get(`/compras/${id}`), email);
+const accion = (id, ruta, email = ANA) =>
+  pedirComo(app, request(app).post(`/compras/${id}/${ruta}`), email);
 
-async function evento(nombre) {
-  return contenedor.repos.eventoRepository.findOneWhere((e) => e.nombre === nombre);
-}
-
-async function idDeCompra(email, nombreEvento) {
-  const compra = await contenedor.repos.compraRepository.findOneWhere(
-    (c) => c.comprador.email === email && c.evento.nombre === nombreEvento,
-  );
-  return compra.id;
-}
+const evento = (nombre) => eventoDelSeed(contenedor, nombre);
+const idDeCompra = (email, nombreEvento) => idDeCompraDelSeed(contenedor, email, nombreEvento);
 
 async function bodyDeCompra(nombreEvento, nombreTipo, cantidad) {
   const { id, tiposEntrada } = await evento(nombreEvento);

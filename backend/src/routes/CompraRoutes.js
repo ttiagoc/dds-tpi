@@ -9,10 +9,12 @@ export function crearCompraRoutes({ compraService }, { autenticar }) {
   const router = Router();
   const controller = new CompraController(compraService);
   const comprador = [autenticar, autorizar(Rol.COMPRADOR)];
+  const organizador = [autenticar, autorizar(Rol.ORGANIZADOR)];
   router.post("/", ...comprador, validate(crearCompraValidation), controller.crear);
   router.get("/", ...comprador, controller.listarDelComprador);
   router.get("/:id", autenticar, controller.obtener);
   router.post("/:id/pago", ...comprador, controller.pagar);
   router.post("/:id/cancelacion", ...comprador, controller.cancelar);
+  router.post("/:id/uso", ...organizador, controller.marcarUtilizada);
   return router;
 }

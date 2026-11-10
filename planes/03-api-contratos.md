@@ -107,7 +107,7 @@ Body `POST /eventos`:
 | GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 400, 401, 403, 404 |
 | POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 400, 401, 403, 404, 422 transición inválida o evento ocurrido |
 | POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 400, 401, 403, 404, 422 |
-| POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle | 403, 422 |
+| POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle con las acciones del organizador. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404, 422 |
 | POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle }` | 201 reseña | 403, 409 ya reseñada, 422 no utilizada |
 
 ### Mensajes (chat)

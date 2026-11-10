@@ -20,6 +20,20 @@ function ordenarParaElComprador(compras, ahora) {
   });
 }
 
+function ordenarParaElOrganizador(compras) {
+  return [...compras].sort((a, b) => b.fechaCompra - a.fechaCompra || b.id - a.id);
+}
+
+function disponibilidadDe(evento) {
+  return evento.tiposEntrada.map((tipo) => ({
+    tipoEntradaId: tipo.id,
+    nombre: tipo.nombre,
+    cupo: tipo.cupo,
+    vendidas: tipo.vendidas,
+    disponibles: tipo.disponibles(),
+  }));
+}
+
 function nombresDeParticipantes(compra) {
   const { comprador, evento } = compra;
   return new Map([
@@ -83,11 +97,40 @@ export class CompraService {
     );
   }
 
-  async accionDelComprador(id, usuario, accion) {
-    const compra = await this.buscar(id);
-    if (!compra.esDe(usuario.id)) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
+  async listarDelEvento(eventoId, usuario, { estado, ...paginacion }) {
+    const evento = await this.eventoRepository.findById(eventoId);
+    if (!evento) throw new NotFoundError(MENSAJE_EVENTO_INEXISTENTE);
+    if (!evento.esDe(usuario.id)) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
     const ahora = this.reloj.ahora();
-    accion(compra, ahora);
+    const todas = await this.compraRepository.findByEvento(evento.id);
+    const filtradas = todas.filter((compra) => estado == null || compra.estado === estado);
+    const { items, ...pagina } = paginar(ordenarParaElOrganizador(filtradas), paginacion);
+    return {
+      evento: { id: evento.id, nombre: evento.nombre },
+      disponibilidad: disponibilidadDe(evento),
+      compras: items.map((compra) => this.toResumen(compra, { usuario, ahora, reseniada: false })),
+      ...pagina,
+    };
+  }
+
+  async marcarUtilizada(id, usuario) {
+    return this.accion(
+      id,
+      usuario,
+      (compra) => compra.evento.esDe(usuario.id),
+      (compra, ahora) => compra.marcarUtilizada(usuario.id, ahora),
+    );
+  }
+
+  async accionDelComprador(id, usuario, ejecutar) {
+    return this.accion(id, usuario, (compra) => compra.esDe(usuario.id), ejecutar);
+  }
+
+  async accion(id, usuario, tienePermiso, ejecutar) {
+    const compra = await this.buscar(id);
+    if (!tienePermiso(compra)) throw new ForbiddenError(MENSAJE_SIN_PERMISO);
+    const ahora = this.reloj.ahora();
+    ejecutar(compra, ahora);
     await this.guardar(compra);
     return this.detalleConResenia(compra, usuario, ahora);
   }

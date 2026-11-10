@@ -24,3 +24,21 @@ export async function loginComo(app, email, password = CONTRASENIA_DEMO) {
 
 export const conToken = (pedido, token) =>
   token ? pedido.set("Authorization", `Bearer ${token}`) : pedido;
+
+export const eventoDelSeed = (contenedor, nombre) =>
+  contenedor.repos.eventoRepository.findOneWhere((e) => e.nombre === nombre);
+
+export async function idDeCompraDelSeed(contenedor, email, nombreEvento) {
+  const compra = await contenedor.repos.compraRepository.findOneWhere(
+    (c) => c.comprador.email === email && c.evento.nombre === nombreEvento,
+  );
+  return compra.id;
+}
+
+export const ANA = "ana@aiticket.com";
+export const BRUNO = "bruno@aiticket.com";
+export const FENIX = "fenix@aiticket.com";
+export const KONEX = "konex@aiticket.com";
+
+export const pedirComo = async (app, pedido, email) =>
+  conToken(pedido, email && (await loginComo(app, email)));
