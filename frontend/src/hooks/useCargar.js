@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { mensajeDeError } from "../api/cliente";
+import { codigoDeError, mensajeDeError } from "../api/cliente";
 
 export function useCargar(cargar) {
   const [version, setVersion] = useState(0);
@@ -15,7 +15,7 @@ export function useCargar(cargar) {
       (error) =>
         terminar({
           error: mensajeDeError(error),
-          codigoError: error?.response?.status ?? null,
+          codigoError: codigoDeError(error),
         }),
     );
     return () => {

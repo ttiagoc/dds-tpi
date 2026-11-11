@@ -14,6 +14,7 @@ import MisEventos from "../app/(organizador)/mis-eventos";
 import PerfilOrganizador from "../app/(organizador)/cuenta";
 import DetalleEventoRuta from "../app/eventos/[id]/index";
 import ComprarRuta from "../app/eventos/[id]/comprar";
+import CompraRuta from "../app/compras/[id]/index";
 import { leerSesion } from "../auth/sesion";
 import { login, obtenerYo } from "../api/authApi";
 import { buscarEventos, obtenerEvento } from "../api/eventosApi";
@@ -48,6 +49,7 @@ const RUTAS = {
   "(organizador)/cuenta": PerfilOrganizador,
   "eventos/[id]/index": DetalleEventoRuta,
   "eventos/[id]/comprar": ComprarRuta,
+  "compras/[id]/index": CompraRuta,
 };
 
 const conSesion = (usuario) => {
@@ -146,6 +148,24 @@ describe("detalle del evento", () => {
     await waitFor(() => expect(screen).toHavePathname("/eventos/1"));
     await fireEvent.press(await screen.findByTestId("evento-comprar"));
     await waitFor(() => expect(screen).toHavePathname("/eventos/1/comprar"));
+    expect(await screen.findByTestId("comprar-confirmar")).toBeTruthy();
+  });
+
+  it("un organizador no puede entrar a Comprar", async () => {
+    conSesion(FENIX);
+    await abrirApp();
+    await waitFor(() => expect(screen).toHavePathname("/mis-eventos"));
+    await act(() => router.push("/eventos/1/comprar"));
+    await waitFor(() => expect(screen).toHavePathname("/mis-eventos"));
+    expect(screen.queryByTestId("comprar-confirmar")).toBeNull();
+  });
+
+  it("la compra creada abre su pantalla provisoria", async () => {
+    conSesion(ANA);
+    await abrirApp();
+    await waitFor(() => expect(screen).toHavePathname("/explorar"));
+    await act(() => router.push("/compras/77"));
+    await waitFor(() => expect(screen).toHavePathname("/compras/77"));
     expect(screen.getByTestId("proximamente")).toBeTruthy();
   });
 

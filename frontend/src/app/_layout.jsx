@@ -22,6 +22,9 @@ function Navegacion() {
       </Stack.Protected>
       <Stack.Protected guard={!!usuario}>
         <Stack.Screen name="eventos/[id]/index" options={{ headerShown: true, title: "Evento" }} />
+        <Stack.Screen name="compras/[id]/index" options={{ headerShown: true, title: "Compra" }} />
+      </Stack.Protected>
+      <Stack.Protected guard={rol === "COMPRADOR"}>
         <Stack.Screen
           name="eventos/[id]/comprar"
           options={{ headerShown: true, title: "Comprar" }}

@@ -23,6 +23,9 @@ export function formatearFecha(fecha, { zonaHoraria } = {}) {
 
 export const formatearPrecio = (monto) => precio.format(monto);
 
+export const textoDisponibilidad = (disponibles) =>
+  disponibles === 0 ? "Agotado" : `Quedan ${disponibles}`;
+
 const puntaje = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
 
 export const formatearPuntaje = (valor) => puntaje.format(valor);

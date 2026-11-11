@@ -16,10 +16,7 @@ import {
 jest.mock("../../api/eventosApi");
 jest.mock("../../api/organizadoresApi");
 jest.mock("../../api/favoritosApi");
-jest.mock("expo-router", () => ({
-  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: jest.fn() },
-  useLocalSearchParams: jest.fn(),
-}));
+jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
 
 const RESENIAS = [
   resenia({ id: 1, detalle: "Impecable", comprador: { nombre: "Bruno" } }),

@@ -1,23 +1,17 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Chip, Snackbar, Text, useTheme } from "react-native-paper";
-import { router, useLocalSearchParams } from "expo-router";
-import { obtenerEvento } from "../../api/eventosApi";
+import { router } from "expo-router";
 import { useAuth } from "../../auth/AuthContext";
 import { Pantalla } from "../../components/Pantalla";
-import { Cargando } from "../../components/Cargando";
-import { ErrorCarga } from "../../components/ErrorCarga";
-import { EstadoVacio } from "../../components/EstadoVacio";
+import { ConEvento } from "../../components/ConEvento";
 import { ImagenEvento } from "../../components/ImagenEvento";
 import { PuntajeOrganizador } from "../../components/PuntajeOrganizador";
-import { useCargar } from "../../hooks/useCargar";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha } from "../../utils/formato";
 import { BotonFavorito } from "./BotonFavorito";
 import { ReseniasOrganizador } from "./ReseniasOrganizador";
 import { TiposEntrada } from "./TiposEntrada";
-
-const volver = () => (router.canGoBack() ? router.back() : router.replace("/"));
 
 function Encabezado({ evento, esComprador, onErrorFavorito }) {
   const { colors } = useTheme();
@@ -83,30 +77,7 @@ function Contenido({ evento }) {
 }
 
 export default function DetalleEvento() {
-  const { id } = useLocalSearchParams();
-  const cargar = useCallback(() => obtenerEvento(id), [id]);
-  const { datos, cargando, error, codigoError, recargar } = useCargar(cargar);
-  if (cargando) return <Cargando />;
-  if (codigoError === 404) {
-    return (
-      <Pantalla>
-        <EstadoVacio
-          icono="calendar-remove"
-          texto={error}
-          accion={{ etiqueta: "Volver", onPress: volver, testID: "volver" }}
-          testID="evento-inexistente"
-        />
-      </Pantalla>
-    );
-  }
-  if (error) {
-    return (
-      <Pantalla>
-        <ErrorCarga mensaje={error} onReintentar={recargar} />
-      </Pantalla>
-    );
-  }
-  return <Contenido evento={datos} />;
+  return <ConEvento>{(evento) => <Contenido evento={evento} />}</ConEvento>;
 }
 
 const estilos = StyleSheet.create({

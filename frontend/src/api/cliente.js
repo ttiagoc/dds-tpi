@@ -27,10 +27,12 @@ cliente.interceptors.request.use((config) => {
 cliente.interceptors.response.use(
   (respuesta) => respuesta,
   (error) => {
-    if (error.response?.status === 401 && error.config?.url !== RUTA_LOGIN) alExpirar();
+    if (codigoDeError(error) === 401 && error.config?.url !== RUTA_LOGIN) alExpirar();
     return Promise.reject(error);
   },
 );
+
+export const codigoDeError = (error) => error?.response?.status ?? null;
 
 export function mensajeDeError(error) {
   return error?.response?.data?.message ?? MENSAJE_SIN_CONEXION;
