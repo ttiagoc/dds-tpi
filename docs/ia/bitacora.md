@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 10 |
-| Features cerradas | 14 (It1, It2 e It3 cerradas) |
+| Sesiones | 11 |
+| Features cerradas | 15 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -227,3 +227,19 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Ante un 422, mostrar el mensaje del back, recargar el evento y ajustar la cantidad conservando el tipo elegido — el usuario ve el cupo real sin perder lo que había elegido — propuesta de la IA, aceptada.
   - Sin diálogo de confirmación — la compra nace pendiente y se puede cancelar — propuesta de la IA, aceptada.
 - **Aprendizaje:** la verificación de punta a punta volvió a ser necesaria, aunque esta vez los fallos fueron del propio test temporal y no de la aplicación: un selector por texto encontraba un elemento oculto de la pantalla anterior, que el stack de navegación mantiene montado. Con selectores por `testID` el problema desaparece.
+
+## Sesión 11 — 2026-11-11 — Mis compras y detalle de la compra (It4)
+
+- **Objetivo:** especificar e implementar la consulta de compras del comprador (CU1).
+- **Avances:**
+  - La feature de compras del roadmap se dividió en dos specs: 10c (lista y detalle de solo lectura) y 10c2 (pagar y cancelar, CU7 y CU8), porque juntas superaban los ocho escenarios. Se actualizaron el roadmap y el plan de pantallas.
+  - Spec 10c implementada con TDD: lista paginada con filtro por estado, tarjeta con estado y días restantes, refresco al volver al tab, detalle con la línea de tiempo del historial y manejo de 403 y 404.
+  - Antes de agregar la segunda lista paginada, la de Explorar se generalizó en piezas compartidas (hook, lista, pie y chips de filtro). Las métricas de duplicación marcaron tres clones nuevos durante la implementación; se resolvieron extrayendo componentes (`FechaYLugar`, `ConRecursoDeRuta`, `useEstadoCompra`), sin tocar umbrales.
+  - Revisión de calidad con 1 hallazgo aprobado y aplicado: una función común para adaptar las respuestas paginadas, que van a reutilizar Favoritos y las pantallas del organizador.
+  - Verificación con una spec temporal de Cypress contra el back real (filtro por estado con historial completo y compra nueva visible al volver al tab), eliminada al cerrar la rama. Suite del front en 192 tests en verde; rama mergeada a `develop`.
+- **Decisiones:**
+  - Partir CU1 de CU7 y CU8 en dos specs — ramas más chicas y revisables — propuesta de la IA, aceptada.
+  - Filtro con chips "Todas" + los 5 estados — coincide uno a uno con el parámetro `estado` del contrato — propuesta de la IA, aceptada.
+  - Los botones de otras features (reseñar, chat, marcar utilizada) aparecen recién con su spec, sin rutas vacías — propuesta de la IA, aceptada.
+  - Pagar sin diálogo y con confirmación por Snackbar, para la spec 10c2 — pagar no es destructivo — propuesta de la IA, aceptada.
+- **Aprendizaje:** la primera corrida de Cypress falló por un servidor web que había quedado vivo de la sesión anterior y servía código desactualizado. Detener la tarea en segundo plano no terminaba el proceso hijo. Una falla de verificación puede venir del entorno y no del código, y conviene leer la captura antes de tocar la implementación.
