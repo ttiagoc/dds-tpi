@@ -2,15 +2,27 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
 
-export function PieDeLista({ hayMas, cargandoMas, errorMas, onCargarMas }) {
-  if (!hayMas) return null;
+function MensajeError({ children }) {
+  if (!children) return null;
+  return (
+    <HelperText type="error" visible>
+      {children}
+    </HelperText>
+  );
+}
+
+export function PieDeLista({ hayMas, cargandoMas, errorMas, errorRefresco, onCargarMas }) {
+  if (!hayMas) {
+    return errorRefresco ? (
+      <View style={estilos.pie}>
+        <MensajeError>{errorRefresco}</MensajeError>
+      </View>
+    ) : null;
+  }
   return (
     <View style={estilos.pie}>
-      {errorMas && (
-        <HelperText type="error" visible>
-          {errorMas}
-        </HelperText>
-      )}
+      <MensajeError>{errorRefresco}</MensajeError>
+      <MensajeError>{errorMas}</MensajeError>
       <Button
         mode="outlined"
         onPress={onCargarMas}

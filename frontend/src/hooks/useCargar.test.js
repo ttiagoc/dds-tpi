@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from "@testing-library/react-native";
-import { AxiosError } from "axios";
 import { useCargar } from "./useCargar";
+import { errorHttp } from "../test-utils/fixtures";
 
 describe("useCargar", () => {
   it("arranca cargando y después expone los datos", async () => {
@@ -12,11 +12,7 @@ describe("useCargar", () => {
   });
 
   it("expone el mensaje de error del back", async () => {
-    const error = new AxiosError("x", "ERR", {}, null, {
-      status: 404,
-      data: { message: "No existe el evento" },
-    });
-    const cargar = jest.fn().mockRejectedValue(error);
+    const cargar = jest.fn().mockRejectedValue(errorHttp(404, "No existe el evento"));
     const { result } = await renderHook(() => useCargar(cargar));
     await waitFor(() => expect(result.current.cargando).toBe(false));
     expect(result.current.error).toBe("No existe el evento");

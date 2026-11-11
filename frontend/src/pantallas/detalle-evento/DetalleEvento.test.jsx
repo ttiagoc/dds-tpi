@@ -95,6 +95,16 @@ describe("DetalleEvento: favorito", () => {
     expect(quitarFavorito).toHaveBeenCalledWith(1);
   });
 
+  it("si falla quitar el favorito vuelve a quedar marcado", async () => {
+    obtenerEvento.mockResolvedValue(eventoDetalle({ esFavorito: true }));
+    quitarFavorito.mockRejectedValue(errorHttp(500, "Error interno"));
+    await abrir();
+    await fireEvent.press(screen.getByTestId("evento-favorito"));
+    expect(quitarFavorito).toHaveBeenCalledWith(1);
+    expect(await screen.findByText("Error interno")).toBeTruthy();
+    expect(screen.getByLabelText("Quitar de favoritos")).toBeTruthy();
+  });
+
   it("arranca marcado si el evento ya es favorito", async () => {
     obtenerEvento.mockResolvedValue(eventoDetalle({ esFavorito: true }));
     await abrir();
@@ -135,6 +145,9 @@ describe("DetalleEvento: comprar y permisos", () => {
     await abrir();
     expect(screen.getByTestId("evento-comprar")).toBeDisabled();
     expect(screen.getByTestId("evento-comprar")).toHaveTextContent("Agotado");
+    expect(screen.getByTestId("tipo-entrada-10")).toHaveTextContent(/Agotado/);
+    expect(screen.getByTestId("tipo-entrada-11")).toHaveTextContent(/Agotado/);
+    expect(screen.queryByText(/Quedan/)).toBeNull();
   });
 
   it("un organizador no ve el favorito ni Comprar", async () => {

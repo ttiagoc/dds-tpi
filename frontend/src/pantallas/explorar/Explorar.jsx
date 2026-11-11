@@ -20,7 +20,8 @@ function useFiltros() {
   const [texto, setTexto] = useState("");
   const [categoria, setCategoria] = useState(null);
   const [orden, setOrden] = useState(OPCIONES_ORDEN[0]);
-  const q = useDebounce(texto.trim(), DEMORA_BUSQUEDA);
+  const demorado = useDebounce(texto.trim(), DEMORA_BUSQUEDA);
+  const q = texto.trim() === "" ? "" : demorado;
   const criterio = {
     q: q || undefined,
     categoria: categoria ?? undefined,

@@ -13,7 +13,7 @@ export function TarjetaEvento({ evento, onPress }) {
       mode="elevated"
       onPress={onPress}
       testID={`tarjeta-evento-${id}`}
-      accessibilityLabel={nombre}
+      accessibilityLabel={`${nombre}, ${formatearFecha(fecha)}, ${lugar}, desde ${formatearPrecio(precioDesde)}`}
       style={estilos.tarjeta}
     >
       <ImagenEvento uri={imagen} nombre={nombre} />

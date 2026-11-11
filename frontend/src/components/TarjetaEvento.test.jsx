@@ -15,6 +15,15 @@ describe("TarjetaEvento", () => {
     expect(screen.getByLabelText("Imagen de Los Piojos en River")).toBeTruthy();
   });
 
+  it("la tarjeta se anuncia con nombre, fecha, lugar y precio desde", async () => {
+    await renderConProviders(<TarjetaEvento evento={eventoResumen()} onPress={jest.fn()} />);
+    expect(
+      screen.getByLabelText(
+        /^Los Piojos en River, .*dic.*, Estadio River Plate, desde \$\s45\.000$/,
+      ),
+    ).toBeTruthy();
+  });
+
   it("al tocarla llama a onPress", async () => {
     const onPress = jest.fn();
     await renderConProviders(<TarjetaEvento evento={eventoResumen({ id: 7 })} onPress={onPress} />);
@@ -31,5 +40,12 @@ describe("TarjetaEvento", () => {
     expect(screen.getByTestId("imagen-placeholder")).toBeTruthy();
     expect(screen.getByText("Sin reseñas")).toBeTruthy();
     expect(screen.queryByLabelText(/Puntaje/)).toBeNull();
+  });
+
+  it("si la imagen no carga muestra el placeholder", async () => {
+    await renderConProviders(<TarjetaEvento evento={eventoResumen()} onPress={jest.fn()} />);
+    expect(screen.queryByTestId("imagen-placeholder")).toBeNull();
+    await fireEvent(screen.getByLabelText("Imagen de Los Piojos en River"), "error");
+    expect(screen.getByTestId("imagen-placeholder")).toBeTruthy();
   });
 });

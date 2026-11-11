@@ -1,6 +1,6 @@
 # Spec 10 — Explorar eventos y detalle del evento
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/explorar-eventos`
 - **Casos de uso:** CU3, CU10, CU11 (ver `planes/00-indice.md`)
 - **Iteración:** It4
@@ -43,7 +43,7 @@ Sin reglas de negocio nuevas: el front usa lo que calcula el back (`disponibles`
 
 - **RE4 Paginado.** `limit=10`. Debajo de la lista, botón "Cargar más" (`cargar-mas`) mientras `page < totalPages`; agrega la página siguiente al final y queda `loading` mientras carga. Si falla, la lista ya cargada queda y se muestra el error con Reintentar debajo.
 - **RE5 Cambio de criterio.** Cambiar texto, categoría u orden vuelve a la página 1 y reemplaza la lista. Una respuesta de un criterio viejo que llega tarde se descarta.
-- **RE6 Pull-to-refresh** recarga la página 1 con el criterio actual.
+- **RE6 Pull-to-refresh** recarga la página 1 con el criterio actual. Si falla, la lista ya cargada queda y el error se muestra en el pie de la lista (como en RE4).
 - **RE7 Estados de Explorar.** Cargando inicial con `Cargando`; error con `ErrorCarga` (mensaje del back) y Reintentar; vacío con `EstadoVacio` "No encontramos eventos con esos filtros" (con acción "Limpiar filtros" si hay texto o categoría).
 - **RE8 Tarjeta.** `TarjetaEvento`: imagen 16:9 (`imagen`; sin imagen → placeholder con ícono), nombre, fecha (`formatearFecha`), lugar, "Desde $X" (`formatearPrecio(precioDesde)`), nombre del organizador con `Estrellas` de solo lectura y su puntaje (sin puntaje: "Sin reseñas"). Tocar → `eventos/<id>`.
 - **RE9 Detalle.** `eventos/[id]` muestra imagen, nombre, fecha, lugar, categoría, descripción, organizador con estrellas y lista de tipos de entrada: nombre, descripción, precio y "Quedan N" (con 0: chip "Agotado").
@@ -172,6 +172,7 @@ Escenario: organizador mirando un evento
 - Pantalla Comprar real (10b), tab Favoritos (10d), `Estrellas` editables (10d).
 - Scroll infinito automático (se usa "Cargar más").
 - Galería de `multimedia` (se muestra solo la primera imagen).
+- Por ahora un organizador puede entrar a `eventos/[id]/comprar` por deep link (ve "Próximamente"); el guard `rol === "COMPRADOR"` de esa ruta va en la spec 10b.
 
 ## Notas de IA
 
@@ -190,3 +191,9 @@ Escenario: organizador mirando un evento
   - `useCargar` expone `codigoError` (status HTTP o `null`) para distinguir el 404 del detalle;
   - componentes extra `ImagenEvento` y `PuntajeOrganizador` (los usan la tarjeta y el detalle), token de tema `colors.estrella` y `formatearDia`/`formatearPuntaje` en `formato.js`;
   - las rutas del detalle son `eventos/[id]/index` y `eventos/[id]/comprar`; con un deep link en frío, mientras se restaura la sesión el guard cae a `index` y el usuario termina en sus tabs (mismo comportamiento que el resto de las rutas protegidas).
+- Revisión de calidad (9 hallazgos aplicados):
+  - "Limpiar filtros" y borrar el texto hacen un solo pedido: el texto vacío no pasa por el debounce;
+  - `cargarMas` ignora un segundo toque mientras viaja el pedido (marca con `useRef`);
+  - si falla el pull-to-refresh se conservan los eventos y el error va al pie (RE6);
+  - la tarjeta se anuncia con nombre, fecha, lugar y precio desde; `ImagenEvento` cae al placeholder si la URL no carga;
+  - cada reseña del detalle muestra también el nombre del evento reseñado (viene en el contrato `Resenia`); se deja así.

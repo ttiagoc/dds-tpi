@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { Icon, useTheme } from "react-native-paper";
 import { radios } from "../tema/espaciado";
 
 export function ImagenEvento({ uri, nombre, redondeada = false }) {
   const { colors } = useTheme();
+  const [fallo, setFallo] = useState(false);
   const forma = [estilos.imagen, redondeada && estilos.redondeada];
-  if (!uri) {
+  if (!uri || fallo) {
     return (
       <View
         style={[...forma, estilos.centro, { backgroundColor: colors.surfaceVariant }]}
@@ -22,6 +24,7 @@ export function ImagenEvento({ uri, nombre, redondeada = false }) {
       source={{ uri }}
       style={[...forma, { backgroundColor: colors.surfaceVariant }]}
       resizeMode="cover"
+      onError={() => setFallo(true)}
       accessibilityLabel={`Imagen de ${nombre}`}
     />
   );

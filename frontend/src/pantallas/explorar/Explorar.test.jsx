@@ -1,4 +1,4 @@
-import { screen, fireEvent, waitFor, act } from "@testing-library/react-native";
+import { screen, fireEvent, waitFor, act, within } from "@testing-library/react-native";
 import { router } from "expo-router";
 import Explorar from "./Explorar";
 import { buscarEventos } from "../../api/eventosApi";
@@ -23,6 +23,7 @@ const CATEGORIAS = [
 ];
 
 const ultimoPedido = () => buscarEventos.mock.calls.at(-1)[0];
+const esperar = (ms) => act(() => new Promise((listo) => setTimeout(listo, ms)));
 
 async function abrir() {
   await renderConProviders(<Explorar />, { usuario: ANA });
@@ -123,12 +124,54 @@ describe("Explorar: paginado y refresco", () => {
     await screen.findByTestId("tarjeta-evento-2");
   });
 
+  it("mientras carga la página siguiente el botón queda en loading", async () => {
+    const pagina2 = promesaManual();
+    buscarEventos
+      .mockResolvedValueOnce(paginaDeEventos([PIOJOS], { page: 1, totalPages: 2 }))
+      .mockReturnValueOnce(pagina2.promesa);
+    await abrir();
+    expect(within(screen.getByTestId("cargar-mas")).queryByRole("progressbar")).toBeNull();
+    await fireEvent.press(screen.getByTestId("cargar-mas"));
+    expect(within(screen.getByTestId("cargar-mas")).getByRole("progressbar")).toBeTruthy();
+    expect(screen.getByTestId("cargar-mas")).toBeDisabled();
+    await act(() => pagina2.resolver(paginaDeEventos([KONEX], { page: 2, totalPages: 2 })));
+    await screen.findByTestId("tarjeta-evento-2");
+  });
+
+  it("cambiar de filtro después de cargar la página 2 reemplaza la lista", async () => {
+    const MAGO = eventoResumen({ id: 3, nombre: "Magia en el Gran Rex" });
+    buscarEventos
+      .mockResolvedValueOnce(paginaDeEventos([PIOJOS], { page: 1, totalPages: 2 }))
+      .mockResolvedValueOnce(paginaDeEventos([KONEX], { page: 2, totalPages: 2 }))
+      .mockResolvedValueOnce(paginaDeEventos([MAGO]));
+    await abrir();
+    await fireEvent.press(screen.getByTestId("cargar-mas"));
+    await screen.findByTestId("tarjeta-evento-2");
+    await fireEvent.press(await screen.findByTestId("chip-categoria-6"));
+    await screen.findByTestId("tarjeta-evento-3");
+    expect(ultimoPedido()).toMatchObject({ categoria: 6, page: 1 });
+    expect(screen.queryByTestId("tarjeta-evento-1")).toBeNull();
+    expect(screen.queryByTestId("tarjeta-evento-2")).toBeNull();
+  });
+
   it("pull-to-refresh vuelve a pedir la página 1", async () => {
     await abrir();
     const lista = screen.getByTestId("lista-eventos");
     await act(() => lista.props.refreshControl.props.onRefresh());
     await waitFor(() => expect(buscarEventos).toHaveBeenCalledTimes(2));
     expect(ultimoPedido()).toMatchObject({ page: 1 });
+  });
+
+  it("si falla el pull-to-refresh conserva la lista y muestra el error abajo", async () => {
+    buscarEventos
+      .mockResolvedValueOnce(paginaDeEventos([PIOJOS]))
+      .mockRejectedValueOnce(new Error("red"));
+    await abrir();
+    const lista = screen.getByTestId("lista-eventos");
+    await act(() => lista.props.refreshControl.props.onRefresh());
+    expect(await screen.findByText("No pudimos conectar con el servidor")).toBeTruthy();
+    expect(screen.getByTestId("tarjeta-evento-1")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Reintentar" })).toBeNull();
   });
 
   it("tocar una tarjeta abre el detalle del evento", async () => {
@@ -147,6 +190,22 @@ describe("Explorar: vacío y error", () => {
     expect(await screen.findByText("No encontramos eventos con esos filtros")).toBeTruthy();
     await fireEvent.press(screen.getByRole("button", { name: "Limpiar filtros" }));
     await waitFor(() => expect(ultimoPedido().categoria).toBeUndefined());
+  });
+
+  it("Limpiar filtros con texto y categoría hace un solo pedido sin q ni categoría", async () => {
+    buscarEventos.mockResolvedValueOnce(paginaDeEventos([PIOJOS]));
+    buscarEventos.mockResolvedValue(paginaDeEventos([], { totalPages: 0 }));
+    await abrir();
+    await fireEvent.changeText(screen.getByTestId("buscador"), "zzz");
+    await waitFor(() => expect(ultimoPedido()).toMatchObject({ q: "zzz" }));
+    await fireEvent.press(await screen.findByTestId("chip-categoria-6"));
+    await waitFor(() => expect(ultimoPedido()).toMatchObject({ q: "zzz", categoria: 6 }));
+    await screen.findByTestId("limpiar-filtros");
+    buscarEventos.mockClear();
+    await fireEvent.press(screen.getByRole("button", { name: "Limpiar filtros" }));
+    await esperar(400);
+    expect(buscarEventos).toHaveBeenCalledTimes(1);
+    expect(ultimoPedido()).toEqual({ ordenarPor: "fecha", orden: "asc", page: 1, limit: 10 });
   });
 
   it("sin resultados y sin filtros no ofrece limpiar", async () => {

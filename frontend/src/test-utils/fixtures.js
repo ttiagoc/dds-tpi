@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+
 export function eventoResumen(cambios = {}) {
   return {
     id: 1,
@@ -60,7 +62,6 @@ export function reseniasDe(resenias, organizador = {}) {
 }
 
 export function errorHttp(status, message) {
-  const { AxiosError } = require("axios");
   return new AxiosError("x", "ERR", {}, null, { status, data: { message } });
 }
 

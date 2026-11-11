@@ -1,7 +1,6 @@
 import { router } from "expo-router";
 import { renderRouter, screen } from "expo-router/testing-library";
 import { act, fireEvent, waitFor } from "@testing-library/react-native";
-import { AxiosError } from "axios";
 import RootLayout from "../app/_layout";
 import Inicio from "../app/index";
 import LoginRuta from "../app/(auth)/login";
@@ -21,7 +20,13 @@ import { buscarEventos, obtenerEvento } from "../api/eventosApi";
 import { listarCategorias } from "../api/categoriasApi";
 import { obtenerReseniasDeOrganizador } from "../api/organizadoresApi";
 import { ANA, FENIX } from "../test-utils/renderConProviders";
-import { eventoDetalle, eventoResumen, paginaDeEventos, reseniasDe } from "../test-utils/fixtures";
+import {
+  errorHttp,
+  eventoDetalle,
+  eventoResumen,
+  paginaDeEventos,
+  reseniasDe,
+} from "../test-utils/fixtures";
 
 jest.mock("../auth/sesion");
 jest.mock("../api/authApi");
@@ -90,7 +95,7 @@ describe("navegación según la sesión", () => {
 
   it("con la sesión vencida vuelve al login", async () => {
     leerSesion.mockResolvedValue({ token: "viejo", usuario: ANA });
-    obtenerYo.mockRejectedValue(new AxiosError("x", "ERR", {}, null, { status: 401, data: {} }));
+    obtenerYo.mockRejectedValue(errorHttp(401, "Token inválido"));
     await abrirApp();
     await waitFor(() => expect(screen).toHavePathname("/login"));
   });
