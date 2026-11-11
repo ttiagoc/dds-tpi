@@ -5,10 +5,10 @@ import { router } from "expo-router";
 import { useAuth } from "../../auth/AuthContext";
 import { Pantalla } from "../../components/Pantalla";
 import { ConEvento } from "../../components/ConEvento";
+import { FechaYLugar } from "../../components/FechaYLugar";
 import { ImagenEvento } from "../../components/ImagenEvento";
 import { PuntajeOrganizador } from "../../components/PuntajeOrganizador";
 import { espaciado } from "../../tema/espaciado";
-import { formatearFecha } from "../../utils/formato";
 import { BotonFavorito } from "./BotonFavorito";
 import { ReseniasOrganizador } from "./ReseniasOrganizador";
 import { TiposEntrada } from "./TiposEntrada";
@@ -30,7 +30,7 @@ function Encabezado({ evento, esComprador, onErrorFavorito }) {
           />
         )}
       </View>
-      <Text variant="bodyLarge">{`${formatearFecha(evento.fecha)} · ${evento.lugar}`}</Text>
+      <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} variant="bodyLarge" atenuado={false} />
       <Chip compact icon="tag-outline" style={estilos.categoria}>
         {evento.categoria.nombre}
       </Chip>

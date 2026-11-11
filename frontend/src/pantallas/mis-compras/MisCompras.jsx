@@ -1,0 +1,84 @@
+import { useCallback, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useTheme } from "react-native-paper";
+import { listarMisCompras } from "../../api/comprasApi";
+import { ChipsFiltro } from "../../components/ChipsFiltro";
+import { EstadoVacio } from "../../components/EstadoVacio";
+import { ListaPaginada } from "../../components/ListaPaginada";
+import { Pantalla } from "../../components/Pantalla";
+import { TarjetaCompra } from "../../components/TarjetaCompra";
+import { paginaDe, useListaPaginada } from "../../hooks/useListaPaginada";
+import { ESTADOS_COMPRA } from "../../tema/tema";
+
+const pedirCompras = paginaDe(listarMisCompras, "compras");
+
+function useRecargarAlVolver(recargar) {
+  const primeraVez = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (primeraVez.current) {
+        primeraVez.current = false;
+        return;
+      }
+      recargar();
+    }, [recargar]),
+  );
+}
+
+function FiltroEstado({ estado, onElegir }) {
+  const { estados } = useTheme();
+  const opciones = ESTADOS_COMPRA.map((valor) => ({ valor, etiqueta: estados[valor].etiqueta }));
+  return (
+    <ChipsFiltro
+      opciones={opciones}
+      seleccionada={estado}
+      onElegir={onElegir}
+      prefijoTestID="filtro-estado"
+    />
+  );
+}
+
+function SinCompras({ estado, onVerTodas }) {
+  const { estados } = useTheme();
+  if (estado) {
+    return (
+      <EstadoVacio
+        icono="filter-remove-outline"
+        texto={`No tenés compras en estado ${estados[estado].etiqueta}`}
+        accion={{ etiqueta: "Ver todas", onPress: onVerTodas, testID: "ver-todas" }}
+        testID="sin-compras"
+      />
+    );
+  }
+  return (
+    <EstadoVacio
+      icono="ticket-outline"
+      texto="Todavía no compraste entradas"
+      accion={{
+        etiqueta: "Explorar eventos",
+        onPress: () => router.navigate("/explorar"),
+        testID: "ir-a-explorar",
+      }}
+      testID="sin-compras"
+    />
+  );
+}
+
+export default function MisCompras() {
+  const [estado, setEstado] = useState(null);
+  const lista = useListaPaginada(pedirCompras, { estado: estado ?? undefined });
+  useRecargarAlVolver(lista.recargar);
+  return (
+    <Pantalla>
+      <ListaPaginada
+        testID="lista-compras"
+        lista={lista}
+        renderItem={(compra) => (
+          <TarjetaCompra compra={compra} onPress={() => router.push(`/compras/${compra.id}`)} />
+        )}
+        encabezado={<FiltroEstado estado={estado} onElegir={setEstado} />}
+        vacio={<SinCompras estado={estado} onVerTodas={() => setEstado(null)} />}
+      />
+    </Pantalla>
+  );
+}

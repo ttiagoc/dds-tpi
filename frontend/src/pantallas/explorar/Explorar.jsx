@@ -1,20 +1,21 @@
 import { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Searchbar } from "react-native-paper";
 import { router } from "expo-router";
+import { buscarEventos } from "../../api/eventosApi";
 import { Pantalla } from "../../components/Pantalla";
-import { Cargando } from "../../components/Cargando";
-import { ErrorCarga } from "../../components/ErrorCarga";
 import { EstadoVacio } from "../../components/EstadoVacio";
+import { ListaPaginada } from "../../components/ListaPaginada";
 import { TarjetaEvento } from "../../components/TarjetaEvento";
 import { useDebounce } from "../../hooks/useDebounce";
+import { paginaDe, useListaPaginada } from "../../hooks/useListaPaginada";
 import { espaciado } from "../../tema/espaciado";
 import { ChipsCategorias } from "./ChipsCategorias";
 import { MenuOrden, OPCIONES_ORDEN } from "./MenuOrden";
-import { PieDeLista } from "./PieDeLista";
-import { useEventosPaginados } from "./useEventosPaginados";
 
 const DEMORA_BUSQUEDA = 300;
+
+const pedirEventos = paginaDe(buscarEventos, "eventos");
 
 function useFiltros() {
   const [texto, setTexto] = useState("");
@@ -64,9 +65,7 @@ function Filtros({ filtros }) {
   );
 }
 
-function SinEventos({ lista, filtros }) {
-  if (lista.cargando) return <Cargando />;
-  if (lista.error) return <ErrorCarga mensaje={lista.error} onReintentar={lista.recargar} />;
+function SinEventos({ filtros }) {
   const accion = filtros.hayFiltros
     ? { etiqueta: "Limpiar filtros", onPress: filtros.limpiar, testID: "limpiar-filtros" }
     : undefined;
@@ -80,44 +79,25 @@ function SinEventos({ lista, filtros }) {
   );
 }
 
-function useRefresco(lista) {
-  const [refrescando, setRefrescando] = useState(false);
-  if (refrescando && !lista.cargando) setRefrescando(false);
-  const refrescar = () => {
-    setRefrescando(true);
-    lista.recargar();
-  };
-  return { refrescando, refrescar };
-}
-
 export default function Explorar() {
   const filtros = useFiltros();
-  const lista = useEventosPaginados(filtros.criterio);
-  const { refrescando, refrescar } = useRefresco(lista);
-  const mostrarEventos = !lista.cargando || refrescando;
+  const lista = useListaPaginada(pedirEventos, filtros.criterio);
   return (
     <Pantalla>
-      <FlatList
+      <ListaPaginada
         testID="lista-eventos"
-        data={mostrarEventos ? lista.eventos : []}
-        keyExtractor={(evento) => String(evento.id)}
-        renderItem={({ item }) => (
-          <TarjetaEvento evento={item} onPress={() => router.push(`/eventos/${item.id}`)} />
+        lista={lista}
+        renderItem={(evento) => (
+          <TarjetaEvento evento={evento} onPress={() => router.push(`/eventos/${evento.id}`)} />
         )}
-        ListHeaderComponent={<Filtros filtros={filtros} />}
-        ListEmptyComponent={<SinEventos lista={lista} filtros={filtros} />}
-        ListFooterComponent={<PieDeLista {...lista} onCargarMas={lista.cargarMas} />}
-        refreshing={refrescando}
-        onRefresh={refrescar}
-        contentContainerStyle={estilos.lista}
-        keyboardShouldPersistTaps="handled"
+        encabezado={<Filtros filtros={filtros} />}
+        vacio={<SinEventos filtros={filtros} />}
       />
     </Pantalla>
   );
 }
 
 const estilos = StyleSheet.create({
-  lista: { flexGrow: 1, gap: espaciado.md },
   filtros: { gap: espaciado.md },
   orden: { alignItems: "flex-start" },
 });

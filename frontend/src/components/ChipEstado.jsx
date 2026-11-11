@@ -1,13 +1,8 @@
-import { Chip, useTheme } from "react-native-paper";
+import { Chip } from "react-native-paper";
+import { useEstadoCompra } from "../tema/useEstadoCompra";
 
 export function ChipEstado({ estado }) {
-  const { estados, colors } = useTheme();
-  const { etiqueta, icono, fondo, texto } = estados[estado] ?? {
-    etiqueta: estado,
-    icono: "help-circle-outline",
-    fondo: colors.surfaceVariant,
-    texto: colors.onSurfaceVariant,
-  };
+  const { etiqueta, icono, fondo, texto } = useEstadoCompra(estado);
   return (
     <Chip
       icon={icono}

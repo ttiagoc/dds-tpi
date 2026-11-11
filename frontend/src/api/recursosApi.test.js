@@ -3,7 +3,7 @@ import { buscarEventos, obtenerEvento } from "./eventosApi";
 import { listarCategorias } from "./categoriasApi";
 import { obtenerReseniasDeOrganizador } from "./organizadoresApi";
 import { agregarFavorito, quitarFavorito } from "./favoritosApi";
-import { crearCompra } from "./comprasApi";
+import { crearCompra, listarMisCompras, obtenerCompra } from "./comprasApi";
 
 jest.mock("./cliente", () => ({
   cliente: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
@@ -69,5 +69,15 @@ describe("comprasApi", () => {
     const compra = { eventoId: 1, tipoEntradaId: 10, cantidad: 2 };
     expect(await crearCompra(compra)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/compras", compra);
+  });
+
+  it("listarMisCompras omite el estado vacío y devuelve data", async () => {
+    expect(await listarMisCompras({ estado: null, page: 2, limit: 10 })).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/compras", { params: { page: 2, limit: 10 } });
+  });
+
+  it("obtenerCompra pide el detalle", async () => {
+    expect(await obtenerCompra("7")).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/compras/7");
   });
 });

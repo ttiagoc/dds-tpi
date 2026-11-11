@@ -23,6 +23,12 @@ export function formatearFecha(fecha, { zonaHoraria } = {}) {
 
 export const formatearPrecio = (monto) => precio.format(monto);
 
+export function textoDiasRestantes(dias) {
+  if (dias == null) return null;
+  if (dias === 0) return "Es hoy";
+  return dias === 1 ? "Falta 1 día" : `Faltan ${dias} días`;
+}
+
 export const textoDisponibilidad = (disponibles) =>
   disponibles === 0 ? "Agotado" : `Quedan ${disponibles}`;
 

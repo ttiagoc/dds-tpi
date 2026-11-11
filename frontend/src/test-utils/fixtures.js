@@ -74,3 +74,54 @@ export function promesaManual() {
   });
   return { promesa, resolver, rechazar };
 }
+
+export function compraResumen(cambios = {}) {
+  return {
+    id: 7,
+    estado: "CONFIRMADA",
+    cantidad: 2,
+    total: 90000,
+    fechaCompra: "2026-11-01T15:00:00.000Z",
+    diasRestantes: 12,
+    evento: {
+      id: 1,
+      nombre: "Los Piojos en River",
+      fecha: "2026-12-20T23:00:00.000Z",
+      lugar: "Estadio River Plate",
+      imagen: "https://imagenes.test/piojos.jpg",
+    },
+    tipoEntrada: { id: 10, nombre: "Campo", precio: 45000 },
+    comprador: { id: 1, nombre: "Ana Pérez" },
+    acciones: {
+      puedePagar: false,
+      puedeCancelar: true,
+      puedeMarcarUtilizada: false,
+      puedeReseniar: false,
+    },
+    ...cambios,
+  };
+}
+
+export function compraDetalle(cambios = {}) {
+  return {
+    ...compraResumen(),
+    historial: [
+      {
+        estado: "PENDIENTE",
+        quien: { id: 1, nombre: "Ana Pérez" },
+        fechaHora: "2026-11-01T15:00:00.000Z",
+      },
+      {
+        estado: "CONFIRMADA",
+        quien: { id: 1, nombre: "Ana Pérez" },
+        fechaHora: "2026-11-01T15:05:00.000Z",
+      },
+    ],
+    resenia: null,
+    ...cambios,
+  };
+}
+
+export function paginaDeCompras(compras, { page = 1, totalPages = 1, total } = {}) {
+  return { compras, total: total ?? compras.length, page, totalPages };
+}
