@@ -4,6 +4,7 @@ import Login from "./Login";
 import { login } from "../../api/authApi";
 import { guardarSesion } from "../../auth/sesion";
 import { renderConProviders, ANA } from "../../test-utils/renderConProviders";
+import { errorHttp } from "../../test-utils/fixtures";
 
 jest.mock("../../api/authApi");
 jest.mock("../../auth/sesion");
@@ -54,12 +55,7 @@ describe("Login", () => {
   });
 
   it("muestra el error del back y conserva lo escrito", async () => {
-    login.mockRejectedValue(
-      new AxiosError("x", "ERR", {}, null, {
-        status: 401,
-        data: { message: "Email o contraseña incorrectos" },
-      }),
-    );
+    login.mockRejectedValue(errorHttp(401, "Email o contraseña incorrectos"));
     await renderConProviders(<Login />);
     await completar({ email: "ana@aiticket.com", password: "mal" });
     await fireEvent.press(botonIngresar());

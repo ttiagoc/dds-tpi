@@ -50,11 +50,13 @@ export const temaClaro = {
 | `ChipEstado` | `estado` | color + ícono + texto desde `theme.estados` |
 | `TarjetaEvento` | `evento, onPress` | `Card` con imagen, nombre, fecha formateada, lugar, "Desde $X", estrellas organizador, `testID="tarjeta-evento-<id>"` |
 | `SelectorCantidad` | `valor, min, max, onCambiar` | botones − / + deshabilitados en los topes |
-| `Estrellas` | `valor, onCambiar?, tamanio?` | lectura o edición; `accessibilityLabel="Puntaje N de 5"` |
+| `Estrellas` | `valor, onCambiar?, tamanio?` | lectura (redondea a medio punto, color `colors.estrella`) o edición (10d); `accessibilityLabel="Puntaje N de 5"` |
+| `ImagenEvento` | `uri, nombre, redondeada?` | 16:9; sin `uri`, placeholder con ícono (`testID="imagen-placeholder"`) |
+| `PuntajeOrganizador` | `organizador` | nombre + `Estrellas` + puntaje, o "Sin reseñas" |
 | `LineaDeTiempo` | `historial` | estado + quién + fecha |
 | `Precio` | `monto` | `Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" })` |
 
-Formateo de fechas y precios centralizado en `src/utils/formato.js` (`formatearFecha`, `formatearPrecio`) (`es-AR`, ej. "sáb 20 dic · 20:00").
+Formateo centralizado en `src/utils/formato.js` (`formatearFecha`, `formatearDia`, `formatearPrecio`, `formatearPuntaje`) (`es-AR`, ej. "sáb 20 dic · 20:00").
 
 ## Cuándo crear un componente nuevo
 

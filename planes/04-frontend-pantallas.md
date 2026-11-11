@@ -27,8 +27,8 @@ Stack compartido (encima de los tabs):
 | Pantalla | CU | Contenido | Endpoints | testIDs clave |
 |---|---|---|---|---|
 | Login | — | email, password (con ojo), botón Ingresar, error de credenciales, chips de usuarios demo (solo dev). Detalle en `specs/09-front-base.md` | `POST /auth/login` | `login-email`, `login-password`, `login-ingresar`, `login-error` |
-| Explorar | CU3, CU11 | `Searchbar` (debounce 300 ms), chips horizontales de categorías, menú de orden (fecha/precio/puntaje + asc/desc), lista de `TarjetaEvento`, scroll infinito o "cargar más", pull-to-refresh | `GET /categorias`, `GET /eventos` | `buscador`, `chip-categoria-<id>`, `orden-menu`, `tarjeta-evento-<id>` |
-| DetalleEvento | CU10, CU12 | imagen, nombre, fecha, lugar, categoría, descripción, organizador + estrellas, lista de tipos con precio y disponibles, botón favorito, botón Comprar, últimas reseñas del organizador | `GET /eventos/:id`, `GET /organizadores/:id/resenias`, favoritos | `evento-comprar`, `evento-favorito` |
+| Explorar | CU3, CU11 | `Searchbar` (debounce 300 ms), chips horizontales de categorías, menú de orden (6 opciones: fecha/precio/puntaje × asc/desc), lista de `TarjetaEvento`, "cargar más" (10 por página), pull-to-refresh. Detalle en `specs/10-explorar-eventos.md` | `GET /categorias`, `GET /eventos` | `buscador`, `chip-categoria-todas`, `chip-categoria-<id>`, `orden-menu`, `orden-<ordenarPor>-<orden>`, `tarjeta-evento-<id>`, `cargar-mas` |
+| DetalleEvento | CU10, CU12 | imagen, nombre, fecha, lugar, categoría, descripción, organizador + estrellas, lista de tipos con precio y disponibles, botón favorito (optimista, solo comprador), botón Comprar ("Agotado" si no hay disponibles, solo comprador), últimas 3 reseñas del organizador. Detalle en `specs/10-explorar-eventos.md` | `GET /eventos/:id`, `GET /organizadores/:id/resenias`, favoritos | `evento-comprar`, `evento-favorito`, `tipo-entrada-<id>`, `resenias-organizador`, `resenia-<id>` |
 | Comprar | CU12 | `RadioButton` de tipos (deshabilitado si 0 disponibles), `SelectorCantidad` con tope = disponibles, total calculado, Confirmar; éxito → DetalleCompra | `POST /compras` | `tipo-<id>`, `cantidad-mas`, `cantidad-menos`, `comprar-confirmar` |
 | MisCompras | CU1 | filtros por estado (`SegmentedButtons` o chips), lista con `ChipEstado` coloreado, "Faltan N días" si CONFIRMADA | `GET /compras` | `compra-<id>`, `dias-restantes-<id>` |
 | DetalleCompra | CU1, CU7-9 | estado grande, datos del evento, total, timeline del historial, botones según `acciones` (Pagar, Cancelar con diálogo de confirmación, Marcar utilizada, Reseñar), botón Chat | `GET /compras/:id`, acciones | `compra-pagar`, `compra-cancelar`, `confirmar-cancelacion`, `compra-utilizada`, `compra-resenar`, `compra-chat` |
@@ -46,6 +46,8 @@ Stack compartido (encima de los tabs):
 |---|---|
 | `ChipEstado` | color e ícono por `EstadoCompra` desde el tema |
 | `TarjetaEvento` | imagen, nombre, fecha, precio desde, puntaje organizador |
+| `ImagenEvento` | imagen 16:9 o placeholder con ícono |
+| `PuntajeOrganizador` | nombre + `Estrellas` + puntaje, o "Sin reseñas" |
 | `SelectorCantidad` | − / n / + con min/max |
 | `Estrellas` | lectura y edición |
 | `EstadoVacio` | ícono + texto + acción opcional |

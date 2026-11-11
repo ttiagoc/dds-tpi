@@ -44,6 +44,7 @@ export const temaClaro = {
     onSecondary: "#FFFFFF",
     secondaryContainer: "#FFDAD3",
     onSecondaryContainer: "#3E0400",
+    estrella: "#9A5B00",
   },
   estados: conColores(COLORES_ESTADO_CLARO),
 };
@@ -60,6 +61,7 @@ export const temaOscuro = {
     onSecondary: "#5F150A",
     secondaryContainer: "#7D2B1F",
     onSecondaryContainer: "#FFDAD3",
+    estrella: "#FFC94D",
   },
   estados: conColores(COLORES_ESTADO_OSCURO),
 };

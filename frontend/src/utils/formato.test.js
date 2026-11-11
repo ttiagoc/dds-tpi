@@ -23,3 +23,21 @@ describe("formatearPrecio", () => {
     expect(sinEspaciosRaros(formatearPrecio(0))).toBe("$ 0");
   });
 });
+
+describe("formatearPuntaje", () => {
+  const { formatearPuntaje } = require("./formato");
+
+  it("usa coma decimal y un decimal como máximo", () => {
+    expect(formatearPuntaje(4.5)).toBe("4,5");
+    expect(formatearPuntaje(4)).toBe("4");
+    expect(formatearPuntaje(3.333)).toBe("3,3");
+  });
+});
+
+describe("formatearDia", () => {
+  const { formatearDia } = require("./formato");
+
+  it("muestra día, mes y año sin hora", () => {
+    expect(formatearDia("2026-10-01T12:00:00.000Z", { zonaHoraria: "UTC" })).toBe("1 oct 2026");
+  });
+});
