@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { router } from "expo-router";
 import { crearCompra } from "../../api/comprasApi";
-import { codigoDeError, mensajeDeError } from "../../api/cliente";
+import { useEnvio } from "../../hooks/useEnvio";
 
 export const MAXIMO_POR_COMPRA = 10;
 
@@ -22,26 +22,12 @@ export function useSeleccion(tipos) {
 }
 
 export function useConfirmar({ eventoId, tipo, cantidad, recargar }) {
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState(null);
-  const enCurso = useRef(false);
-
-  const confirmar = async () => {
-    if (enCurso.current) return;
-    enCurso.current = true;
-    setEnviando(true);
-    setError(null);
-    try {
-      const compra = await crearCompra({ eventoId, tipoEntradaId: tipo.id, cantidad });
-      router.replace(`/compras/${compra.id}`);
-    } catch (e) {
-      setError(mensajeDeError(e));
-      if (codigoDeError(e) === 422) recargar();
-    } finally {
-      enCurso.current = false;
-      setEnviando(false);
-    }
-  };
-
-  return { enviando, error, confirmar };
+  const { enCurso, error, enviar } = useEnvio({ recargar });
+  const confirmar = () =>
+    enviar(
+      "comprar",
+      () => crearCompra({ eventoId, tipoEntradaId: tipo.id, cantidad }),
+      (compra) => router.replace(`/compras/${compra.id}`),
+    );
+  return { enviando: enCurso !== null, error, confirmar };
 }

@@ -3,7 +3,13 @@ import { buscarEventos, obtenerEvento } from "./eventosApi";
 import { listarCategorias } from "./categoriasApi";
 import { obtenerReseniasDeOrganizador } from "./organizadoresApi";
 import { agregarFavorito, quitarFavorito } from "./favoritosApi";
-import { crearCompra, listarMisCompras, obtenerCompra } from "./comprasApi";
+import {
+  cancelarCompra,
+  crearCompra,
+  listarMisCompras,
+  obtenerCompra,
+  pagarCompra,
+} from "./comprasApi";
 
 jest.mock("./cliente", () => ({
   cliente: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
@@ -79,5 +85,15 @@ describe("comprasApi", () => {
   it("obtenerCompra pide el detalle", async () => {
     expect(await obtenerCompra("7")).toBe("respuesta");
     expect(cliente.get).toHaveBeenCalledWith("/compras/7");
+  });
+
+  it("pagarCompra hace POST /compras/:id/pago y devuelve data", async () => {
+    expect(await pagarCompra(7)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras/7/pago");
+  });
+
+  it("cancelarCompra hace POST /compras/:id/cancelacion y devuelve data", async () => {
+    expect(await cancelarCompra(7)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras/7/cancelacion");
   });
 });

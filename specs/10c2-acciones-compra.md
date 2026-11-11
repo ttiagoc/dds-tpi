@@ -1,6 +1,6 @@
 # Spec 10c2 — Pagar y cancelar desde el detalle de la compra
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/acciones-compra`
 - **Casos de uso:** CU7, CU8 (ver `planes/00-indice.md`); pagar completa el flujo de compra de CU12 (R3)
 - **Iteración:** It4
@@ -113,3 +113,7 @@ Escenario: doble toque
 - Decidido por el usuario antes de la spec: botones desde `compra.acciones`; Pagar sin diálogo con Snackbar "Pago confirmado"; Cancelar con Dialog (`confirmar-cancelacion`); testIDs de `planes/04`; 422 con el texto exacto del back.
 - Preguntas a la IA, el usuario eligió las opciones recomendadas: 422 → mensaje + recarga de la compra; error en `HelperText` bajo los botones (`compra-accion-error`); texto del diálogo según estado (con el monto a reembolsar si está confirmada); Snackbar también al cancelar, según el resultado.
 - La IA agregó sin preguntar (revisable): ubicación de los botones (después del resumen, antes del historial), estilos `contained` / `outlined` con color de error, ambos deshabilitados durante una acción, testID `compra-aviso`, hook `useAccionesCompra`, nombres `pagarCompra` / `cancelarCompra`.
+- Cambios en la implementación: `useCargar` expone `reemplazar(datos)` para mostrar el `CompraDetalle` de la respuesta sin volver a pedirlo; texto "Se libera la entrada." cuando N = 1.
+- Revisión de calidad (3 hallazgos aplicados): `hooks/useEnvio({ recargar })` concentra el envío protegido (guard con `useRef`, error con `mensajeDeError`, recarga en 422) y lo usan `useConfirmar` y `useAccionesCompra`; se borró un `useTheme()` sin uso en DetalleCompra; los handlers async se envuelven todos con `() => { f(); }`.
+- Única derivación de R2b en el front: el texto del diálogo menciona el reembolso si la compra está CONFIRMADA (el back no expone ese dato). Aceptado en la revisión.
+- Verificación: spec temporal de Cypress contra el back real (pagar una pendiente; cancelar una confirmada que termina REEMBOLSADA), 2/2, borrada al terminar.

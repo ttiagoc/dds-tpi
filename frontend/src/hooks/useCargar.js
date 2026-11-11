@@ -24,6 +24,10 @@ export function useCargar(cargar) {
   }, [cargar, version]);
 
   const recargar = useCallback(() => setVersion((v) => v + 1), []);
+  const reemplazar = useCallback(
+    (datos) => setResultado((actual) => ({ ...actual, datos, error: null, codigoError: null })),
+    [],
+  );
   const cargando = resultado.cargar !== cargar || resultado.version !== version;
   return {
     datos: resultado.datos,
@@ -31,5 +35,6 @@ export function useCargar(cargar) {
     error: cargando ? null : resultado.error,
     codigoError: cargando ? null : (resultado.codigoError ?? null),
     recargar,
+    reemplazar,
   };
 }

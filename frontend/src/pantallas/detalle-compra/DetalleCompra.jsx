@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import { Card, Divider, Text, useTheme } from "react-native-paper";
+import { Card, Divider, Snackbar, Text, useTheme } from "react-native-paper";
 import { router } from "expo-router";
 import { obtenerCompra } from "../../api/comprasApi";
 import { ChipEstado } from "../../components/ChipEstado";
@@ -10,6 +10,8 @@ import { LineaDeTiempo } from "../../components/LineaDeTiempo";
 import { Pantalla } from "../../components/Pantalla";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio, textoDiasRestantes } from "../../utils/formato";
+import { AccionesCompra } from "./AccionesCompra";
+import { useAccionesCompra } from "./useAccionesCompra";
 
 function Estado({ compra }) {
   const { colors } = useTheme();
@@ -27,7 +29,6 @@ function Estado({ compra }) {
 }
 
 function Evento({ evento }) {
-  const { colors } = useTheme();
   return (
     <Card
       mode="outlined"
@@ -62,16 +63,27 @@ function Resumen({ compra }) {
   );
 }
 
-function Contenido({ compra }) {
+function Contenido({ compra, carga }) {
+  const acciones = useAccionesCompra({
+    compra,
+    reemplazar: carga.reemplazar,
+    recargar: carga.recargar,
+  });
   return (
-    <Pantalla scroll>
-      <Estado compra={compra} />
-      <Evento evento={compra.evento} />
-      <Resumen compra={compra} />
-      <Divider />
-      <Text variant="titleMedium">Historial</Text>
-      <LineaDeTiempo historial={compra.historial} />
-    </Pantalla>
+    <>
+      <Pantalla scroll>
+        <Estado compra={compra} />
+        <Evento evento={compra.evento} />
+        <Resumen compra={compra} />
+        <AccionesCompra compra={compra} acciones={acciones} />
+        <Divider />
+        <Text variant="titleMedium">Historial</Text>
+        <LineaDeTiempo historial={compra.historial} />
+      </Pantalla>
+      <Snackbar visible={!!acciones.aviso} onDismiss={acciones.cerrarAviso} testID="compra-aviso">
+        {acciones.aviso ?? ""}
+      </Snackbar>
+    </>
   );
 }
 
@@ -82,7 +94,7 @@ export default function DetalleCompra() {
       iconoInexistente="ticket-outline"
       testIDInexistente="compra-inexistente"
     >
-      {(compra) => <Contenido compra={compra} />}
+      {(compra, carga) => <Contenido compra={compra} carga={carga} />}
     </ConRecursoDeRuta>
   );
 }
