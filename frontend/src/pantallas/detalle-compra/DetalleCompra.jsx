@@ -1,13 +1,14 @@
 import { StyleSheet, View } from "react-native";
 import { Card, Divider, Snackbar, Text, useTheme } from "react-native-paper";
-import { router } from "expo-router";
-import { obtenerCompra } from "../../api/comprasApi";
+import { router, useLocalSearchParams } from "expo-router";
 import { ChipEstado } from "../../components/ChipEstado";
-import { ConRecursoDeRuta } from "../../components/ConRecursoDeRuta";
+import { ConCompra } from "../../components/ConCompra";
+import { Estrellas } from "../../components/Estrellas";
 import { FechaYLugar } from "../../components/FechaYLugar";
 import { ImagenEvento } from "../../components/ImagenEvento";
 import { LineaDeTiempo } from "../../components/LineaDeTiempo";
 import { Pantalla } from "../../components/Pantalla";
+import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio, textoDiasRestantes } from "../../utils/formato";
 import { AccionesCompra } from "./AccionesCompra";
@@ -63,12 +64,37 @@ function Resumen({ compra }) {
   );
 }
 
+function TuResenia({ resenia }) {
+  if (!resenia) return null;
+  return (
+    <View style={estilos.resenia} testID="compra-resenia">
+      <Text variant="titleMedium">Tu reseña</Text>
+      <Estrellas valor={resenia.puntuacion} tamanio={20} />
+      <Text variant="bodyMedium">{resenia.detalle}</Text>
+    </View>
+  );
+}
+
+const AVISOS_DE_RUTA = { resenia: "¡Gracias por tu reseña!" };
+
+function useAviso(acciones) {
+  const { aviso: deRuta } = useLocalSearchParams();
+  const texto = acciones.aviso ?? AVISOS_DE_RUTA[deRuta] ?? null;
+  const cerrar = () => {
+    acciones.cerrarAviso();
+    if (deRuta) router.setParams({ aviso: undefined });
+  };
+  return { texto, cerrar };
+}
+
 function Contenido({ compra, carga }) {
   const acciones = useAccionesCompra({
     compra,
     reemplazar: carga.reemplazar,
     recargar: carga.recargar,
   });
+  const aviso = useAviso(acciones);
+  useRecargarAlVolver(carga.recargar);
   return (
     <>
       <Pantalla scroll>
@@ -76,31 +102,25 @@ function Contenido({ compra, carga }) {
         <Evento evento={compra.evento} />
         <Resumen compra={compra} />
         <AccionesCompra compra={compra} acciones={acciones} />
+        <TuResenia resenia={compra.resenia} />
         <Divider />
         <Text variant="titleMedium">Historial</Text>
         <LineaDeTiempo historial={compra.historial} />
       </Pantalla>
-      <Snackbar visible={!!acciones.aviso} onDismiss={acciones.cerrarAviso} testID="compra-aviso">
-        {acciones.aviso ?? ""}
+      <Snackbar visible={!!aviso.texto} onDismiss={aviso.cerrar} testID="compra-aviso">
+        {aviso.texto ?? ""}
       </Snackbar>
     </>
   );
 }
 
 export default function DetalleCompra() {
-  return (
-    <ConRecursoDeRuta
-      obtener={obtenerCompra}
-      iconoInexistente="ticket-outline"
-      testIDInexistente="compra-inexistente"
-    >
-      {(compra, carga) => <Contenido compra={compra} carga={carga} />}
-    </ConRecursoDeRuta>
-  );
+  return <ConCompra>{(compra, carga) => <Contenido compra={compra} carga={carga} />}</ConCompra>;
 }
 
 const estilos = StyleSheet.create({
   estado: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   evento: { paddingTop: espaciado.md, gap: espaciado.xs },
   resumen: { gap: espaciado.xs },
+  resenia: { gap: espaciado.xs },
 });

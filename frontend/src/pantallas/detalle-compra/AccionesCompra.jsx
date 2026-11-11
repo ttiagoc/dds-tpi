@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, HelperText, Portal, Text, useTheme } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
@@ -31,10 +32,26 @@ function DialogoCancelacion({ compra, visible, onVolver, onConfirmar }) {
   );
 }
 
-function Botones({ puedePagar, puedeCancelar, enCurso, onPagar, onCancelar }) {
+function BotonResenar({ compraId, deshabilitado }) {
+  return (
+    <Button
+      mode="contained"
+      icon="star-outline"
+      disabled={deshabilitado}
+      onPress={() => router.push(`/compras/${compraId}/resenia`)}
+      testID="compra-resenar"
+    >
+      Reseñar
+    </Button>
+  );
+}
+
+function Botones({ compraId, permitidas, enCurso, onPagar, onCancelar }) {
   const { colors } = useTheme();
+  const { puedePagar, puedeCancelar, puedeReseniar } = permitidas;
   return (
     <>
+      {puedeReseniar && <BotonResenar compraId={compraId} deshabilitado={!!enCurso} />}
       {puedePagar && (
         <Button
           mode="contained"
@@ -65,15 +82,16 @@ function Botones({ puedePagar, puedeCancelar, enCurso, onPagar, onCancelar }) {
 
 export function AccionesCompra({ compra, acciones }) {
   const [confirmando, setConfirmando] = useState(false);
-  const { puedePagar, puedeCancelar } = compra.acciones ?? {};
+  const permitidas = compra.acciones ?? {};
   const { enCurso, error, pagar, cancelar } = acciones;
-  if (!puedePagar && !puedeCancelar && !error) return null;
+  const { puedePagar, puedeCancelar, puedeReseniar } = permitidas;
+  if (!puedePagar && !puedeCancelar && !puedeReseniar && !error) return null;
 
   return (
     <View style={estilos.acciones}>
       <Botones
-        puedePagar={puedePagar}
-        puedeCancelar={puedeCancelar}
+        compraId={compra.id}
+        permitidas={permitidas}
         enCurso={enCurso}
         onPagar={() => {
           pagar();

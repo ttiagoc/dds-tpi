@@ -1,9 +1,9 @@
 import { act, screen, fireEvent, waitFor } from "@testing-library/react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import DetalleCompra from "./DetalleCompra";
 import { cancelarCompra, obtenerCompra, pagarCompra } from "../../api/comprasApi";
 import { renderConProviders, ANA } from "../../test-utils/renderConProviders";
-import { compraDetalle, errorHttp, promesaManual } from "../../test-utils/fixtures";
+import { compraDetalle, errorHttp, promesaManual, resenia } from "../../test-utils/fixtures";
 
 jest.mock("../../api/comprasApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
@@ -236,5 +236,81 @@ describe("DetalleCompra: cancelar", () => {
     await fireEvent.press(screen.getByTestId("confirmar-cancelacion"));
     expect(await screen.findByTestId("compra-accion-error")).toHaveTextContent(mensaje);
     await waitFor(() => expect(obtenerCompra).toHaveBeenCalledTimes(2));
+  });
+});
+
+const UTILIZADA = compraDetalle({
+  estado: "UTILIZADA",
+  diasRestantes: null,
+  acciones: { ...SIN_ACCIONES, puedeReseniar: true },
+});
+
+const RESENIADA = {
+  ...UTILIZADA,
+  acciones: SIN_ACCIONES,
+  resenia: resenia({ puntuacion: 4, detalle: "Buen sonido" }),
+};
+
+const enfocar = () => act(() => useFocusEffect.mock.calls.at(-1)[0]());
+
+describe("DetalleCompra: reseña", () => {
+  afterEach(() => jest.useRealTimers());
+
+  it.each([
+    [true, true],
+    [false, false],
+  ])("con puedeReseniar %s el botón Reseñar se ve: %s", async (puede, seVe) => {
+    obtenerCompra.mockResolvedValue({
+      ...UTILIZADA,
+      acciones: { ...SIN_ACCIONES, puedeReseniar: puede },
+    });
+    await abrir();
+    expect(!!screen.queryByTestId("compra-resenar")).toBe(seVe);
+  });
+
+  it("Reseñar abre la pantalla de reseña de la compra", async () => {
+    obtenerCompra.mockResolvedValue(UTILIZADA);
+    await abrir();
+    await fireEvent.press(screen.getByTestId("compra-resenar"));
+    expect(router.push).toHaveBeenCalledWith("/compras/7/resenia");
+  });
+
+  it("muestra Tu reseña con las estrellas y el comentario", async () => {
+    obtenerCompra.mockResolvedValue(RESENIADA);
+    await abrir();
+    const seccion = screen.getByTestId("compra-resenia");
+    expect(seccion).toHaveTextContent(/Tu reseña/);
+    expect(seccion).toHaveTextContent(/Buen sonido/);
+    expect(screen.getByLabelText("Puntaje 4 de 5")).toBeTruthy();
+  });
+
+  it("sin reseña no muestra la sección", async () => {
+    obtenerCompra.mockResolvedValue(UTILIZADA);
+    await abrir();
+    expect(screen.queryByTestId("compra-resenia")).toBeNull();
+  });
+
+  it("al volver de reseñar recarga, muestra la reseña y el aviso", async () => {
+    obtenerCompra.mockResolvedValue(UTILIZADA);
+    await abrir();
+    await enfocar();
+    expect(obtenerCompra).toHaveBeenCalledTimes(1);
+    obtenerCompra.mockResolvedValue(RESENIADA);
+    useLocalSearchParams.mockReturnValue({ id: "7", aviso: "resenia" });
+    await enfocar();
+    expect(await screen.findByTestId("compra-resenia")).toHaveTextContent(/Buen sonido/);
+    expect(obtenerCompra).toHaveBeenCalledTimes(2);
+    expect(screen.queryByTestId("compra-resenar")).toBeNull();
+    expect(screen.getByTestId("compra-aviso")).toHaveTextContent("¡Gracias por tu reseña!");
+  });
+
+  it("cuando el aviso de la reseña se cierra limpia el parámetro", async () => {
+    jest.useFakeTimers();
+    useLocalSearchParams.mockReturnValue({ id: "7", aviso: "resenia" });
+    obtenerCompra.mockResolvedValue(RESENIADA);
+    await abrir();
+    expect(screen.getByTestId("compra-aviso")).toHaveTextContent("¡Gracias por tu reseña!");
+    await act(async () => jest.advanceTimersByTime(10000));
+    expect(router.setParams).toHaveBeenCalledWith({ aviso: undefined });
   });
 });

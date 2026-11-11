@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import { router, useFocusEffect } from "expo-router";
+import { useState } from "react";
+import { router } from "expo-router";
 import { useTheme } from "react-native-paper";
 import { listarMisCompras } from "../../api/comprasApi";
 import { ChipsFiltro } from "../../components/ChipsFiltro";
@@ -8,22 +8,10 @@ import { ListaPaginada } from "../../components/ListaPaginada";
 import { Pantalla } from "../../components/Pantalla";
 import { TarjetaCompra } from "../../components/TarjetaCompra";
 import { paginaDe, useListaPaginada } from "../../hooks/useListaPaginada";
+import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { ESTADOS_COMPRA } from "../../tema/tema";
 
 const pedirCompras = paginaDe(listarMisCompras, "compras");
-
-function useRecargarAlVolver(recargar) {
-  const primeraVez = useRef(true);
-  useFocusEffect(
-    useCallback(() => {
-      if (primeraVez.current) {
-        primeraVez.current = false;
-        return;
-      }
-      recargar();
-    }, [recargar]),
-  );
-}
 
 function FiltroEstado({ estado, onElegir }) {
   const { estados } = useTheme();

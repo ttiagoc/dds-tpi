@@ -1,23 +1,13 @@
 import { Pantalla } from "./Pantalla";
 import { Cargando } from "./Cargando";
 import { ErrorCarga } from "./ErrorCarga";
-import { EstadoVacio } from "./EstadoVacio";
-import { volver } from "../navegacion/volver";
+import { AvisoConVolver } from "./AvisoConVolver";
 
 export function ConCarga({ carga, iconoInexistente, testIDInexistente, children }) {
   const { datos, cargando, error, codigoError, recargar } = carga;
   if (cargando && !datos) return <Cargando />;
   if (codigoError === 403 || codigoError === 404) {
-    return (
-      <Pantalla>
-        <EstadoVacio
-          icono={iconoInexistente}
-          texto={error}
-          accion={{ etiqueta: "Volver", onPress: volver, testID: "volver" }}
-          testID={testIDInexistente}
-        />
-      </Pantalla>
-    );
+    return <AvisoConVolver icono={iconoInexistente} texto={error} testID={testIDInexistente} />;
   }
   if (error) {
     return (
