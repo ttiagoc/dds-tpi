@@ -1,6 +1,6 @@
 # Spec 10d — Reseñar una compra y tab Favoritos
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/resenar-favoritos`
 - **Casos de uso:** CU9 (ver `planes/00-indice.md`), extra Favoritos
 - **Iteración:** It4
@@ -138,3 +138,6 @@ Escenario: sin favoritos
 - Decidido por el usuario antes de la spec: botón desde `compra.acciones.puedeReseniar`; pantalla `compras/[id]/resenia` con `Estrellas` editables (`estrella-<n>`), `resenia-detalle` (1-500) y `resenia-enviar`; 409 y 422 con el texto exacto del back; tab Favoritos con `GET /usuarios/yo/favoritos` y `TarjetaEvento`; mostrar `compra.resenia` en DetalleCompra.
 - Preguntas a la IA, el usuario eligió las opciones recomendadas: Reseñar carga la compra y, si no es reseñable, muestra un estado vacío con Volver; al reseñar vuelve a DetalleCompra, que recarga y muestra el Snackbar "¡Gracias por tu reseña!"; "Enviar" deshabilitado hasta completar, con contador; Favoritos con recarga al volver y sin quitar desde la lista.
 - La IA agregó sin preguntar (revisable): `router.dismissTo` con parámetro `aviso` para llevar el Snackbar; no recargar en 422 (a diferencia de 10c2) porque la recarga reemplazaría el formulario y el mensaje; extraer `useRecargarAlVolver` de Mis compras a `src/hooks/`; testIDs `resenia-error`, `resenia-no-disponible`, `compra-resenia`, `lista-favoritos`, `sin-favoritos`; nombres `reseniarCompra`, `listarFavoritos`, `useResenia`; textos "Contá tu experiencia", "Tu reseña", "Todavía no guardaste eventos".
+- Cambios en la implementación: `Estrellas` acepta `onElegir` y `deshabilitadas` (variante editable con `IconButton`); el aviso de la ruta se limpia con `router.setParams` cuando el Snackbar se cierra; Favoritos adapta la lista sin paginar a `useListaPaginada` (una sola página).
+- Revisión de calidad (7 hallazgos, 1 media y 6 bajas, aplicados): `components/AvisoConVolver` reemplaza tres copias del estado vacío con Volver (`ConCarga`, Comprar, Reseñar); `components/ConCompra` como `ConEvento`; `components/EncabezadoEvento` compartido por Comprar y Reseñar (se borró un `useTheme()` sin uso); `Estrellas` concentra el recorrido de posiciones en `Posiciones`; `AccionesCompra` lee `compra.acciones` una sola vez; se simplificó un test de Reseñar.
+- Verificación: 246 tests del front, `npm run calidad` sin errores (0 clones en el front, quedan los 7 del back). Spec temporal de Cypress contra el back real (reseñar la compra utilizada de "Impro Total" y marcar un favorito que aparece en la tab), 2/2, borrada al terminar. En web la tab Explorar sigue montada, así que las aserciones se acotan a `lista-favoritos`.

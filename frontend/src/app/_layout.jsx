@@ -29,6 +29,10 @@ function Navegacion() {
           name="eventos/[id]/comprar"
           options={{ headerShown: true, title: "Comprar" }}
         />
+        <Stack.Screen
+          name="compras/[id]/resenia"
+          options={{ headerShown: true, title: "Reseñar" }}
+        />
       </Stack.Protected>
     </Stack>
   );

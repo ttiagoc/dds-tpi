@@ -1,36 +1,22 @@
 import { StyleSheet, View } from "react-native";
-import { Button, HelperText, Text, useTheme } from "react-native-paper";
+import { Button, HelperText, Text } from "react-native-paper";
+import { AvisoConVolver } from "../../components/AvisoConVolver";
 import { ConEvento } from "../../components/ConEvento";
-import { EstadoVacio } from "../../components/EstadoVacio";
-import { FechaYLugar } from "../../components/FechaYLugar";
+import { EncabezadoEvento } from "../../components/EncabezadoEvento";
 import { Pantalla } from "../../components/Pantalla";
 import { SelectorCantidad } from "../../components/SelectorCantidad";
-import { volver } from "../../navegacion/volver";
 import { espaciado } from "../../tema/espaciado";
 import { formatearPrecio } from "../../utils/formato";
 import { TiposAElegir } from "./TiposAElegir";
 import { useConfirmar, useSeleccion } from "./useCompra";
 
-function Encabezado({ evento }) {
-  const { colors } = useTheme();
-  return (
-    <View style={estilos.encabezado}>
-      <Text variant="headlineSmall">{evento.nombre}</Text>
-      <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />
-    </View>
-  );
-}
-
 function SinEntradas() {
   return (
-    <Pantalla>
-      <EstadoVacio
-        icono="ticket-outline"
-        texto="No quedan entradas para este evento"
-        accion={{ etiqueta: "Volver", onPress: volver, testID: "volver" }}
-        testID="sin-entradas"
-      />
-    </Pantalla>
+    <AvisoConVolver
+      icono="ticket-outline"
+      texto="No quedan entradas para este evento"
+      testID="sin-entradas"
+    />
   );
 }
 
@@ -68,7 +54,7 @@ function Formulario({ evento, actualizando, recargar }) {
   if (!tipo) return <SinEntradas />;
   return (
     <Pantalla scroll>
-      <Encabezado evento={evento} />
+      <EncabezadoEvento evento={evento} />
       <TiposAElegir tipos={evento.tiposEntrada} elegido={tipo.id} onElegir={seleccion.elegirTipo} />
       <View style={estilos.cantidad}>
         <Text variant="titleMedium">Cantidad</Text>
@@ -94,6 +80,5 @@ export default function Comprar() {
 }
 
 const estilos = StyleSheet.create({
-  encabezado: { gap: espaciado.xs },
   cantidad: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 });

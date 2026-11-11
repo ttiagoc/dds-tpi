@@ -2,13 +2,14 @@ import { cliente } from "./cliente";
 import { buscarEventos, obtenerEvento } from "./eventosApi";
 import { listarCategorias } from "./categoriasApi";
 import { obtenerReseniasDeOrganizador } from "./organizadoresApi";
-import { agregarFavorito, quitarFavorito } from "./favoritosApi";
+import { agregarFavorito, listarFavoritos, quitarFavorito } from "./favoritosApi";
 import {
   cancelarCompra,
   crearCompra,
   listarMisCompras,
   obtenerCompra,
   pagarCompra,
+  reseniarCompra,
 } from "./comprasApi";
 
 jest.mock("./cliente", () => ({
@@ -68,6 +69,11 @@ describe("categorías, organizadores y favoritos", () => {
     expect(cliente.put).toHaveBeenCalledWith("/usuarios/yo/favoritos/7");
     expect(cliente.delete).toHaveBeenCalledWith("/usuarios/yo/favoritos/7");
   });
+
+  it("listarFavoritos pide los favoritos del usuario y devuelve data", async () => {
+    expect(await listarFavoritos()).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/usuarios/yo/favoritos");
+  });
 });
 
 describe("comprasApi", () => {
@@ -95,5 +101,11 @@ describe("comprasApi", () => {
   it("cancelarCompra hace POST /compras/:id/cancelacion y devuelve data", async () => {
     expect(await cancelarCompra(7)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/compras/7/cancelacion");
+  });
+
+  it("reseniarCompra hace POST /compras/:id/resenia con el body y devuelve data", async () => {
+    const resenia = { puntuacion: 5, detalle: "Excelente" };
+    expect(await reseniarCompra(7, resenia)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras/7/resenia", resenia);
   });
 });

@@ -15,3 +15,6 @@ export const pagarCompra = (id) =>
 
 export const cancelarCompra = (id) =>
   cliente.post(`/compras/${id}/cancelacion`).then((respuesta) => respuesta.data);
+
+export const reseniarCompra = (id, resenia) =>
+  cliente.post(`/compras/${id}/resenia`, resenia).then((respuesta) => respuesta.data);
