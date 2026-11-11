@@ -1,6 +1,6 @@
 # Spec 10b — Comprar entradas
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/comprar`
 - **Casos de uso:** CU12 (ver `planes/00-indice.md`)
 - **Iteración:** It4
@@ -130,3 +130,11 @@ Escenario: un organizador no puede comprar
   - estado "No quedan entradas para este evento" si se llega con todo agotado;
   - testIDs `cantidad-valor`, `comprar-total`, `comprar-error`;
   - `compras/[id]` protegida para cualquier logueado, título "Compra".
+- Cambios en la implementación:
+  - `ConCarga` (estados de `useCargar`) y `ConEvento` (evento de la ruta) en `src/components/`, compartidos con DetalleEvento; `ConCarga` muestra `Cargando` solo sin datos previos, así la recarga después de un 422 conserva la elección;
+  - `navegacion/volver.js` (antes local de DetalleEvento), `test-utils/mockRouter.js` para los tests que mockean `expo-router`;
+  - la ruta provisoria es `compras/[id]/index` (deja lugar a `compras/[id]/chat` y `compras/[id]/resenia`);
+  - el `onPress` de Confirmar envuelve la llamada async: `fireEvent.press` de RNTL 14 espera la promesa del handler (mismo patrón que `BotonFavorito`);
+  - la etiqueta de cada tipo es "Nombre · $precio · Quedan N" porque `RadioButton.Item` solo acepta texto.
+- Revisión de calidad (3 hallazgos aplicados): `textoDisponibilidad` en `formato.js` (lo usan el detalle y Comprar), `codigoDeError` en `cliente.js` (lo usan `useCargar`, Comprar y el interceptor del 401) y tests de `useSeleccion`.
+- Verificación: spec temporal de Cypress contra el back real (compra feliz, 422 forzado por otra sesión, organizador por URL), 3/3, borrada al terminar.

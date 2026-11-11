@@ -1,5 +1,11 @@
 import { AxiosError } from "axios";
-import { cliente, establecerToken, alExpirarSesion, mensajeDeError } from "./cliente";
+import {
+  cliente,
+  establecerToken,
+  alExpirarSesion,
+  mensajeDeError,
+  codigoDeError,
+} from "./cliente";
 
 let pedidos;
 let respuesta;
@@ -67,5 +73,18 @@ describe("mensajeDeError", () => {
       "No pudimos conectar con el servidor",
     );
     expect(mensajeDeError(new Error("x"))).toBe("No pudimos conectar con el servidor");
+  });
+});
+
+describe("codigoDeError", () => {
+  it("devuelve el status de la respuesta del back", () => {
+    const error = new AxiosError("x", "ERR", {}, null, { status: 422, data: {} });
+    expect(codigoDeError(error)).toBe(422);
+  });
+
+  it("sin respuesta devuelve null", () => {
+    expect(codigoDeError(new AxiosError("Network Error", "ERR_NETWORK"))).toBeNull();
+    expect(codigoDeError(new Error("x"))).toBeNull();
+    expect(codigoDeError(undefined)).toBeNull();
   });
 });

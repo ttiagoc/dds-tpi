@@ -1,20 +1,20 @@
 import { StyleSheet, View } from "react-native";
 import { Chip, Surface, Text, useTheme } from "react-native-paper";
 import { espaciado, radios } from "../../tema/espaciado";
-import { formatearPrecio } from "../../utils/formato";
+import { formatearPrecio, textoDisponibilidad } from "../../utils/formato";
 
 function Disponibilidad({ disponibles }) {
   const { colors } = useTheme();
   if (disponibles === 0) {
     return (
       <Chip compact icon="close-circle-outline">
-        Agotado
+        {textoDisponibilidad(disponibles)}
       </Chip>
     );
   }
   return (
     <Text variant="bodySmall" style={{ color: colors.onSurfaceVariant }}>
-      {`Quedan ${disponibles}`}
+      {textoDisponibilidad(disponibles)}
     </Text>
   );
 }

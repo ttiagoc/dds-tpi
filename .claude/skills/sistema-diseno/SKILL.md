@@ -47,9 +47,11 @@ export const temaClaro = {
 | `ErrorCarga` | `mensaje, onReintentar` | ícono + texto + botón |
 | `Aviso` | `icono, texto, color?, accion?, testID?` | base interna de `EstadoVacio` y `ErrorCarga`; no usar directo en pantallas |
 | `EstadoVacio` | `icono, texto, accion?` | |
+| `ConCarga` | `carga, iconoInexistente, testIDInexistente, children(datos)` | estados de un `useCargar`: `Cargando` solo si no hay datos previos (una recarga conserva la pantalla), 404 → `EstadoVacio` con "Volver", otro error → `ErrorCarga` |
+| `ConEvento` | `children(evento, carga)` | `ConCarga` del evento de la ruta (`useLocalSearchParams().id`); lo usan DetalleEvento y Comprar |
 | `ChipEstado` | `estado` | color + ícono + texto desde `theme.estados` |
 | `TarjetaEvento` | `evento, onPress` | `Card` con imagen, nombre, fecha formateada, lugar, "Desde $X", estrellas organizador, `testID="tarjeta-evento-<id>"` |
-| `SelectorCantidad` | `valor, min, max, onCambiar` | botones − / + deshabilitados en los topes |
+| `SelectorCantidad` | `valor, min?, max, onCambiar, testIDPrefijo?` | `IconButton` − / + deshabilitados en los topes, labels "Restar uno" / "Sumar uno"; testIDs `<prefijo>-menos`, `<prefijo>-valor`, `<prefijo>-mas` (prefijo `cantidad`) |
 | `Estrellas` | `valor, onCambiar?, tamanio?` | lectura (redondea a medio punto, color `colors.estrella`) o edición (10d); `accessibilityLabel="Puntaje N de 5"` |
 | `ImagenEvento` | `uri, nombre, redondeada?` | 16:9; sin `uri`, placeholder con ícono (`testID="imagen-placeholder"`) |
 | `PuntajeOrganizador` | `organizador` | nombre + `Estrellas` + puntaje, o "Sin reseñas" |

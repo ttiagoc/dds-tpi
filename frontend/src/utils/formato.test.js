@@ -1,4 +1,4 @@
-import { formatearFecha, formatearPrecio } from "./formato";
+import { formatearFecha, formatearPrecio, textoDisponibilidad } from "./formato";
 
 const BUENOS_AIRES = "America/Argentina/Buenos_Aires";
 const sinEspaciosRaros = (texto) => texto.replace(/\s/g, " ");
@@ -39,5 +39,15 @@ describe("formatearDia", () => {
 
   it("muestra día, mes y año sin hora", () => {
     expect(formatearDia("2026-10-01T12:00:00.000Z", { zonaHoraria: "UTC" })).toBe("1 oct 2026");
+  });
+});
+
+describe("textoDisponibilidad", () => {
+  it.each([
+    [0, "Agotado"],
+    [1, "Quedan 1"],
+    [40, "Quedan 40"],
+  ])("con %i disponibles dice %s", (disponibles, texto) => {
+    expect(textoDisponibilidad(disponibles)).toBe(texto);
   });
 });

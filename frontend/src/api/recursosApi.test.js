@@ -3,14 +3,15 @@ import { buscarEventos, obtenerEvento } from "./eventosApi";
 import { listarCategorias } from "./categoriasApi";
 import { obtenerReseniasDeOrganizador } from "./organizadoresApi";
 import { agregarFavorito, quitarFavorito } from "./favoritosApi";
+import { crearCompra } from "./comprasApi";
 
 jest.mock("./cliente", () => ({
-  cliente: { get: jest.fn(), put: jest.fn(), delete: jest.fn() },
+  cliente: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
 }));
 
 beforeEach(() => {
   jest.clearAllMocks();
-  for (const metodo of ["get", "put", "delete"]) {
+  for (const metodo of ["get", "post", "put", "delete"]) {
     cliente[metodo].mockResolvedValue({ data: "respuesta" });
   }
 });
@@ -60,5 +61,13 @@ describe("categorías, organizadores y favoritos", () => {
     await quitarFavorito(7);
     expect(cliente.put).toHaveBeenCalledWith("/usuarios/yo/favoritos/7");
     expect(cliente.delete).toHaveBeenCalledWith("/usuarios/yo/favoritos/7");
+  });
+});
+
+describe("comprasApi", () => {
+  it("crearCompra hace POST /compras y devuelve data", async () => {
+    const compra = { eventoId: 1, tipoEntradaId: 10, cantidad: 2 };
+    expect(await crearCompra(compra)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras", compra);
   });
 });
