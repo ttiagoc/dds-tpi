@@ -18,3 +18,6 @@ export const cancelarCompra = (id) =>
 
 export const reseniarCompra = (id, resenia) =>
   cliente.post(`/compras/${id}/resenia`, resenia).then((respuesta) => respuesta.data);
+
+export const marcarUtilizada = (id) =>
+  cliente.post(`/compras/${id}/uso`).then((respuesta) => respuesta.data);

@@ -125,3 +125,28 @@ export function compraDetalle(cambios = {}) {
 export function paginaDeCompras(compras, { page = 1, totalPages = 1, total } = {}) {
   return { compras, total: total ?? compras.length, page, totalPages };
 }
+
+export function eventoPropio(cambios = {}) {
+  return {
+    ...eventoResumen({ esFavorito: false }),
+    vendidas: 60,
+    cupo: 150,
+    recaudado: 2700000,
+    ...cambios,
+  };
+}
+
+export function comprasDelEvento(compras, cambios = {}) {
+  return {
+    evento: { id: 1, nombre: "Los Piojos en River" },
+    disponibilidad: [
+      { tipoEntradaId: 10, nombre: "Campo", cupo: 100, vendidas: 60, disponibles: 40 },
+      { tipoEntradaId: 11, nombre: "Platea", cupo: 50, vendidas: 50, disponibles: 0 },
+    ],
+    compras,
+    total: compras.length,
+    page: 1,
+    totalPages: 1,
+    ...cambios,
+  };
+}

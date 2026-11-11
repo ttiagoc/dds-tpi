@@ -1,1 +1,1 @@
-export { default } from "../../pantallas/proximamente/Proximamente";
+export { default } from "../../pantallas/mis-eventos/MisEventos";

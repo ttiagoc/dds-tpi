@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { Card, Divider, Snackbar, Text, useTheme } from "react-native-paper";
 import { router, useLocalSearchParams } from "expo-router";
+import { useAuth } from "../../auth/AuthContext";
 import { ChipEstado } from "../../components/ChipEstado";
 import { ConCompra } from "../../components/ConCompra";
 import { Estrellas } from "../../components/Estrellas";
@@ -64,11 +65,13 @@ function Resumen({ compra }) {
   );
 }
 
-function TuResenia({ resenia }) {
+function SeccionResenia({ resenia }) {
+  const { usuario } = useAuth();
   if (!resenia) return null;
+  const titulo = usuario?.rol === "ORGANIZADOR" ? "Reseña del comprador" : "Tu reseña";
   return (
     <View style={estilos.resenia} testID="compra-resenia">
-      <Text variant="titleMedium">Tu reseña</Text>
+      <Text variant="titleMedium">{titulo}</Text>
       <Estrellas valor={resenia.puntuacion} tamanio={20} />
       <Text variant="bodyMedium">{resenia.detalle}</Text>
     </View>
@@ -102,7 +105,7 @@ function Contenido({ compra, carga }) {
         <Evento evento={compra.evento} />
         <Resumen compra={compra} />
         <AccionesCompra compra={compra} acciones={acciones} />
-        <TuResenia resenia={compra.resenia} />
+        <SeccionResenia resenia={compra.resenia} />
         <Divider />
         <Text variant="titleMedium">Historial</Text>
         <LineaDeTiempo historial={compra.historial} />

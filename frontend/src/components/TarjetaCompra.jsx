@@ -6,17 +6,18 @@ import { espaciado } from "../tema/espaciado";
 import { useEstadoCompra } from "../tema/useEstadoCompra";
 import { formatearPrecio, textoDiasRestantes } from "../utils/formato";
 
-export function TarjetaCompra({ compra, onPress }) {
+export function TarjetaCompra({ compra, onPress, conComprador = false }) {
   const { colors } = useTheme();
   const { id, estado, cantidad, total, evento, tipoEntrada } = compra;
   const { etiqueta: etiquetaEstado } = useEstadoCompra(estado);
   const dias = textoDiasRestantes(compra.diasRestantes);
-  const etiqueta = [evento.nombre, etiquetaEstado, dias].filter(Boolean).join(", ");
+  const titulo = conComprador ? compra.comprador.nombre : evento.nombre;
+  const etiqueta = [titulo, etiquetaEstado, dias].filter(Boolean).join(", ");
   return (
     <Card mode="elevated" onPress={onPress} testID={`compra-${id}`} accessibilityLabel={etiqueta}>
       <Card.Content style={estilos.contenido}>
-        <Text variant="titleMedium">{evento.nombre}</Text>
-        <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />
+        <Text variant="titleMedium">{titulo}</Text>
+        {!conComprador && <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />}
         <Text variant="bodyMedium">
           {`${tipoEntrada.nombre} × ${cantidad} · ${formatearPrecio(total)}`}
         </Text>

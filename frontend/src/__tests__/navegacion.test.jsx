@@ -14,19 +14,22 @@ import MisEventos from "../app/(organizador)/mis-eventos";
 import PerfilOrganizador from "../app/(organizador)/cuenta";
 import DetalleEventoRuta from "../app/eventos/[id]/index";
 import ComprarRuta from "../app/eventos/[id]/comprar";
+import ComprasEventoRuta from "../app/eventos/[id]/compras";
 import CompraRuta from "../app/compras/[id]/index";
 import { leerSesion } from "../auth/sesion";
 import { login, obtenerYo } from "../api/authApi";
-import { buscarEventos, obtenerEvento } from "../api/eventosApi";
+import { buscarEventos, listarComprasDelEvento, obtenerEvento } from "../api/eventosApi";
 import { listarCategorias } from "../api/categoriasApi";
-import { obtenerReseniasDeOrganizador } from "../api/organizadoresApi";
+import { listarMisEventos, obtenerReseniasDeOrganizador } from "../api/organizadoresApi";
 import { listarMisCompras, obtenerCompra } from "../api/comprasApi";
 import { ANA, FENIX } from "../test-utils/renderConProviders";
 import {
   compraDetalle,
   compraResumen,
+  comprasDelEvento,
   errorHttp,
   eventoDetalle,
+  eventoPropio,
   eventoResumen,
   paginaDeCompras,
   paginaDeEventos,
@@ -54,6 +57,7 @@ const RUTAS = {
   "(organizador)/cuenta": PerfilOrganizador,
   "eventos/[id]/index": DetalleEventoRuta,
   "eventos/[id]/comprar": ComprarRuta,
+  "eventos/[id]/compras": ComprasEventoRuta,
   "compras/[id]/index": CompraRuta,
 };
 
@@ -73,6 +77,8 @@ beforeEach(() => {
   obtenerReseniasDeOrganizador.mockResolvedValue(reseniasDe([]));
   listarMisCompras.mockResolvedValue(paginaDeCompras([compraResumen()]));
   obtenerCompra.mockResolvedValue(compraDetalle());
+  listarMisEventos.mockResolvedValue(paginaDeEventos([eventoPropio()]));
+  listarComprasDelEvento.mockResolvedValue(comprasDelEvento([compraResumen()]));
 });
 
 describe("navegación según la sesión", () => {
@@ -183,6 +189,23 @@ describe("detalle del evento", () => {
     await act(() => router.push("/eventos/1"));
     await waitFor(() => expect(screen).toHavePathname("/eventos/1"));
     expect(await screen.findByText("Los Piojos en River")).toBeTruthy();
+  });
+
+  it("desde Mis eventos el organizador abre las compras de un evento", async () => {
+    conSesion(FENIX);
+    await abrirApp();
+    await fireEvent.press(await screen.findByTestId("evento-propio-1"));
+    await waitFor(() => expect(screen).toHavePathname("/eventos/1/compras"));
+    expect(await screen.findByTestId("disponibilidad-10")).toBeTruthy();
+  });
+
+  it("un comprador no puede entrar a las compras de un evento", async () => {
+    conSesion(ANA);
+    await abrirApp();
+    await waitFor(() => expect(screen).toHavePathname("/explorar"));
+    await act(() => router.push("/eventos/1/compras"));
+    await waitFor(() => expect(screen).toHavePathname("/explorar"));
+    expect(listarComprasDelEvento).not.toHaveBeenCalled();
   });
 
   it("sin sesión el detalle manda al login", async () => {

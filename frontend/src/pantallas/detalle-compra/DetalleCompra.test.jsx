@@ -1,57 +1,17 @@
-import { act, screen, fireEvent, waitFor } from "@testing-library/react-native";
+import { act, screen, fireEvent } from "@testing-library/react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import DetalleCompra from "./DetalleCompra";
-import { cancelarCompra, obtenerCompra, pagarCompra } from "../../api/comprasApi";
-import { renderConProviders, ANA } from "../../test-utils/renderConProviders";
-import { compraDetalle, errorHttp, promesaManual, resenia } from "../../test-utils/fixtures";
+import { obtenerCompra } from "../../api/comprasApi";
+import { renderConProviders, ANA, FENIX } from "../../test-utils/renderConProviders";
+import { compraDetalle, errorHttp, resenia } from "../../test-utils/fixtures";
+import {
+  REEMBOLSADA,
+  SIN_ACCIONES,
+  abrirDetalleCompra as abrir,
+} from "../../test-utils/detalleCompra";
 
 jest.mock("../../api/comprasApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
-
-const SIN_ACCIONES = {
-  puedePagar: false,
-  puedeCancelar: false,
-  puedeMarcarUtilizada: false,
-  puedeReseniar: false,
-};
-
-const paso = (estado, minuto) => ({
-  estado,
-  quien: { id: 1, nombre: "Ana Pérez" },
-  fechaHora: `2026-11-01T15:${minuto}:00.000Z`,
-});
-
-const PENDIENTE = compraDetalle({
-  estado: "PENDIENTE",
-  diasRestantes: null,
-  historial: [paso("PENDIENTE", "00")],
-  acciones: { ...SIN_ACCIONES, puedePagar: true, puedeCancelar: true },
-});
-
-const PAGADA = compraDetalle({ historial: [paso("PENDIENTE", "00"), paso("CONFIRMADA", "05")] });
-
-const CANCELADA = compraDetalle({
-  estado: "CANCELADA",
-  diasRestantes: null,
-  historial: [paso("PENDIENTE", "00"), paso("CANCELADA", "10")],
-  acciones: SIN_ACCIONES,
-});
-
-const REEMBOLSADA = compraDetalle({
-  estado: "REEMBOLSADA",
-  diasRestantes: null,
-  acciones: SIN_ACCIONES,
-  historial: ["PENDIENTE", "CONFIRMADA", "CANCELADA", "REEMBOLSADA"].map((estado, i) => ({
-    estado,
-    quien: { id: 1, nombre: "Ana Pérez" },
-    fechaHora: `2026-11-0${i + 1}T15:00:00.000Z`,
-  })),
-});
-
-async function abrir() {
-  await renderConProviders(<DetalleCompra />, { usuario: ANA });
-  await screen.findByTestId("linea-de-tiempo");
-}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -105,137 +65,6 @@ describe("DetalleCompra: errores", () => {
     await renderConProviders(<DetalleCompra />, { usuario: ANA });
     await fireEvent.press(await screen.findByRole("button", { name: "Reintentar" }));
     await screen.findByTestId("linea-de-tiempo");
-  });
-});
-
-describe("DetalleCompra: botones según acciones", () => {
-  it.each([
-    ["ninguno", SIN_ACCIONES, false, false],
-    ["solo pagar", { ...SIN_ACCIONES, puedePagar: true }, true, false],
-    ["solo cancelar", { ...SIN_ACCIONES, puedeCancelar: true }, false, true],
-    ["los dos", { ...SIN_ACCIONES, puedePagar: true, puedeCancelar: true }, true, true],
-  ])("con %s muestra esos botones", async (_, acciones, pagar, cancelar) => {
-    obtenerCompra.mockResolvedValue(compraDetalle({ acciones }));
-    await abrir();
-    expect(!!screen.queryByTestId("compra-pagar")).toBe(pagar);
-    expect(!!screen.queryByTestId("compra-cancelar")).toBe(cancelar);
-  });
-
-  it("sin acciones en la respuesta no muestra botones", async () => {
-    obtenerCompra.mockResolvedValue(compraDetalle({ acciones: undefined }));
-    await abrir();
-    expect(screen.queryByTestId("compra-pagar")).toBeNull();
-    expect(screen.queryByTestId("compra-cancelar")).toBeNull();
-  });
-});
-
-describe("DetalleCompra: pagar", () => {
-  beforeEach(() => obtenerCompra.mockResolvedValue(PENDIENTE));
-
-  it("paga sin diálogo, se actualiza con la respuesta y avisa", async () => {
-    const pago = promesaManual();
-    pagarCompra.mockReturnValue(pago.promesa);
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-pagar"));
-    expect(pagarCompra).toHaveBeenCalledWith(7);
-    expect(screen.getByTestId("compra-pagar")).toBeDisabled();
-    expect(screen.getByTestId("compra-cancelar")).toBeDisabled();
-    await act(async () => pago.resolver(PAGADA));
-    expect(await screen.findByTestId("compra-aviso")).toHaveTextContent("Pago confirmado");
-    expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Confirmada/);
-    expect(screen.getByTestId("dias-restantes")).toHaveTextContent("Faltan 12 días");
-    expect(screen.getByTestId("historial-1")).toHaveTextContent(/Confirmada/);
-    expect(screen.queryByTestId("compra-pagar")).toBeNull();
-    expect(screen.getByTestId("compra-cancelar")).toBeEnabled();
-    expect(obtenerCompra).toHaveBeenCalledTimes(1);
-  });
-
-  it("con doble toque hace un solo pedido", async () => {
-    const pago = promesaManual();
-    pagarCompra.mockReturnValue(pago.promesa);
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-pagar"));
-    await fireEvent.press(screen.getByTestId("compra-pagar"));
-    await fireEvent.press(screen.getByTestId("compra-cancelar"));
-    expect(pagarCompra).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId("confirmar-cancelacion")).toBeNull();
-    await act(async () => pago.resolver(PAGADA));
-  });
-
-  it("con 422 muestra el texto del back y vuelve a pedir la compra", async () => {
-    const mensaje = "No podés pagar una compra de un evento que ya ocurrió";
-    pagarCompra.mockRejectedValue(errorHttp(422, mensaje));
-    await abrir();
-    obtenerCompra.mockResolvedValue(compraDetalle({ estado: "PENDIENTE", acciones: SIN_ACCIONES }));
-    await fireEvent.press(screen.getByTestId("compra-pagar"));
-    expect(await screen.findByTestId("compra-accion-error")).toHaveTextContent(mensaje);
-    await waitFor(() => expect(screen.queryByTestId("compra-pagar")).toBeNull());
-    expect(obtenerCompra).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId("compra-accion-error")).toHaveTextContent(mensaje);
-  });
-
-  it("con error de red muestra el mensaje, no recarga y lo limpia al reintentar", async () => {
-    pagarCompra.mockRejectedValueOnce(new Error("red")).mockResolvedValueOnce(PAGADA);
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-pagar"));
-    expect(await screen.findByTestId("compra-accion-error")).toHaveTextContent(
-      "No pudimos conectar con el servidor",
-    );
-    expect(obtenerCompra).toHaveBeenCalledTimes(1);
-    await fireEvent.press(screen.getByTestId("compra-pagar"));
-    await screen.findByTestId("compra-aviso");
-    expect(screen.queryByTestId("compra-accion-error")).toBeNull();
-  });
-});
-
-describe("DetalleCompra: cancelar", () => {
-  it("una confirmada pide confirmación con el reembolso y termina reembolsada", async () => {
-    cancelarCompra.mockResolvedValue(REEMBOLSADA);
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-cancelar"));
-    expect(screen.getByText("¿Cancelar la compra?")).toBeTruthy();
-    expect(
-      screen.getByText(/Se liberan las 2 entradas y se te reembolsan \$\s90\.000\./),
-    ).toBeTruthy();
-    expect(cancelarCompra).not.toHaveBeenCalled();
-    await fireEvent.press(screen.getByTestId("confirmar-cancelacion"));
-    expect(cancelarCompra).toHaveBeenCalledWith(7);
-    expect(await screen.findByTestId("compra-aviso")).toHaveTextContent(
-      "Compra cancelada y reembolsada",
-    );
-    expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Reembolsada/);
-    expect(screen.queryByTestId("compra-pagar")).toBeNull();
-    expect(screen.queryByTestId("compra-cancelar")).toBeNull();
-  });
-
-  it("una pendiente de una entrada avisa que se libera y queda cancelada", async () => {
-    obtenerCompra.mockResolvedValue({ ...PENDIENTE, cantidad: 1 });
-    cancelarCompra.mockResolvedValue(CANCELADA);
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-cancelar"));
-    expect(screen.getByText("Se libera la entrada.")).toBeTruthy();
-    await fireEvent.press(screen.getByTestId("confirmar-cancelacion"));
-    expect(await screen.findByTestId("compra-aviso")).toHaveTextContent(/^Compra cancelada$/);
-    expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Cancelada/);
-  });
-
-  it("Volver cierra el diálogo sin llamar al back", async () => {
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-cancelar"));
-    await fireEvent.press(screen.getByRole("button", { name: "Volver" }));
-    await waitFor(() => expect(screen.queryByTestId("confirmar-cancelacion")).toBeNull());
-    expect(cancelarCompra).not.toHaveBeenCalled();
-    expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Confirmada/);
-  });
-
-  it("con 422 muestra el texto exacto del back y recarga", async () => {
-    const mensaje = "No podés cancelar una compra de un evento que ya ocurrió";
-    cancelarCompra.mockRejectedValue(errorHttp(422, mensaje));
-    await abrir();
-    await fireEvent.press(screen.getByTestId("compra-cancelar"));
-    await fireEvent.press(screen.getByTestId("confirmar-cancelacion"));
-    expect(await screen.findByTestId("compra-accion-error")).toHaveTextContent(mensaje);
-    await waitFor(() => expect(obtenerCompra).toHaveBeenCalledTimes(2));
   });
 });
 
@@ -312,5 +141,16 @@ describe("DetalleCompra: reseña", () => {
     expect(screen.getByTestId("compra-aviso")).toHaveTextContent("¡Gracias por tu reseña!");
     await act(async () => jest.advanceTimersByTime(10000));
     expect(router.setParams).toHaveBeenCalledWith({ aviso: undefined });
+  });
+});
+
+describe("DetalleCompra: reseña según el rol", () => {
+  it.each([
+    ["el comprador", ANA, "Tu reseña"],
+    ["el organizador", FENIX, "Reseña del comprador"],
+  ])("para %s la sección se titula como corresponde", async (_, usuario, titulo) => {
+    obtenerCompra.mockResolvedValue(RESENIADA);
+    await abrir(usuario);
+    expect(screen.getByTestId("compra-resenia")).toHaveTextContent(new RegExp(`^${titulo}`));
   });
 });
