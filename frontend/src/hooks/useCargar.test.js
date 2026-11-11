@@ -71,4 +71,14 @@ describe("useCargar", () => {
     expect(result.current.error).toBeNull();
     expect(cargar).toHaveBeenCalledTimes(2);
   });
+
+  it("reemplazar cambia los datos sin volver a cargar", async () => {
+    const cargar = jest.fn().mockResolvedValue("viejo");
+    const { result } = await renderHook(() => useCargar(cargar));
+    await waitFor(() => expect(result.current.datos).toBe("viejo"));
+    await act(() => result.current.reemplazar("nuevo"));
+    expect(result.current.datos).toBe("nuevo");
+    expect(result.current.cargando).toBe(false);
+    expect(cargar).toHaveBeenCalledTimes(1);
+  });
 });

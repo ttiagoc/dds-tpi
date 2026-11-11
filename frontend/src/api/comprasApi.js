@@ -9,3 +9,9 @@ export const listarMisCompras = (criterio = {}) =>
 
 export const obtenerCompra = (id) =>
   cliente.get(`/compras/${id}`).then((respuesta) => respuesta.data);
+
+export const pagarCompra = (id) =>
+  cliente.post(`/compras/${id}/pago`).then((respuesta) => respuesta.data);
+
+export const cancelarCompra = (id) =>
+  cliente.post(`/compras/${id}/cancelacion`).then((respuesta) => respuesta.data);
