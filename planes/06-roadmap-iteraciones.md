@@ -40,14 +40,15 @@ Specs: `08-chat-rest`, `08b-chat-socket`.
 **Aceptación:** dos clientes de prueba (script o test) reciben el mensaje en vivo.
 
 ## It4 — App Expo (19-26/11)
-Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `10c-mis-compras`, `10c2-acciones-compra`, `10d-resenar-favoritos`, `11-pantallas-organizador`, `12-chat-front`.
+Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `10c-mis-compras`, `10c2-acciones-compra`, `10d-resenar-favoritos`, `11-pantallas-organizador`, `11b-crear-evento`, `12-chat-front`.
 - [x] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo y pantalla Login (absorbe `feature/login`).
 - [x] `feature/explorar-eventos` (CU3, CU11) + DetalleEvento (CU10)
 - [x] `feature/comprar` (CU12)
 - [x] `feature/mis-compras` (CU1): MisCompras + DetalleCompra de solo lectura con `LineaDeTiempo`
 - [x] `feature/acciones-compra` (CU7, CU8): pagar y cancelar desde DetalleCompra
 - [x] `feature/resenar-favoritos` (CU9) + tab Favoritos
-- [ ] `feature/organizador` (CU2, CU4)
+- [ ] `feature/organizador` (CU2): MisEventos, ComprasDelEvento y Marcar utilizada
+- [ ] `feature/crear-evento` (CU4)
 - [ ] `feature/chat-front` (CU5, CU6)
 
 **Aceptación:** todos los CU recorribles en Expo Go en el celular; tests RNTL de Explorar, Comprar, MisCompras, DetalleCompra.
