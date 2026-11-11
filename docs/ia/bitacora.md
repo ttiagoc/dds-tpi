@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 11 |
-| Features cerradas | 15 (It1, It2 e It3 cerradas) |
+| Sesiones | 12 |
+| Features cerradas | 16 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -243,3 +243,17 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Los botones de otras features (reseñar, chat, marcar utilizada) aparecen recién con su spec, sin rutas vacías — propuesta de la IA, aceptada.
   - Pagar sin diálogo y con confirmación por Snackbar, para la spec 10c2 — pagar no es destructivo — propuesta de la IA, aceptada.
 - **Aprendizaje:** la primera corrida de Cypress falló por un servidor web que había quedado vivo de la sesión anterior y servía código desactualizado. Detener la tarea en segundo plano no terminaba el proceso hijo. Una falla de verificación puede venir del entorno y no del código, y conviene leer la captura antes de tocar la implementación.
+
+## Sesión 12 — 2026-11-11 — Pagar y cancelar compras (It4)
+
+- **Objetivo:** especificar e implementar el pago y la cancelación de una compra desde su detalle (CU7 y CU8).
+- **Avances:**
+  - Spec 10c2 escrita y aprobada; los huecos (comportamiento ante un 422, ubicación del error, texto del diálogo y aviso al cancelar) se resolvieron en una sola tanda de preguntas. El plan de pantallas sumó dos identificadores de prueba.
+  - Implementación con TDD: botones habilitados por las `acciones` que calcula el back, pago directo con Snackbar, cancelación con diálogo de confirmación que informa el reembolso, protección contra el doble toque y actualización del detalle con la respuesta del back sin volver a pedirlo.
+  - Revisión de calidad con 3 hallazgos aplicados: el envío protegido que repetían la compra y las acciones de la compra pasó a un hook común (`useEnvio`), que van a reutilizar Reseñar y Marcar utilizada; se eliminó código muerto heredado de la sesión anterior y se unificó el patrón de los manejadores asíncronos.
+  - Verificación con una spec temporal de Cypress contra el back real (pagar una compra pendiente; cancelar una confirmada, que termina reembolsada), eliminada al cerrar la rama. Suite del front en 212 tests en verde; rama mergeada a `develop`.
+- **Decisiones:**
+  - Los botones salen de `compra.acciones` y el front no reimplementa las reglas R2, R2b y R3 — una sola fuente de verdad — decisión del usuario.
+  - Ante un 422, mostrar el texto del back y recargar la compra — los botones reflejan el estado real — propuesta de la IA, aceptada.
+  - El texto del diálogo menciona el reembolso si la compra está confirmada — es la única derivación de R2b en el front, porque el contrato no expone ese dato; se aceptó en la revisión en lugar de ampliar el contrato — propuesta de la IA, aceptada.
+  - Extraer `useEnvio` recién con la segunda aparición del patrón, ya que la tercera y la cuarta están planificadas (10d y 11) — propuesta de la IA en la revisión, aceptada.
