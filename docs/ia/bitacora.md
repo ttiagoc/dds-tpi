@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 13 |
-| Features cerradas | 17 (It1, It2 e It3 cerradas) |
+| Features cerradas | 18 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -20,6 +20,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 6. Specs que contradicen una convención del propio repo (pedir que el controlador valide el cuerpo cuando la validación vive en el middleware de la ruta) y tests de integración que no verifican el orden de los middlewares de autorización y validación.
 7. Diseños escritos en la spec que fallan en una configuración que los tests no ejercitan: el servidor de Socket.io se integró con Express de una forma que solo funcionaba por websocket, y los tests se conectaban únicamente por ese transporte.
 8. Acciones fuera del alcance pedido y tests con dependencias inestables: formatear documentos de planificación que no correspondía tocar, y un test de hook que creaba la función a cargar en cada render, lo que disparaba recargas sin fin y colgaba la suite.
+9. Nombres de archivo que solo difieren en mayúsculas de otro del mismo directorio (`accionesCompra.js` junto a `AccionesCompra.jsx`): en Windows la importación resolvía al archivo equivocado y rompió la suite; la IA lo detectó al correr los tests y lo renombró.
 
 ---
 
@@ -258,9 +259,9 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - El texto del diálogo menciona el reembolso si la compra está confirmada — es la única derivación de R2b en el front, porque el contrato no expone ese dato; se aceptó en la revisión en lugar de ampliar el contrato — propuesta de la IA, aceptada.
   - Extraer `useEnvio` recién con la segunda aparición del patrón, ya que la tercera y la cuarta están planificadas (10d y 11) — propuesta de la IA en la revisión, aceptada.
 
-## Sesión 13 — 2026-11-11 — Reseñar compras y favoritos (It4)
+## Sesión 13 — 2026-11-11 — Reseñar compras, favoritos y pantallas del organizador (It4)
 
-- **Objetivo:** especificar e implementar la reseña de una compra utilizada (CU9) y la pestaña Favoritos del comprador.
+- **Objetivo:** especificar e implementar la reseña de una compra utilizada (CU9), la pestaña Favoritos del comprador y las pantallas del organizador para seguir ventas y marcar entradas utilizadas (CU2).
 - **Avances:**
   - Spec 10d escrita y aprobada sin partir (8 escenarios); los huecos (carga previa de la compra, comportamiento tras el envío, validación local y alcance de Favoritos) se resolvieron en una sola tanda de preguntas. El plan de pantallas se actualizó con los nuevos identificadores de prueba.
   - Implementación con TDD: pantalla Reseñar con estrellas editables, comentario con contador y envío protegido reutilizando `useEnvio`; DetalleCompra suma el botón Reseñar habilitado por `acciones.puedeReseniar`, la sección con la reseña hecha, la recarga al recuperar el foco y el aviso de confirmación; la pestaña Favoritos reutiliza `TarjetaEvento` y la lista paginada existente.
@@ -271,4 +272,14 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Ante un 409 o un 422 al reseñar se muestra el texto del back sin recargar la compra, a diferencia de pagar y cancelar — la recarga reemplazaría el formulario y el mensaje por el estado "no se puede reseñar" — propuesta de la IA, aceptada.
   - Volver al detalle con `router.dismissTo` y un parámetro de aviso, en lugar de un estado global — resuelve también la entrada por enlace directo — propuesta de la IA, aceptada y verificada en web con Cypress.
   - Extraer `useRecargarAlVolver` al aparecer su segundo y tercer uso (DetalleCompra y Favoritos) — propuesta de la IA, aceptada.
+- **Avances (pantallas del organizador):**
+  - Spec 11 partida a propuesta de la IA: la 11 cubre Mis eventos, Compras del evento y Marcar utilizada (CU2), y la creación de eventos (CU4) queda para la 11b. El plan de pantallas y el roadmap se actualizaron con la partición.
+  - Implementación con TDD: Mis eventos con vendidas sobre cupo, recaudado y marca de evento finalizado; Compras del evento con la disponibilidad por tipo, filtro por estado y el comprador de cada compra; Marcar utilizada en el detalle de la compra con diálogo de confirmación; la reseña se titula según el rol de quien la ve.
+  - Revisión de calidad con 3 hallazgos aplicados: cada acción de la compra pasó a definirse una sola vez en un catálogo que usan botones, diálogo y hook (agregar el chat en la spec 12 va a ser sumar una entrada); se corrigió un parpadeo del diálogo al cerrarse; se partió el archivo de tests del detalle.
+  - Verificación con una spec temporal de Cypress contra el back real (Fénix marca utilizada una compra confirmada desde Mis eventos), eliminada al cerrar. Suite del front en 273 tests en verde; rama mergeada a `develop`.
+- **Decisiones (pantallas del organizador):**
+  - Partir la spec del organizador en dos ramas — superaba holgadamente los 8 escenarios y la creación de eventos tiene huecos propios (selector de fecha, tipos dinámicos) — propuesta de la IA, aceptada.
+  - Marcar utilizada con diálogo de confirmación, como cancelar — es irreversible y habilita la reseña — propuesta de la IA, aceptada.
+  - La marca de evento finalizado se calcula en el front comparando la fecha con el reloj — es solo presentación, no una regla de negocio — propuesta de la IA, aceptada.
+  - La lista paginada expone los datos de la primera página que no son ítems (evento y disponibilidad), en lugar de un segundo pedido — un solo endpoint ya los devuelve — propuesta de la IA, aceptada.
 - **Aprendizaje:** en Expo Web las pestañas inactivas permanecen montadas, por lo que las aserciones e2e deben acotarse al contenedor de la pantalla visible para no dar falsos negativos.
