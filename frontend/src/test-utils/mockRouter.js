@@ -1,4 +1,11 @@
 export const mockRouter = () => ({
-  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn(), canGoBack: jest.fn() },
+  router: {
+    push: jest.fn(),
+    back: jest.fn(),
+    replace: jest.fn(),
+    navigate: jest.fn(),
+    canGoBack: jest.fn(),
+  },
   useLocalSearchParams: jest.fn(),
+  useFocusEffect: jest.fn(),
 });

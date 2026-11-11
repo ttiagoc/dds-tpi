@@ -1,6 +1,6 @@
 # Spec 10c — Mis compras y detalle de la compra
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/mis-compras`
 - **Casos de uso:** CU1 (ver `planes/00-indice.md`)
 - **Iteración:** It4
@@ -125,3 +125,11 @@ Escenario: compra ajena o inexistente
   - 403 tratado igual que 404 (mensaje del back + Volver);
   - testIDs `filtro-estado-*`, `lista-compras`, `compra-estado`, `compra-evento`, `compra-total`, `linea-de-tiempo`, `historial-<n>`;
   - generalizar el hook de lista paginada de Explorar para que lo usen las dos pantallas.
+- Cambios en la implementación:
+  - la lista paginada de Explorar pasó a ser compartida: `hooks/useListaPaginada(pedir, criterio)` (con `paginaDe(listar, campo)` para adaptar cada respuesta y `useRefresco`), `components/ListaPaginada` (FlatList con pull-to-refresh, vacío, error y pie), `components/PieDeLista` y `components/ChipsFiltro` (categorías y estados);
+  - al recargar con el mismo criterio la lista anterior queda visible (lo necesita RM4); Explorar se comporta igual en el pull-to-refresh;
+  - `ConRecursoDeRuta` (recurso de la ruta + `ConCarga`) lo usan `ConEvento` y DetalleCompra; `ConCarga` trata el 403 igual que el 404;
+  - `FechaYLugar` reemplaza el texto "fecha · lugar" repetido en 5 lugares; `useEstadoCompra` (etiqueta, ícono y colores con fallback) lo usan `ChipEstado`, `LineaDeTiempo` y `TarjetaCompra`;
+  - `sinVacios` pasó a `api/parametros.js` (lo usan `eventosApi` y `comprasApi`).
+- Revisión de calidad (1 hallazgo aplicado): `paginaDe` para no repetir la adaptación de cada respuesta paginada (la van a usar Favoritos y las pantallas del organizador).
+- Verificación: spec temporal de Cypress contra el back real (filtro por estado e historial completo de una reembolsada; compra nueva que aparece al volver al tab), 2/2, borrada al terminar.

@@ -20,11 +20,15 @@ import { login, obtenerYo } from "../api/authApi";
 import { buscarEventos, obtenerEvento } from "../api/eventosApi";
 import { listarCategorias } from "../api/categoriasApi";
 import { obtenerReseniasDeOrganizador } from "../api/organizadoresApi";
+import { listarMisCompras, obtenerCompra } from "../api/comprasApi";
 import { ANA, FENIX } from "../test-utils/renderConProviders";
 import {
+  compraDetalle,
+  compraResumen,
   errorHttp,
   eventoDetalle,
   eventoResumen,
+  paginaDeCompras,
   paginaDeEventos,
   reseniasDe,
 } from "../test-utils/fixtures";
@@ -34,6 +38,7 @@ jest.mock("../api/authApi");
 jest.mock("../api/eventosApi");
 jest.mock("../api/categoriasApi");
 jest.mock("../api/organizadoresApi");
+jest.mock("../api/comprasApi");
 
 const RUTAS = {
   _layout: RootLayout,
@@ -66,6 +71,8 @@ beforeEach(() => {
   buscarEventos.mockResolvedValue(paginaDeEventos([eventoResumen()]));
   obtenerEvento.mockResolvedValue(eventoDetalle());
   obtenerReseniasDeOrganizador.mockResolvedValue(reseniasDe([]));
+  listarMisCompras.mockResolvedValue(paginaDeCompras([compraResumen()]));
+  obtenerCompra.mockResolvedValue(compraDetalle());
 });
 
 describe("navegación según la sesión", () => {
@@ -160,13 +167,13 @@ describe("detalle del evento", () => {
     expect(screen.queryByTestId("comprar-confirmar")).toBeNull();
   });
 
-  it("la compra creada abre su pantalla provisoria", async () => {
+  it("desde Mis compras se abre el detalle de una compra", async () => {
     conSesion(ANA);
     await abrirApp();
-    await waitFor(() => expect(screen).toHavePathname("/explorar"));
-    await act(() => router.push("/compras/77"));
-    await waitFor(() => expect(screen).toHavePathname("/compras/77"));
-    expect(screen.getByTestId("proximamente")).toBeTruthy();
+    await fireEvent.press(await screen.findByTestId("tab-mis-compras"));
+    await fireEvent.press(await screen.findByTestId("compra-7"));
+    await waitFor(() => expect(screen).toHavePathname("/compras/7"));
+    expect(await screen.findByTestId("linea-de-tiempo")).toBeTruthy();
   });
 
   it("un organizador puede abrir el detalle de un evento", async () => {

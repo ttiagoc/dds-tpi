@@ -7,7 +7,7 @@ import { volver } from "../navegacion/volver";
 export function ConCarga({ carga, iconoInexistente, testIDInexistente, children }) {
   const { datos, cargando, error, codigoError, recargar } = carga;
   if (cargando && !datos) return <Cargando />;
-  if (codigoError === 404) {
+  if (codigoError === 403 || codigoError === 404) {
     return (
       <Pantalla>
         <EstadoVacio

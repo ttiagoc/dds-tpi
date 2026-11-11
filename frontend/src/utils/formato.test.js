@@ -1,4 +1,9 @@
-import { formatearFecha, formatearPrecio, textoDisponibilidad } from "./formato";
+import {
+  formatearFecha,
+  formatearPrecio,
+  textoDiasRestantes,
+  textoDisponibilidad,
+} from "./formato";
 
 const BUENOS_AIRES = "America/Argentina/Buenos_Aires";
 const sinEspaciosRaros = (texto) => texto.replace(/\s/g, " ");
@@ -49,5 +54,16 @@ describe("textoDisponibilidad", () => {
     [40, "Quedan 40"],
   ])("con %i disponibles dice %s", (disponibles, texto) => {
     expect(textoDisponibilidad(disponibles)).toBe(texto);
+  });
+});
+
+describe("textoDiasRestantes", () => {
+  it.each([
+    [0, "Es hoy"],
+    [1, "Falta 1 día"],
+    [12, "Faltan 12 días"],
+    [null, null],
+  ])("con %p dice %p", (dias, texto) => {
+    expect(textoDiasRestantes(dias)).toBe(texto);
   });
 });

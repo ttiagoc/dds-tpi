@@ -44,7 +44,7 @@ Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `1
 - [x] `chore/front-base`: create-expo-app, expo-router, Paper + tema, cliente axios, sesión (secure-store/localStorage), AuthContext, layouts por rol, componentes base, jest-expo y pantalla Login (absorbe `feature/login`).
 - [x] `feature/explorar-eventos` (CU3, CU11) + DetalleEvento (CU10)
 - [x] `feature/comprar` (CU12)
-- [ ] `feature/mis-compras` (CU1): MisCompras + DetalleCompra de solo lectura con `LineaDeTiempo`
+- [x] `feature/mis-compras` (CU1): MisCompras + DetalleCompra de solo lectura con `LineaDeTiempo`
 - [ ] `feature/acciones-compra` (CU7, CU8): pagar y cancelar desde DetalleCompra
 - [ ] `feature/resenar-favoritos` (CU9) + tab Favoritos
 - [ ] `feature/organizador` (CU2, CU4)

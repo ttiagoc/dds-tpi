@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Button, HelperText } from "react-native-paper";
-import { espaciado } from "../../tema/espaciado";
+import { espaciado } from "../tema/espaciado";
 
 function MensajeError({ children }) {
   if (!children) return null;

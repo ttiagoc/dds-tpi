@@ -47,15 +47,20 @@ export const temaClaro = {
 | `ErrorCarga` | `mensaje, onReintentar` | ícono + texto + botón |
 | `Aviso` | `icono, texto, color?, accion?, testID?` | base interna de `EstadoVacio` y `ErrorCarga`; no usar directo en pantallas |
 | `EstadoVacio` | `icono, texto, accion?` | |
-| `ConCarga` | `carga, iconoInexistente, testIDInexistente, children(datos)` | estados de un `useCargar`: `Cargando` solo si no hay datos previos (una recarga conserva la pantalla), 404 → `EstadoVacio` con "Volver", otro error → `ErrorCarga` |
-| `ConEvento` | `children(evento, carga)` | `ConCarga` del evento de la ruta (`useLocalSearchParams().id`); lo usan DetalleEvento y Comprar |
+| `ConCarga` | `carga, iconoInexistente, testIDInexistente, children(datos)` | estados de un `useCargar`: `Cargando` solo si no hay datos previos (una recarga conserva la pantalla), 403/404 → `EstadoVacio` con "Volver", otro error → `ErrorCarga` |
+| `ConRecursoDeRuta` | `obtener, iconoInexistente, testIDInexistente, children(datos, carga)` | `ConCarga` del recurso cuyo id viene en la ruta; `obtener` tiene que ser estable (función de `src/api/`) |
+| `ConEvento` | `children(evento, carga)` | `ConRecursoDeRuta` con `obtenerEvento`; lo usan DetalleEvento y Comprar |
+| `ListaPaginada` | `lista, renderItem, encabezado, vacio, testID` | `FlatList` sobre `useListaPaginada(paginaDe(listar, campo), criterio)`: pull-to-refresh, `Cargando`/`ErrorCarga`/`vacio` y `PieDeLista` ("Cargar más", errores al pie) |
+| `ChipsFiltro` | `opciones: [{ valor, etiqueta }], seleccionada, onElegir, prefijoTestID` | chip "Todas" + selección única; tocar el elegido lo quita; testIDs `<prefijo>-todas` y `<prefijo>-<valor>` |
+| `FechaYLugar` | `fecha, lugar, variant?, atenuado?` | "dom 20 dic · 20:00 · Lugar" |
+| `TarjetaCompra` | `compra, onPress` | evento, tipo × cantidad · total, `ChipEstado`, días restantes; `testID="compra-<id>"` |
 | `ChipEstado` | `estado` | color + ícono + texto desde `theme.estados` |
 | `TarjetaEvento` | `evento, onPress` | `Card` con imagen, nombre, fecha formateada, lugar, "Desde $X", estrellas organizador, `testID="tarjeta-evento-<id>"` |
 | `SelectorCantidad` | `valor, min?, max, onCambiar, testIDPrefijo?` | `IconButton` − / + deshabilitados en los topes, labels "Restar uno" / "Sumar uno"; testIDs `<prefijo>-menos`, `<prefijo>-valor`, `<prefijo>-mas` (prefijo `cantidad`) |
 | `Estrellas` | `valor, onCambiar?, tamanio?` | lectura (redondea a medio punto, color `colors.estrella`) o edición (10d); `accessibilityLabel="Puntaje N de 5"` |
 | `ImagenEvento` | `uri, nombre, redondeada?` | 16:9; sin `uri`, placeholder con ícono (`testID="imagen-placeholder"`) |
 | `PuntajeOrganizador` | `organizador` | nombre + `Estrellas` + puntaje, o "Sin reseñas" |
-| `LineaDeTiempo` | `historial` | estado + quién + fecha |
+| `LineaDeTiempo` | `historial` | un paso por cambio con ícono y color del estado (`useEstadoCompra`), quién y fecha; `testID="historial-<n>"` |
 | `Precio` | `monto` | `Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" })` |
 
 Formateo centralizado en `src/utils/formato.js` (`formatearFecha`, `formatearDia`, `formatearPrecio`, `formatearPuntaje`) (`es-AR`, ej. "sáb 20 dic · 20:00").

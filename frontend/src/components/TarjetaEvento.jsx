@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Card, Text, useTheme } from "react-native-paper";
+import { FechaYLugar } from "./FechaYLugar";
 import { ImagenEvento } from "./ImagenEvento";
 import { PuntajeOrganizador } from "./PuntajeOrganizador";
 import { espaciado } from "../tema/espaciado";
@@ -19,9 +20,7 @@ export function TarjetaEvento({ evento, onPress }) {
       <ImagenEvento uri={imagen} nombre={nombre} />
       <Card.Content style={estilos.contenido}>
         <Text variant="titleMedium">{nombre}</Text>
-        <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
-          {`${formatearFecha(fecha)} · ${lugar}`}
-        </Text>
+        <FechaYLugar fecha={fecha} lugar={lugar} />
         <View style={estilos.pie}>
           <Text variant="titleSmall" style={{ color: colors.primary }}>
             {`Desde ${formatearPrecio(precioDesde)}`}

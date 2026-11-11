@@ -2,11 +2,12 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText, Text, useTheme } from "react-native-paper";
 import { ConEvento } from "../../components/ConEvento";
 import { EstadoVacio } from "../../components/EstadoVacio";
+import { FechaYLugar } from "../../components/FechaYLugar";
 import { Pantalla } from "../../components/Pantalla";
 import { SelectorCantidad } from "../../components/SelectorCantidad";
 import { volver } from "../../navegacion/volver";
 import { espaciado } from "../../tema/espaciado";
-import { formatearFecha, formatearPrecio } from "../../utils/formato";
+import { formatearPrecio } from "../../utils/formato";
 import { TiposAElegir } from "./TiposAElegir";
 import { useConfirmar, useSeleccion } from "./useCompra";
 
@@ -15,9 +16,7 @@ function Encabezado({ evento }) {
   return (
     <View style={estilos.encabezado}>
       <Text variant="headlineSmall">{evento.nombre}</Text>
-      <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
-        {`${formatearFecha(evento.fecha)} · ${evento.lugar}`}
-      </Text>
+      <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />
     </View>
   );
 }
