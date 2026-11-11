@@ -6,9 +6,9 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 8 |
-| Features cerradas | 12 (It1, It2 e It3 cerradas) |
-| Correcciones relevantes a la IA | 4 |
+| Sesiones | 9 |
+| Features cerradas | 13 (It1, It2 e It3 cerradas) |
+| Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
 ### Errores típicos de la IA (se actualiza)
@@ -19,6 +19,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 5. Casos borde de la librería de validación que los tests no cubren: la conversión de un parámetro vacío a número da 0 y filtraba resultados sin aviso; lo detectó el subagente revisor, no los tests escritos por la misma IA.
 6. Specs que contradicen una convención del propio repo (pedir que el controlador valide el cuerpo cuando la validación vive en el middleware de la ruta) y tests de integración que no verifican el orden de los middlewares de autorización y validación.
 7. Diseños escritos en la spec que fallan en una configuración que los tests no ejercitan: el servidor de Socket.io se integró con Express de una forma que solo funcionaba por websocket, y los tests se conectaban únicamente por ese transporte.
+8. Acciones fuera del alcance pedido y tests con dependencias inestables: formatear documentos de planificación que no correspondía tocar, y un test de hook que creaba la función a cargar en cada render, lo que disparaba recargas sin fin y colgaba la suite.
 
 ---
 
@@ -193,3 +194,20 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Antes de escribir código del front, la IA leyó la documentación de Expo SDK 58 (rutas protegidas, tabs, secure-store, testing), como pide `frontend/AGENTS.md`, en lugar de confiar en lo que recordaba de versiones anteriores.
   - Servicio de mensajes separado del de compras y extracción de `parsearId` para compartirlo entre los controladores y el socket — decisión de la IA, señalada como revisable en la spec.
 - **Aprendizaje:** la suite completa pasaba, pero el servidor real se caía con la primera conexión de un cliente por defecto. El diseño que la IA había escrito en la spec registraba Express después de Socket.io. Por eso Express respondía 404 a las peticiones de long-polling, y los tests no lo detectaban porque solo usaban websocket. Lo encontró una prueba manual del `server.js` antes de cerrar la rama. Se corrigió con un test de regresión que fuerza ese transporte. Que los tests pasen no prueba que el sistema funcione si los tests no ejercitan la configuración real; levantar el proceso real antes de cerrar una rama sigue siendo necesario. Por eso, la base del front se verificó además con un bundle web de producción contra el back real. Esa prueba confirmó que los usuarios demo no aparecen fuera de desarrollo y encontró que el soporte de Cypress del repo no funciona con Cypress 16, una tarea que quedó anotada para It5.
+
+## Sesión 9 — 2026-11-11 — Explorar eventos y detalle del evento (It4)
+
+- **Objetivo:** especificar e implementar la búsqueda de eventos y su detalle (CU3, CU10 y CU11), primera pantalla del comprador.
+- **Avances:**
+  - Spec 10 escrita y aprobada. El alcance del comprador se dividió en cuatro specs: 10 (explorar y detalle), 10b (comprar), 10c (mis compras, pago y cancelación) y 10d (reseñar y favoritos).
+  - Spec 10 implementada con TDD: búsqueda con debounce, chips de categoría, menú de orden, paginado con "Cargar más", pull-to-refresh, descarte de respuestas de criterios viejos, detalle con tipos de entrada, reputación del organizador y favorito.
+  - Verificación con una spec temporal de Cypress contra el back real sobre Expo Web, eliminada al cerrar la rama; los flujos e2e definitivos quedan para It5.
+  - Revisión de calidad con 9 hallazgos aprobados y aplicados con TDD, entre ellos: un solo pedido al limpiar filtros, protección contra pedidos duplicados de la página siguiente, conservación de la lista cuando falla el refresco, etiqueta accesible completa de la tarjeta y placeholder ante imágenes que no cargan. Suite del front en 137 tests en verde; rama mergeada a `develop`.
+- **Decisiones:**
+  - Partir la spec del comprador en 10, 10b, 10c y 10d — cada una queda acotada a una rama revisable — propuesta de la IA, aceptada.
+  - Menú de orden con 6 opciones (fecha, precio y puntaje del organizador, en ambos sentidos) — cubre CU11 sin pantallas adicionales — elección del autor entre alternativas de la IA.
+  - Mostrar solo las últimas 3 reseñas del organizador, sin pantalla "ver todas" — suficiente para decidir una compra — elección del autor.
+  - Favorito optimista con rollback y aviso del error del back — respuesta inmediata sin perder consistencia — elección del autor.
+  - Botón Comprar deshabilitado con el texto "Agotado" cuando ningún tipo tiene disponibles — elección del autor.
+  - Si falla el pull-to-refresh, la lista ya cargada se conserva y el error se muestra al pie, igual que al fallar "Cargar más" — hallazgo de la revisión, incorporado a la spec.
+- **Aprendizaje:** dos intervenciones de la IA requirieron corrección del autor. Primero, ejecutó Prettier sobre `planes/`, lo que reformateó documentos fuera del alcance de la tarea y hubo que revertir. Segundo, escribió un test de `useCargar` que creaba la función de carga en cada render; como el hook depende de esa referencia, las recargas no terminaban y la suite quedaba colgada. Ambos casos muestran que el trabajo generado necesita revisión aunque la tarea parezca mecánica.
