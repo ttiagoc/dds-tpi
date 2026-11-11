@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 9 |
-| Features cerradas | 13 (It1, It2 e It3 cerradas) |
+| Sesiones | 10 |
+| Features cerradas | 14 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -211,3 +211,19 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Botón Comprar deshabilitado con el texto "Agotado" cuando ningún tipo tiene disponibles — elección del autor.
   - Si falla el pull-to-refresh, la lista ya cargada se conserva y el error se muestra al pie, igual que al fallar "Cargar más" — hallazgo de la revisión, incorporado a la spec.
 - **Aprendizaje:** dos intervenciones de la IA requirieron corrección del autor. Primero, ejecutó Prettier sobre `planes/`, lo que reformateó documentos fuera del alcance de la tarea y hubo que revertir. Segundo, escribió un test de `useCargar` que creaba la función de carga en cada render; como el hook depende de esa referencia, las recargas no terminaban y la suite quedaba colgada. Ambos casos muestran que el trabajo generado necesita revisión aunque la tarea parezca mecánica.
+
+## Sesión 10 — 2026-11-11 — Compra de entradas (It4)
+
+- **Objetivo:** especificar e implementar la pantalla de compra (CU12), segunda feature del comprador.
+- **Avances:**
+  - Spec 10b escrita y aprobada, sin reglas de negocio nuevas: la pantalla aplica R1 y el tope de 10 entradas por compra de la spec 06, y el back sigue siendo quien decide.
+  - Spec 10b implementada con TDD: elección del tipo de entrada con los agotados deshabilitados, `SelectorCantidad` con tope `min(disponibles, 10)`, total calculado, protección contra el doble envío, manejo del 422 y ruta de compra restringida al rol COMPRADOR, lo que cerró el pendiente de la spec 10.
+  - Para no repetir los estados de carga del detalle se extrajeron componentes compartidos (`ConCarga`, `ConEvento`); el detalle del evento pasó a usarlos sin cambios de comportamiento.
+  - Revisión de calidad con 3 hallazgos aprobados y aplicados: un único texto de disponibilidad para el detalle y la compra, una función común para obtener el código HTTP de un error y tests propios de la lógica de selección.
+  - Verificación con una spec temporal de Cypress contra el back real (compra exitosa, falta de cupo provocada desde otra sesión y acceso de un organizador por URL), eliminada al cerrar la rama. Suite del front en 165 tests en verde; rama mergeada a `develop`.
+- **Decisiones:**
+  - Después de comprar, reemplazar la pantalla por la compra creada (`compras/[id]`, provisoria hasta la spec 10c) — la navegación no cambia cuando llegue el detalle real — propuesta de la IA, aceptada.
+  - Preseleccionar el primer tipo con disponibles — el total se ve desde el inicio — propuesta de la IA, aceptada.
+  - Ante un 422, mostrar el mensaje del back, recargar el evento y ajustar la cantidad conservando el tipo elegido — el usuario ve el cupo real sin perder lo que había elegido — propuesta de la IA, aceptada.
+  - Sin diálogo de confirmación — la compra nace pendiente y se puede cancelar — propuesta de la IA, aceptada.
+- **Aprendizaje:** la verificación de punta a punta volvió a ser necesaria, aunque esta vez los fallos fueron del propio test temporal y no de la aplicación: un selector por texto encontraba un elemento oculto de la pantalla anterior, que el stack de navegación mantiene montado. Con selectores por `testID` el problema desaparece.
