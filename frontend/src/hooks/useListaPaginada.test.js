@@ -18,6 +18,25 @@ describe("useListaPaginada", () => {
     expect(result.current.hayMas).toBe(false);
   });
 
+  it("expone lo extra de la primera página y lo conserva mientras carga otro criterio", async () => {
+    const segunda = promesaManual();
+    pedir
+      .mockResolvedValueOnce({ ...pagina([{ id: 1 }], 1, 1), extra: { total: 5 } })
+      .mockReturnValueOnce(segunda.promesa);
+    const { result, rerender } = await renderHook(
+      ({ criterio }) => useListaPaginada(pedir, criterio),
+      {
+        initialProps: { criterio: CRITERIO },
+      },
+    );
+    await waitFor(() => expect(result.current.extra).toEqual({ total: 5 }));
+    await rerender({ criterio: { ...CRITERIO, orden: "desc" } });
+    expect(result.current.cargando).toBe(true);
+    expect(result.current.extra).toEqual({ total: 5 });
+    await act(() => segunda.resolver({ ...pagina([], 1, 0), extra: { total: 6 } }));
+    expect(result.current.extra).toEqual({ total: 6 });
+  });
+
   it("al recargar con el mismo criterio conserva los items mientras carga", async () => {
     const recarga = promesaManual();
     pedir.mockResolvedValueOnce(pagina([{ id: 1 }], 1, 1)).mockReturnValueOnce(recarga.promesa);

@@ -15,6 +15,16 @@ describe("TarjetaCompra", () => {
     expect(screen.getByLabelText(/^Los Piojos en River, Confirmada, Faltan 12 días/)).toBeTruthy();
   });
 
+  it("con conComprador muestra el comprador como título, sin fecha ni lugar", async () => {
+    await renderConProviders(
+      <TarjetaCompra compra={compraResumen()} conComprador onPress={jest.fn()} />,
+    );
+    expect(screen.getByText("Ana Pérez")).toBeTruthy();
+    expect(screen.queryByText("Los Piojos en River")).toBeNull();
+    expect(screen.queryByText(/Estadio River Plate/)).toBeNull();
+    expect(screen.getByLabelText(/^Ana Pérez, Confirmada/)).toBeTruthy();
+  });
+
   it("sin días restantes no muestra el contador", async () => {
     const compra = compraResumen({ estado: "REEMBOLSADA", diasRestantes: null });
     await renderConProviders(<TarjetaCompra compra={compra} onPress={jest.fn()} />);

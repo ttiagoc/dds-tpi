@@ -1,6 +1,6 @@
 # Spec 11 — Mis eventos, compras del evento y marcar utilizada
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/organizador`
 - **Casos de uso:** CU2 (ver `planes/00-indice.md`); Marcar utilizada completa el flujo de CU9
 - **Iteración:** It4
@@ -127,3 +127,7 @@ Escenario: el organizador ve la reseña del comprador
 
 - Preguntas a la IA, el usuario eligió las opciones recomendadas: partir en 11 (MisEventos, ComprasDelEvento y Marcar utilizada) y 11b (CrearEvento); tarjeta de MisEventos con ventas, recaudado y chip "Finalizado" que abre ComprasDelEvento; Marcar utilizada con diálogo de confirmación y Snackbar, como Cancelar.
 - La IA agregó sin preguntar (revisable): título "Reseña del comprador" para el organizador (en 10d la sección decía "Tu reseña" para cualquiera); `TarjetaCompra` con el comprador como título en ComprasDelEvento; extraer el filtro por estado de Mis compras a un componente; error 403/404 de ComprasDelEvento con `ErrorCarga` (la lista paginada no distingue el código); testIDs `lista-mis-eventos`, `evento-propio-<id>`, `sin-eventos-propios`, `lista-compras-evento`, `confirmar-utilizada`; textos "Todavía no publicaste eventos", "Este evento todavía no tiene compras", "Entrada marcada como utilizada".
+- Cambios en la implementación: `useListaPaginada` expone `extra` (datos de la primera página que no son items, como `evento` y `disponibilidad`) y lo conserva mientras carga otro criterio; `BarraDeVentas` compartida por MisEventos y la disponibilidad; `TarjetaCompra` con `conComprador`; `FiltroEstadoCompra` extraído de Mis compras; la ruta `eventos/[id]/compras` queda protegida para ORGANIZADOR.
+- Revisión de calidad (3 hallazgos, 1 media y 2 bajas, aplicados): cada acción de la compra se define una sola vez en `pantallas/detalle-compra/catalogoAcciones.js` (botón, confirmación, pedido y aviso), que usan los botones, el diálogo y `useAccionesCompra`; el diálogo recuerda la última acción para no mostrar el texto de otra mientras se cierra; los tests de DetalleCompra se partieron en lectura y acciones con el helper `test-utils/detalleCompra.jsx`.
+- Error de la IA corregido en la misma sesión: el catálogo se llamó primero `accionesCompra.js` y, en Windows (sistema de archivos sin distinción de mayúsculas), `./AccionesCompra` resolvía a ese archivo; se renombró.
+- Verificación: 273 tests del front, `npm run calidad` sin errores (0 clones en el front, quedan los 7 del back). Spec temporal de Cypress contra el back real (Fénix marca utilizada una compra confirmada de "Festival Primavera Sonora" desde Mis eventos y la ve con el filtro Utilizada), 1/1, borrada al terminar.

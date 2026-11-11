@@ -4,3 +4,8 @@ export const obtenerReseniasDeOrganizador = (id, paginado = {}) =>
   cliente
     .get(`/organizadores/${id}/resenias`, { params: paginado })
     .then((respuesta) => respuesta.data);
+
+export const listarMisEventos = (paginado = {}) =>
+  cliente
+    .get("/organizadores/yo/eventos", { params: paginado })
+    .then((respuesta) => respuesta.data);

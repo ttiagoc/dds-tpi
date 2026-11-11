@@ -47,7 +47,7 @@ Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `1
 - [x] `feature/mis-compras` (CU1): MisCompras + DetalleCompra de solo lectura con `LineaDeTiempo`
 - [x] `feature/acciones-compra` (CU7, CU8): pagar y cancelar desde DetalleCompra
 - [x] `feature/resenar-favoritos` (CU9) + tab Favoritos
-- [ ] `feature/organizador` (CU2): MisEventos, ComprasDelEvento y Marcar utilizada
+- [x] `feature/organizador` (CU2): MisEventos, ComprasDelEvento y Marcar utilizada
 - [ ] `feature/crear-evento` (CU4)
 - [ ] `feature/chat-front` (CU5, CU6)
 

@@ -1,12 +1,13 @@
 import { cliente } from "./cliente";
-import { buscarEventos, obtenerEvento } from "./eventosApi";
+import { buscarEventos, listarComprasDelEvento, obtenerEvento } from "./eventosApi";
 import { listarCategorias } from "./categoriasApi";
-import { obtenerReseniasDeOrganizador } from "./organizadoresApi";
+import { listarMisEventos, obtenerReseniasDeOrganizador } from "./organizadoresApi";
 import { agregarFavorito, listarFavoritos, quitarFavorito } from "./favoritosApi";
 import {
   cancelarCompra,
   crearCompra,
   listarMisCompras,
+  marcarUtilizada,
   obtenerCompra,
   pagarCompra,
   reseniarCompra,
@@ -44,6 +45,13 @@ describe("eventosApi", () => {
     expect(cliente.get).toHaveBeenCalledWith("/eventos", { params: { q: "piojos", categoria: 3 } });
   });
 
+  it("listarComprasDelEvento omite el estado vacío y devuelve data", async () => {
+    expect(await listarComprasDelEvento(4, { estado: null, page: 1, limit: 10 })).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/eventos/4/compras", {
+      params: { page: 1, limit: 10 },
+    });
+  });
+
   it("obtenerEvento pide el detalle", async () => {
     expect(await obtenerEvento("4")).toBe("respuesta");
     expect(cliente.get).toHaveBeenCalledWith("/eventos/4");
@@ -60,6 +68,13 @@ describe("categorías, organizadores y favoritos", () => {
     await obtenerReseniasDeOrganizador(2, { limit: 3 });
     expect(cliente.get).toHaveBeenCalledWith("/organizadores/2/resenias", {
       params: { limit: 3 },
+    });
+  });
+
+  it("listarMisEventos pide los eventos del organizador con paginado", async () => {
+    expect(await listarMisEventos({ page: 2, limit: 10 })).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/organizadores/yo/eventos", {
+      params: { page: 2, limit: 10 },
     });
   });
 
@@ -107,5 +122,12 @@ describe("comprasApi", () => {
     const resenia = { puntuacion: 5, detalle: "Excelente" };
     expect(await reseniarCompra(7, resenia)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/compras/7/resenia", resenia);
+  });
+});
+
+describe("marcarUtilizada", () => {
+  it("hace POST /compras/:id/uso y devuelve data", async () => {
+    expect(await marcarUtilizada(7)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras/7/uso");
   });
 });

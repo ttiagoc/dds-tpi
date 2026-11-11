@@ -3,28 +3,28 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, HelperText, Portal, Text, useTheme } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
-import { formatearPrecio } from "../../utils/formato";
+import { ACCIONES_COMPRA, accionDeCompra } from "./catalogoAcciones";
 
-function textoDeCancelacion({ estado, cantidad, total }) {
-  const entradas = cantidad === 1 ? "Se libera la entrada" : `Se liberan las ${cantidad} entradas`;
-  return estado === "CONFIRMADA"
-    ? `${entradas} y se te reembolsan ${formatearPrecio(total)}.`
-    : `${entradas}.`;
-}
-
-function DialogoCancelacion({ compra, visible, onVolver, onConfirmar }) {
+function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
   const { colors } = useTheme();
+  const accion = accionDeCompra(confirmando.nombre);
+  if (!accion) return null;
+  const { titulo, texto, boton, testID } = accion.confirmacion;
   return (
     <Portal>
-      <Dialog visible={visible} onDismiss={onVolver}>
-        <Dialog.Title>¿Cancelar la compra?</Dialog.Title>
+      <Dialog visible={confirmando.visible} onDismiss={onVolver}>
+        <Dialog.Title>{titulo}</Dialog.Title>
         <Dialog.Content>
-          <Text variant="bodyMedium">{textoDeCancelacion(compra)}</Text>
+          <Text variant="bodyMedium">{texto(compra)}</Text>
         </Dialog.Content>
         <Dialog.Actions>
           <Button onPress={onVolver}>Volver</Button>
-          <Button textColor={colors.error} onPress={onConfirmar} testID="confirmar-cancelacion">
-            Cancelar compra
+          <Button
+            textColor={accion.destructiva ? colors.error : undefined}
+            onPress={() => onConfirmar(accion.nombre)}
+            testID={testID}
+          >
+            {boton}
           </Button>
         </Dialog.Actions>
       </Dialog>
@@ -46,46 +46,42 @@ function BotonResenar({ compraId, deshabilitado }) {
   );
 }
 
-function Botones({ compraId, permitidas, enCurso, onPagar, onCancelar }) {
+function BotonAccion({ accion, enCurso, onAccion }) {
   const { colors } = useTheme();
-  const { puedePagar, puedeCancelar, puedeReseniar } = permitidas;
+  return (
+    <Button
+      mode={accion.destructiva ? "outlined" : "contained"}
+      icon={accion.icono}
+      textColor={accion.destructiva ? colors.error : undefined}
+      loading={enCurso === accion.nombre}
+      disabled={!!enCurso}
+      onPress={() => onAccion(accion)}
+      testID={accion.testID}
+    >
+      {accion.etiqueta}
+    </Button>
+  );
+}
+
+function Botones({ compraId, permitidas, enCurso, onAccion }) {
   return (
     <>
-      {puedeReseniar && <BotonResenar compraId={compraId} deshabilitado={!!enCurso} />}
-      {puedePagar && (
-        <Button
-          mode="contained"
-          icon="credit-card-outline"
-          loading={enCurso === "pagar"}
-          disabled={!!enCurso}
-          onPress={onPagar}
-          testID="compra-pagar"
-        >
-          Pagar
-        </Button>
-      )}
-      {puedeCancelar && (
-        <Button
-          mode="outlined"
-          textColor={colors.error}
-          loading={enCurso === "cancelar"}
-          disabled={!!enCurso}
-          onPress={onCancelar}
-          testID="compra-cancelar"
-        >
-          Cancelar compra
-        </Button>
-      )}
+      {permitidas.puedeReseniar && <BotonResenar compraId={compraId} deshabilitado={!!enCurso} />}
+      {ACCIONES_COMPRA.filter((accion) => permitidas[accion.permiso]).map((accion) => (
+        <BotonAccion key={accion.nombre} accion={accion} enCurso={enCurso} onAccion={onAccion} />
+      ))}
     </>
   );
 }
 
+const hayAlgunaAccion = (permitidas) => Object.values(permitidas).some(Boolean);
+
 export function AccionesCompra({ compra, acciones }) {
-  const [confirmando, setConfirmando] = useState(false);
+  const [confirmando, setConfirmando] = useState({ nombre: null, visible: false });
   const permitidas = compra.acciones ?? {};
-  const { enCurso, error, pagar, cancelar } = acciones;
-  const { puedePagar, puedeCancelar, puedeReseniar } = permitidas;
-  if (!puedePagar && !puedeCancelar && !puedeReseniar && !error) return null;
+  const { enCurso, error, ejecutar } = acciones;
+  if (!hayAlgunaAccion(permitidas) && !error) return null;
+  const cerrar = () => setConfirmando((actual) => ({ ...actual, visible: false }));
 
   return (
     <View style={estilos.acciones}>
@@ -93,23 +89,23 @@ export function AccionesCompra({ compra, acciones }) {
         compraId={compra.id}
         permitidas={permitidas}
         enCurso={enCurso}
-        onPagar={() => {
-          pagar();
+        onAccion={(accion) => {
+          if (accion.confirmacion) setConfirmando({ nombre: accion.nombre, visible: true });
+          else ejecutar(accion.nombre);
         }}
-        onCancelar={() => setConfirmando(true)}
       />
       {error && (
         <HelperText type="error" visible testID="compra-accion-error">
           {error}
         </HelperText>
       )}
-      <DialogoCancelacion
+      <DialogoConfirmacion
         compra={compra}
-        visible={confirmando}
-        onVolver={() => setConfirmando(false)}
-        onConfirmar={() => {
-          setConfirmando(false);
-          cancelar();
+        confirmando={confirmando}
+        onVolver={cerrar}
+        onConfirmar={(nombre) => {
+          cerrar();
+          ejecutar(nombre);
         }}
       />
     </View>

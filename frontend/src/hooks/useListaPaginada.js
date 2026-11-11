@@ -6,6 +6,7 @@ const SIN_RESULTADO = {
   clave: null,
   criterio: null,
   items: [],
+  extra: null,
   page: 0,
   totalPages: 0,
   error: null,
@@ -31,12 +32,13 @@ function usePrimeraPagina(pedir, claveCriterio, version) {
     };
     const nuevo = (cambios) => ({ ...SIN_RESULTADO, clave, criterio: claveCriterio, ...cambios });
     pedirPagina(pedir, claveCriterio, 1).then(
-      ({ items, page, totalPages }) => terminar(() => nuevo({ items, page, totalPages })),
+      ({ items, page, totalPages, extra = null }) =>
+        terminar(() => nuevo({ items, page, totalPages, extra })),
       (error) =>
         terminar((previo) =>
           previo.criterio === claveCriterio && previo.items.length > 0
             ? { ...previo, clave, errorRefresco: mensajeDeError(error) }
-            : nuevo({ error: mensajeDeError(error) }),
+            : nuevo({ error: mensajeDeError(error), extra: previo.extra }),
         ),
     );
     return () => {
@@ -83,6 +85,7 @@ export function useListaPaginada(pedir, criterio) {
   const cargando = resultado.clave !== `${claveCriterio}#${version}`;
   return {
     items: resultado.criterio === claveCriterio ? resultado.items : [],
+    extra: resultado.extra,
     cargando,
     error: cargando ? null : resultado.error,
     hayMas: !cargando && resultado.page < resultado.totalPages,

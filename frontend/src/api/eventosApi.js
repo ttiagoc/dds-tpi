@@ -6,3 +6,8 @@ export const buscarEventos = (criterio = {}) =>
 
 export const obtenerEvento = (id) =>
   cliente.get(`/eventos/${id}`).then((respuesta) => respuesta.data);
+
+export const listarComprasDelEvento = (id, criterio = {}) =>
+  cliente
+    .get(`/eventos/${id}/compras`, { params: sinVacios(criterio) })
+    .then((respuesta) => respuesta.data);
