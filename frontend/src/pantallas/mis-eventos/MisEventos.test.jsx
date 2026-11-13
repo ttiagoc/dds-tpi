@@ -1,5 +1,7 @@
 import { act, fireEvent, screen } from "@testing-library/react-native";
-import { router, useFocusEffect } from "expo-router";
+import { StyleSheet } from "react-native";
+import { ESPACIO_FAB } from "../../tema/espaciado";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import MisEventos from "./MisEventos";
 import { listarMisEventos } from "../../api/organizadoresApi";
 import { FENIX, renderConProviders } from "../../test-utils/renderConProviders";
@@ -26,6 +28,7 @@ async function abrir() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  useLocalSearchParams.mockReturnValue({});
   jest.useFakeTimers({ now: new Date("2026-11-11T12:00:00.000Z"), advanceTimers: true });
   listarMisEventos.mockResolvedValue(paginaDeEventos([PASADO, FUTURO]));
 });
@@ -89,5 +92,35 @@ describe("MisEventos: vacío y error", () => {
     await renderConProviders(<MisEventos />, { usuario: FENIX });
     await fireEvent.press(await screen.findByRole("button", { name: "Reintentar" }));
     expect(await screen.findByTestId("evento-propio-1")).toBeTruthy();
+  });
+});
+
+describe("MisEventos: nuevo evento", () => {
+  it("el botón Nuevo evento abre el formulario", async () => {
+    await abrir();
+    await fireEvent.press(screen.getByTestId("fab-nuevo-evento"));
+    expect(router.push).toHaveBeenCalledWith("/eventos/nuevo");
+  });
+
+  it("la lista deja lugar abajo para que el botón no tape la última tarjeta", async () => {
+    await abrir();
+    expect(ESPACIO_FAB).toBeGreaterThan(0);
+    const { contentContainerStyle } = screen.getByTestId("lista-mis-eventos").props;
+    expect(StyleSheet.flatten(contentContainerStyle).paddingBottom).toBe(ESPACIO_FAB);
+  });
+
+  it("también aparece sin eventos", async () => {
+    listarMisEventos.mockResolvedValue(paginaDeEventos([], { totalPages: 0 }));
+    await renderConProviders(<MisEventos />, { usuario: FENIX });
+    await screen.findByTestId("sin-eventos-propios");
+    expect(screen.getByTestId("fab-nuevo-evento")).toBeTruthy();
+  });
+
+  it("al volver de publicar muestra el aviso y lo limpia al cerrarse", async () => {
+    useLocalSearchParams.mockReturnValue({ aviso: "evento-creado" });
+    await abrir();
+    expect(screen.getByTestId("mis-eventos-aviso")).toHaveTextContent("Evento publicado");
+    await act(async () => jest.advanceTimersByTime(10000));
+    expect(router.setParams).toHaveBeenCalledWith({ aviso: undefined });
   });
 });

@@ -11,7 +11,7 @@ function SinItems({ lista, vacio }) {
   return vacio;
 }
 
-export function ListaPaginada({ lista, renderItem, encabezado, vacio, testID }) {
+export function ListaPaginada({ lista, renderItem, encabezado, vacio, testID, espacioInferior }) {
   const { refrescando, refrescar } = useRefresco(lista);
   return (
     <FlatList
@@ -24,7 +24,7 @@ export function ListaPaginada({ lista, renderItem, encabezado, vacio, testID }) 
       ListFooterComponent={<PieDeLista {...lista} onCargarMas={lista.cargarMas} />}
       refreshing={refrescando}
       onRefresh={refrescar}
-      contentContainerStyle={estilos.lista}
+      contentContainerStyle={[estilos.lista, espacioInferior && { paddingBottom: espacioInferior }]}
       keyboardShouldPersistTaps="handled"
     />
   );
