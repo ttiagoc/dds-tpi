@@ -1,5 +1,5 @@
 import { act, screen, fireEvent, waitFor } from "@testing-library/react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { cancelarCompra, marcarUtilizada, obtenerCompra, pagarCompra } from "../../api/comprasApi";
 import { ANA, FENIX } from "../../test-utils/renderConProviders";
 import { compraDetalle, errorHttp, promesaManual } from "../../test-utils/fixtures";
@@ -240,5 +240,29 @@ describe("DetalleCompra: 422 en acciones con confirmación", () => {
     for (const id of ids) await fireEvent.press(screen.getByTestId(id));
     expect(await screen.findByTestId("compra-accion-error")).toHaveTextContent(msj);
     await waitFor(() => expect(obtenerCompra).toHaveBeenCalledTimes(2));
+  });
+});
+
+describe("DetalleCompra: chat", () => {
+  it.each([
+    ["Ana en una compra reembolsada", ANA, REEMBOLSADA],
+    ["Fénix en una compra confirmada", FENIX, compraDetalle()],
+  ])("%s ve Chat y abre el chat de la compra", async (_, usuario, compra) => {
+    obtenerCompra.mockResolvedValue(compra);
+    await abrir(usuario);
+    await fireEvent.press(screen.getByTestId("compra-chat"));
+    expect(router.push).toHaveBeenCalledWith("/compras/7/chat");
+  });
+
+  it("Chat se deshabilita mientras corre una acción", async () => {
+    const pago = promesaManual();
+    pagarCompra.mockReturnValue(pago.promesa);
+    obtenerCompra.mockResolvedValue(
+      compraDetalle({ estado: "PENDIENTE", acciones: { ...SIN_ACCIONES, puedePagar: true } }),
+    );
+    await abrir();
+    await fireEvent.press(screen.getByTestId("compra-pagar"));
+    expect(screen.getByTestId("compra-chat")).toBeDisabled();
+    await act(async () => pago.resolver(compraDetalle()));
   });
 });

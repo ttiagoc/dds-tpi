@@ -15,6 +15,8 @@ export function establecerToken(token) {
   tokenActual = token;
 }
 
+export const obtenerToken = () => tokenActual;
+
 export function alExpirarSesion(callback) {
   alExpirar = callback;
 }

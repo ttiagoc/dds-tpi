@@ -17,12 +17,13 @@ import ComprarRuta from "../app/eventos/[id]/comprar";
 import ComprasEventoRuta from "../app/eventos/[id]/compras";
 import NuevoEventoRuta from "../app/eventos/nuevo";
 import CompraRuta from "../app/compras/[id]/index";
+import ChatRuta from "../app/compras/[id]/chat";
 import { leerSesion } from "../auth/sesion";
 import { login, obtenerYo } from "../api/authApi";
 import { buscarEventos, listarComprasDelEvento, obtenerEvento } from "../api/eventosApi";
 import { listarCategorias } from "../api/categoriasApi";
 import { listarMisEventos, obtenerReseniasDeOrganizador } from "../api/organizadoresApi";
-import { listarMisCompras, obtenerCompra } from "../api/comprasApi";
+import { listarMensajes, listarMisCompras, obtenerCompra } from "../api/comprasApi";
 import { ANA, FENIX } from "../test-utils/renderConProviders";
 import {
   compraDetalle,
@@ -61,6 +62,7 @@ const RUTAS = {
   "eventos/[id]/compras": ComprasEventoRuta,
   "eventos/nuevo": NuevoEventoRuta,
   "compras/[id]/index": CompraRuta,
+  "compras/[id]/chat": ChatRuta,
 };
 
 const conSesion = (usuario) => {
@@ -79,6 +81,7 @@ beforeEach(() => {
   obtenerReseniasDeOrganizador.mockResolvedValue(reseniasDe([]));
   listarMisCompras.mockResolvedValue(paginaDeCompras([compraResumen()]));
   obtenerCompra.mockResolvedValue(compraDetalle());
+  listarMensajes.mockResolvedValue([]);
   listarMisEventos.mockResolvedValue(paginaDeEventos([eventoPropio()]));
   listarComprasDelEvento.mockResolvedValue(comprasDelEvento([compraResumen()]));
 });
@@ -226,6 +229,19 @@ describe("detalle del evento", () => {
     await act(() => router.push("/eventos/1/compras"));
     await waitFor(() => expect(screen).toHavePathname("/explorar"));
     expect(listarComprasDelEvento).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["un comprador", ANA, "/explorar"],
+    ["un organizador", FENIX, "/mis-eventos"],
+  ])("%s abre el chat desde el detalle de la compra", async (_, usuario, inicio) => {
+    conSesion(usuario);
+    await abrirApp();
+    await waitFor(() => expect(screen).toHavePathname(inicio));
+    await act(() => router.push("/compras/7"));
+    await fireEvent.press(await screen.findByTestId("compra-chat"));
+    await waitFor(() => expect(screen).toHavePathname("/compras/7/chat"));
+    expect(await screen.findByTestId("chat-vacio")).toBeTruthy();
   });
 
   it("sin sesión el detalle manda al login", async () => {

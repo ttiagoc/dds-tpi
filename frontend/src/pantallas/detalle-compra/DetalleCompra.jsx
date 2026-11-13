@@ -11,6 +11,7 @@ import { LineaDeTiempo } from "../../components/LineaDeTiempo";
 import { Pantalla } from "../../components/Pantalla";
 import { useAvisoDeRuta } from "../../hooks/useAvisoDeRuta";
 import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
+import { useSalaDeCompra } from "../../hooks/useSalaDeCompra";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio, textoDiasRestantes } from "../../utils/formato";
 import { AccionesCompra } from "./AccionesCompra";
@@ -98,6 +99,11 @@ function Contenido({ compra, carga }) {
   });
   const aviso = useAviso(acciones);
   useRecargarAlVolver(carga.recargar);
+  useSalaDeCompra(compra.id, {
+    "compra:estado": ({ estado }) => {
+      if (estado !== compra.estado) carga.recargar();
+    },
+  });
   return (
     <>
       <Pantalla scroll>

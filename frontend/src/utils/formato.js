@@ -7,17 +7,24 @@ const precio = new Intl.NumberFormat(LOCALE, {
   maximumFractionDigits: 0,
 });
 
-export function formatearFecha(fecha, { zonaHoraria } = {}) {
+function partesDeFecha(fecha, opciones, zonaHoraria) {
   const partes = new Intl.DateTimeFormat(LOCALE, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
+    ...opciones,
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
     timeZone: zonaHoraria,
   }).formatToParts(new Date(fecha));
-  const parte = (tipo) => partes.find((p) => p.type === tipo)?.value.replace(".", "");
+  return (tipo) => partes.find((p) => p.type === tipo)?.value;
+}
+
+export function formatearFecha(fecha, { zonaHoraria } = {}) {
+  const valor = partesDeFecha(
+    fecha,
+    { weekday: "short", day: "numeric", month: "short" },
+    zonaHoraria,
+  );
+  const parte = (tipo) => valor(tipo)?.replace(".", "");
   return `${parte("weekday")} ${parte("day")} ${parte("month")} · ${parte("hour")}:${parte("minute")}`;
 }
 
@@ -46,4 +53,10 @@ export function formatearDia(fecha, { zonaHoraria } = {}) {
     .format(new Date(fecha))
     .replaceAll(".", "")
     .replaceAll(" de ", " ");
+}
+
+export function formatearFechaCorta(fecha, { zonaHoraria } = {}) {
+  const valor = partesDeFecha(fecha, { day: "numeric", month: "numeric" }, zonaHoraria);
+  const parte = (tipo) => valor(tipo)?.padStart(2, "0");
+  return `${parte("day")}/${parte("month")} ${parte("hour")}:${parte("minute")}`;
 }

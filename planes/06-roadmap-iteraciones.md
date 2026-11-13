@@ -49,7 +49,7 @@ Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `1
 - [x] `feature/resenar-favoritos` (CU9) + tab Favoritos
 - [x] `feature/organizador` (CU2): MisEventos, ComprasDelEvento y Marcar utilizada
 - [x] `feature/crear-evento` (CU4)
-- [ ] `feature/chat-front` (CU5, CU6)
+- [x] `feature/chat-front` (CU5, CU6)
 
 **Aceptación:** todos los CU recorribles en Expo Go en el celular; tests RNTL de Explorar, Comprar, MisCompras, DetalleCompra.
 

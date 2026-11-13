@@ -1,4 +1,5 @@
-import { act, screen, fireEvent } from "@testing-library/react-native";
+import { act, screen, fireEvent, waitFor } from "@testing-library/react-native";
+import { ultimoSocket } from "socket.io-client";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import DetalleCompra from "./DetalleCompra";
 import { obtenerCompra } from "../../api/comprasApi";
@@ -38,7 +39,8 @@ describe("DetalleCompra: datos", () => {
     ["Pendiente", "Confirmada", "Cancelada", "Reembolsada"].forEach((etiqueta, i) =>
       expect(screen.getByTestId(`historial-${i}`)).toHaveTextContent(new RegExp(etiqueta)),
     );
-    expect(screen.queryByRole("button", { name: /Pagar|Cancelar|Reseñar|Chat/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Pagar|Cancelar|Reseñar/ })).toBeNull();
+    expect(screen.getByTestId("compra-chat")).toBeTruthy();
   });
 
   it("tocar el evento abre su detalle", async () => {
@@ -152,5 +154,34 @@ describe("DetalleCompra: reseña según el rol", () => {
     obtenerCompra.mockResolvedValue(RESENIADA);
     await abrir(usuario);
     expect(screen.getByTestId("compra-resenia")).toHaveTextContent(new RegExp(`^${titulo}`));
+  });
+});
+
+const llegaEstado = (estado) =>
+  act(async () => ultimoSocket().simular("compra:estado", { compraId: 7, estado }));
+
+describe("DetalleCompra: estado en vivo", () => {
+  it("se une al room de la compra", async () => {
+    await abrir();
+    await act(async () => ultimoSocket().simular("connect"));
+    expect(ultimoSocket().emit).toHaveBeenCalledWith(
+      "compra:unirse",
+      { compraId: 7 },
+      expect.any(Function),
+    );
+  });
+
+  it("si llega un estado distinto vuelve a pedir la compra y lo muestra", async () => {
+    await abrir();
+    obtenerCompra.mockResolvedValue(UTILIZADA);
+    await llegaEstado("UTILIZADA");
+    await waitFor(() => expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Utilizada/));
+    expect(obtenerCompra).toHaveBeenCalledTimes(2);
+  });
+
+  it("si llega el mismo estado que muestra no vuelve a pedir", async () => {
+    await abrir();
+    await llegaEstado("CONFIRMADA");
+    expect(obtenerCompra).toHaveBeenCalledTimes(1);
   });
 });

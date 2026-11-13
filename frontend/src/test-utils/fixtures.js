@@ -150,3 +150,26 @@ export function comprasDelEvento(compras, cambios = {}) {
     ...cambios,
   };
 }
+
+export function mensaje(cambios = {}) {
+  return {
+    id: 1,
+    usuario: { id: 3, nombre: "Ana Pérez", rol: "COMPRADOR" },
+    mensaje: "¿A qué hora abren las puertas?",
+    enviado: "2026-11-01T15:00:00.000Z",
+    ...cambios,
+  };
+}
+
+export function conversacion() {
+  return {
+    pregunta: mensaje({ id: 1 }),
+    respuesta: mensaje({
+      id: 2,
+      usuario: { id: 2, nombre: "Fénix Producciones", rol: "ORGANIZADOR" },
+      mensaje: "Abrimos a las 17 h. ¡Los esperamos!",
+      enviado: "2026-11-01T15:05:00.000Z",
+    }),
+    nuevo: mensaje({ id: 3, mensaje: "¿Hay guardarropas?", enviado: "2026-11-02T10:00:00.000Z" }),
+  };
+}

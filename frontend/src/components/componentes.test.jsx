@@ -2,6 +2,7 @@ import { Text } from "react-native-paper";
 import { screen, fireEvent } from "@testing-library/react-native";
 import { renderConProviders } from "../test-utils/renderConProviders";
 import { ChipEstado } from "./ChipEstado";
+import { Contador } from "./Contador";
 import { ErrorCarga } from "./ErrorCarga";
 import { EstadoVacio } from "./EstadoVacio";
 import { Cargando } from "./Cargando";
@@ -91,5 +92,12 @@ describe("Cargando y Pantalla", () => {
       </Pantalla>,
     );
     expect(screen.getByTestId("pantalla").props.keyboardShouldPersistTaps).toBe("handled");
+  });
+});
+
+describe("Contador", () => {
+  it("muestra los caracteres usados sobre el máximo", async () => {
+    await renderConProviders(<Contador largo={12} maximo={500} testID="contador" />);
+    expect(screen.getByTestId("contador")).toHaveTextContent("12/500");
   });
 });

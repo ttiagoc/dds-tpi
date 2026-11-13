@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, HelperText, Portal, Text, useTheme } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
-import { ACCIONES_COMPRA, accionDeCompra } from "./catalogoAcciones";
+import { ACCIONES_COMPRA, accionDeCompra, accionVisible } from "./catalogoAcciones";
 
 function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
   const { colors } = useTheme();
@@ -32,25 +32,11 @@ function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
   );
 }
 
-function BotonResenar({ compraId, deshabilitado }) {
-  return (
-    <Button
-      mode="contained"
-      icon="star-outline"
-      disabled={deshabilitado}
-      onPress={() => router.push(`/compras/${compraId}/resenia`)}
-      testID="compra-resenar"
-    >
-      Reseñar
-    </Button>
-  );
-}
-
 function BotonAccion({ accion, enCurso, onAccion }) {
   const { colors } = useTheme();
   return (
     <Button
-      mode={accion.destructiva ? "outlined" : "contained"}
+      mode={accion.modo ?? "contained"}
       icon={accion.icono}
       textColor={accion.destructiva ? colors.error : undefined}
       loading={enCurso === accion.nombre}
@@ -63,34 +49,26 @@ function BotonAccion({ accion, enCurso, onAccion }) {
   );
 }
 
-function Botones({ compraId, permitidas, enCurso, onAccion }) {
-  return (
-    <>
-      {permitidas.puedeReseniar && <BotonResenar compraId={compraId} deshabilitado={!!enCurso} />}
-      {ACCIONES_COMPRA.filter((accion) => permitidas[accion.permiso]).map((accion) => (
-        <BotonAccion key={accion.nombre} accion={accion} enCurso={enCurso} onAccion={onAccion} />
-      ))}
-    </>
-  );
+function Botones({ permitidas, enCurso, onAccion }) {
+  return ACCIONES_COMPRA.filter((accion) => accionVisible(accion, permitidas)).map((accion) => (
+    <BotonAccion key={accion.nombre} accion={accion} enCurso={enCurso} onAccion={onAccion} />
+  ));
 }
-
-const hayAlgunaAccion = (permitidas) => Object.values(permitidas).some(Boolean);
 
 export function AccionesCompra({ compra, acciones }) {
   const [confirmando, setConfirmando] = useState({ nombre: null, visible: false });
   const permitidas = compra.acciones ?? {};
   const { enCurso, error, ejecutar } = acciones;
-  if (!hayAlgunaAccion(permitidas) && !error) return null;
   const cerrar = () => setConfirmando((actual) => ({ ...actual, visible: false }));
 
   return (
     <View style={estilos.acciones}>
       <Botones
-        compraId={compra.id}
         permitidas={permitidas}
         enCurso={enCurso}
         onAccion={(accion) => {
-          if (accion.confirmacion) setConfirmando({ nombre: accion.nombre, visible: true });
+          if (accion.ruta) router.push(accion.ruta(compra));
+          else if (accion.confirmacion) setConfirmando({ nombre: accion.nombre, visible: true });
           else ejecutar(accion.nombre);
         }}
       />
