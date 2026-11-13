@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 13 |
-| Features cerradas | 18 (It1, It2 e It3 cerradas) |
+| Features cerradas | 19 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -259,7 +259,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - El texto del diálogo menciona el reembolso si la compra está confirmada — es la única derivación de R2b en el front, porque el contrato no expone ese dato; se aceptó en la revisión en lugar de ampliar el contrato — propuesta de la IA, aceptada.
   - Extraer `useEnvio` recién con la segunda aparición del patrón, ya que la tercera y la cuarta están planificadas (10d y 11) — propuesta de la IA en la revisión, aceptada.
 
-## Sesión 13 — 2026-11-11 — Reseñar compras, favoritos y pantallas del organizador (It4)
+## Sesión 13 — 2026-11-11 — Reseñar compras, favoritos, pantallas del organizador y creación de eventos (It4)
 
 - **Objetivo:** especificar e implementar la reseña de una compra utilizada (CU9), la pestaña Favoritos del comprador y las pantallas del organizador para seguir ventas y marcar entradas utilizadas (CU2).
 - **Avances:**
@@ -282,4 +282,14 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Marcar utilizada con diálogo de confirmación, como cancelar — es irreversible y habilita la reseña — propuesta de la IA, aceptada.
   - La marca de evento finalizado se calcula en el front comparando la fecha con el reloj — es solo presentación, no una regla de negocio — propuesta de la IA, aceptada.
   - La lista paginada expone los datos de la primera página que no son ítems (evento y disponibilidad), en lugar de un segundo pedido — un solo endpoint ya los devuelve — propuesta de la IA, aceptada.
+- **Avances (creación de eventos):**
+  - Spec 11b escrita y aprobada (6 escenarios): formulario de evento con categoría, fecha, hora, imagen opcional y de 1 a 10 tipos de entrada con precio y cupo (CU4); al publicar se vuelve a Mis eventos con un aviso de confirmación.
+  - Implementación con TDD: el armado del cuerpo del pedido y la completitud del formulario quedaron como funciones puras, el estado del formulario en un hook propio y los tipos de entrada en un componente aparte; el aviso por parámetro de ruta, que antes vivía en DetalleCompra, pasó a un hook compartido que también usa Mis eventos.
+  - Revisión de calidad con 5 hallazgos aplicados: un componente común para las listas de compras del comprador y del organizador, la disponibilidad por tipo dentro del encabezado de la lista, un espacio inferior para que el botón flotante no tape el último evento, la agrupación de los campos del formulario y un indicador de carga de las categorías. El componente común resolvió además dos clones entre pantallas de la spec 11 que la herramienta de duplicados recién detectó tras normalizar los fines de línea.
+  - Verificación con una spec temporal de Cypress contra el back real (Fénix publica un evento y lo ve en Mis eventos), eliminada al cerrar. Suite del front en 312 tests en verde, sin clones en el front; rama mergeada a `develop`.
+- **Decisiones (creación de eventos):**
+  - Selector de fecha y hora con `react-native-paper-dates` — funciona en Expo Go y en web (necesario para Cypress) y respeta el estilo de Paper; el selector nativo no corre en web — propuesta de la IA entre tres opciones, aceptada (ADR-009).
+  - El front valida solo que el formulario esté completo; las reglas de R8 (fecha futura, nombres de tipo únicos, precio y cupo válidos) las responde el back con su mensaje — una sola fuente de verdad — propuesta de la IA, aceptada.
+  - Mock manual de la librería de fechas para Jest — publica módulos que Jest no transforma y sus modales no se pueden operar desde los tests — surgió de la IA al correr la suite.
+  - El caso de agregar hasta 10 tipos se prueba en el hook y no en la pantalla — con diez grupos de campos el test superaba el tiempo límite al correr en paralelo — propuesta de la IA, aceptada.
 - **Aprendizaje:** en Expo Web las pestañas inactivas permanecen montadas, por lo que las aserciones e2e deben acotarse al contenedor de la pantalla visible para no dar falsos negativos.
