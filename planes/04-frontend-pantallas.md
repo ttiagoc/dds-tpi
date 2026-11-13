@@ -26,19 +26,19 @@ Stack compartido (encima de los tabs):
 
 | Pantalla | CU | Contenido | Endpoints | testIDs clave |
 |---|---|---|---|---|
-| Login | — | email, password (con ojo), botón Ingresar, error de credenciales, chips de usuarios demo (solo dev) | `POST /auth/login` | `login-email`, `login-password`, `login-ingresar` |
-| Explorar | CU3, CU11 | `Searchbar` (debounce 300 ms), chips horizontales de categorías, menú de orden (fecha/precio/puntaje + asc/desc), lista de `TarjetaEvento`, scroll infinito o "cargar más", pull-to-refresh | `GET /categorias`, `GET /eventos` | `buscador`, `chip-categoria-<id>`, `orden-menu`, `tarjeta-evento-<id>` |
-| DetalleEvento | CU10, CU12 | imagen, nombre, fecha, lugar, categoría, descripción, organizador + estrellas, lista de tipos con precio y disponibles, botón favorito, botón Comprar, últimas reseñas del organizador | `GET /eventos/:id`, `GET /organizadores/:id/resenias`, favoritos | `evento-comprar`, `evento-favorito` |
-| Comprar | CU12 | `RadioButton` de tipos (deshabilitado si 0 disponibles), `SelectorCantidad` con tope = disponibles, total calculado, Confirmar; éxito → DetalleCompra | `POST /compras` | `tipo-<id>`, `cantidad-mas`, `cantidad-menos`, `comprar-confirmar` |
-| MisCompras | CU1 | filtros por estado (`SegmentedButtons` o chips), lista con `ChipEstado` coloreado, "Faltan N días" si CONFIRMADA | `GET /compras` | `compra-<id>`, `dias-restantes-<id>` |
-| DetalleCompra | CU1, CU7-9 | estado grande, datos del evento, total, timeline del historial, botones según `acciones` (Pagar, Cancelar con diálogo de confirmación, Marcar utilizada, Reseñar), botón Chat | `GET /compras/:id`, acciones | `compra-pagar`, `compra-cancelar`, `confirmar-cancelacion`, `compra-utilizada`, `compra-resenar`, `compra-chat` |
-| Chat | CU5, CU6 | lista de burbujas (propias a la derecha), input + enviar, recibe en vivo por socket, indicador de conexión | `GET/POST /compras/:id/mensajes` + socket | `chat-input`, `chat-enviar`, `mensaje-<id>` |
-| Reseñar | CU9 | `Estrellas` (1-5 tocables), comentario multilínea, Enviar | `POST /compras/:id/resenia` | `estrella-<n>`, `resenia-detalle`, `resenia-enviar` |
-| Favoritos | extra | lista de `TarjetaEvento` | `GET /usuarios/yo/favoritos` | |
-| Perfil | — | nombre, rol, cerrar sesión | — | `cerrar-sesion` |
-| MisEventos | CU2 | lista de eventos propios con vendidas/cupo, FAB "Nuevo evento" | `GET /organizadores/yo/eventos` | `fab-nuevo-evento` |
-| CrearEvento | CU4 | nombre, descripción, categoría (`Menu`), fecha y hora, lugar, URL de imagen, sección dinámica de tipos (agregar/quitar: nombre, precio, cupo), validación local + errores del back | `GET /categorias`, `POST /eventos` | `evento-nombre`, `tipo-agregar`, `evento-guardar` |
-| ComprasDelEvento | CU2 | tarjetas de disponibilidad por tipo (`ProgressBar` vendidas/cupo + "quedan N"), filtro por estado, lista de compras con `ChipEstado` | `GET /eventos/:id/compras` | `disponibilidad-<tipoId>` |
+| Login | — | email, password (con ojo), botón Ingresar, error de credenciales, chips de usuarios demo (solo dev). Detalle en `specs/09-front-base.md` | `POST /auth/login` | `login-email`, `login-password`, `login-ingresar`, `login-error` |
+| Explorar | CU3, CU11 | `Searchbar` (debounce 300 ms), chips horizontales de categorías, menú de orden (6 opciones: fecha/precio/puntaje × asc/desc), lista de `TarjetaEvento`, "cargar más" (10 por página), pull-to-refresh. Detalle en `specs/10-explorar-eventos.md` | `GET /categorias`, `GET /eventos` | `buscador`, `chip-categoria-todas`, `chip-categoria-<id>`, `orden-menu`, `orden-<ordenarPor>-<orden>`, `tarjeta-evento-<id>`, `cargar-mas` |
+| DetalleEvento | CU10, CU12 | imagen, nombre, fecha, lugar, categoría, descripción, organizador + estrellas, lista de tipos con precio y disponibles, botón favorito (optimista, solo comprador), botón Comprar ("Agotado" si no hay disponibles, solo comprador), últimas 3 reseñas del organizador. Detalle en `specs/10-explorar-eventos.md` | `GET /eventos/:id`, `GET /organizadores/:id/resenias`, favoritos | `evento-comprar`, `evento-favorito`, `tipo-entrada-<id>`, `resenias-organizador`, `resenia-<id>` |
+| Comprar | CU12 | solo comprador. `RadioButton` de tipos (deshabilitado si 0 disponibles, preselecciona el primero disponible), `SelectorCantidad` con tope = min(disponibles, 10), total calculado, Confirmar sin diálogo; éxito → `router.replace` a DetalleCompra; 422 → mensaje + recarga del evento. Detalle en `specs/10b-comprar.md` | `GET /eventos/:id`, `POST /compras` | `tipo-<id>`, `cantidad-mas`, `cantidad-menos`, `cantidad-valor`, `comprar-total`, `comprar-confirmar`, `comprar-error` |
+| MisCompras | CU1 | chips de filtro (Todas + 5 estados), lista paginada de `TarjetaCompra` con `ChipEstado`, "Faltan N días" / "Falta 1 día" / "Es hoy" si CONFIRMADA, cargar más, pull-to-refresh, refresco al recuperar el foco. Detalle en `specs/10c-mis-compras.md` | `GET /compras` | `filtro-estado-todas`, `filtro-estado-<ESTADO>`, `lista-compras`, `compra-<id>`, `dias-restantes-<id>`, `cargar-mas` |
+| DetalleCompra | CU1, CU7-9 | estado grande, datos del evento, total, timeline del historial (lectura en `specs/10c-mis-compras.md`); botones según `acciones`, cada uno con su spec: Pagar (directo + Snackbar) y Cancelar con diálogo de confirmación en `specs/10c2-acciones-compra.md`, Reseñar (`compra-resenar`) y la sección "Tu reseña" (`compra-resenia`) en `specs/10d-resenar-favoritos.md`, Marcar utilizada con diálogo (`confirmar-utilizada`) en `specs/11-pantallas-organizador.md`, Chat (`compra-chat`, siempre visible) y recarga por `compra:estado` en `specs/12-chat-front.md` | `GET /compras/:id`, acciones | `compra-pagar`, `compra-cancelar`, `confirmar-cancelacion`, `compra-accion-error`, `compra-aviso`, `compra-utilizada`, `confirmar-utilizada`, `compra-resenar`, `compra-resenia`, `compra-chat` |
+| Chat | CU5, CU6 | ambos roles, entra desde DetalleCompra (`compra-chat`, siempre visible). Burbujas propias a la derecha sin nombre y ajenas a la izquierda con nombre, fecha y hora cortas; input con contador 500 y Enviar deshabilitado si vacío; el mensaje propio aparece con el 201 (dedupe por `id` con `mensaje:nuevo`); aviso "Sin conexión en vivo" con Actualizar y recarga al reconectar. DetalleCompra recarga si llega `compra:estado` distinto. Detalle en `specs/12-chat-front.md` | `GET /compras/:id`, `GET/POST /compras/:id/mensajes` + socket | `lista-mensajes`, `mensaje-<id>`, `chat-vacio`, `chat-carga-error`, `chat-input`, `chat-contador`, `chat-enviar`, `chat-error`, `chat-sin-conexion`, `chat-actualizar` |
+| Reseñar | CU9 | solo comprador. Carga la compra (si no `puedeReseniar`, estado vacío con Volver); `Estrellas` (1-5 tocables), comentario multilínea con contador, Enviar deshabilitado hasta completar; éxito → vuelve a DetalleCompra con Snackbar; errores con el texto del back. Detalle en `specs/10d-resenar-favoritos.md` | `GET /compras/:id`, `POST /compras/:id/resenia` | `estrella-<n>`, `resenia-detalle`, `resenia-enviar`, `resenia-error`, `resenia-no-disponible` |
+| Favoritos | extra | lista de `TarjetaEvento`, recarga al volver, vacío con "Explorar eventos". Detalle en `specs/10d-resenar-favoritos.md` | `GET /usuarios/yo/favoritos` | `lista-favoritos`, `sin-favoritos`, `ir-a-explorar` |
+| Perfil | — | nombre, email, rol, cerrar sesión. Ruta `(comprador)/perfil` y `(organizador)/cuenta` (dos `/perfil` en grupos distintos chocan); el tab es `tab-perfil` en los dos roles | `GET /auth/yo` (al arrancar) | `perfil-nombre`, `perfil-email`, `perfil-rol`, `cerrar-sesion` |
+| MisEventos | CU2 | lista de eventos propios con vendidas/cupo, recaudado y chip "Finalizado"; abre ComprasDelEvento; recarga al volver (`specs/11-pantallas-organizador.md`). FAB "Nuevo evento" y aviso "Evento publicado" en `specs/11b-crear-evento.md` | `GET /organizadores/yo/eventos` | `lista-mis-eventos`, `evento-propio-<id>`, `sin-eventos-propios`, `fab-nuevo-evento` |
+| CrearEvento | CU4 | nombre, descripción, categoría (`Menu`), fecha y hora (`react-native-paper-dates`), lugar, URL de imagen opcional, de 1 a 10 tipos (agregar/quitar: nombre, precio, cupo, descripción opcional); en el front solo completitud, las reglas de R8 las responde el back (422 con su texto); éxito → Mis eventos con aviso "Evento publicado". Detalle en `specs/11b-crear-evento.md` | `GET /categorias`, `POST /eventos` | `evento-nombre`, `evento-categoria`, `evento-fecha`, `evento-hora`, `tipo-<i>-nombre`, `tipo-agregar`, `evento-guardar`, `evento-error` |
+| ComprasDelEvento | CU2 | tarjetas de disponibilidad por tipo (`ProgressBar` vendidas/cupo + "Quedan N" o "Agotado"), filtro por estado, lista de `TarjetaCompra` con el nombre del comprador; abre DetalleCompra. Detalle en `specs/11-pantallas-organizador.md` | `GET /eventos/:id/compras` | `disponibilidad-<tipoId>`, `filtro-estado-<ESTADO>`, `lista-compras-evento` |
 
 ## Componentes compartidos (`src/components/`)
 
@@ -46,13 +46,16 @@ Stack compartido (encima de los tabs):
 |---|---|
 | `ChipEstado` | color e ícono por `EstadoCompra` desde el tema |
 | `TarjetaEvento` | imagen, nombre, fecha, precio desde, puntaje organizador |
-| `SelectorCantidad` | − / n / + con min/max |
+| `ImagenEvento` | imagen 16:9 o placeholder con ícono |
+| `PuntajeOrganizador` | nombre + `Estrellas` + puntaje, o "Sin reseñas" |
+| `SelectorCantidad` | − / n / + con min/max (`<prefijo>-menos`, `<prefijo>-valor`, `<prefijo>-mas`) |
 | `Estrellas` | lectura y edición |
 | `EstadoVacio` | ícono + texto + acción opcional |
 | `ErrorCarga` | `HelperText`/`Banner` + Reintentar |
 | `Cargando` | `ActivityIndicator` centrado |
+| `TarjetaCompra` | evento, tipo × cantidad, total, `ChipEstado`, días restantes |
 | `LineaDeTiempo` | historial de estados |
-| `Pantalla` | `SafeAreaView` + scroll + ancho máximo en web |
+| `Pantalla` | `SafeAreaView` (bordes configurables) + scroll + ancho máximo en web |
 
 ## Estados obligatorios por pantalla
 

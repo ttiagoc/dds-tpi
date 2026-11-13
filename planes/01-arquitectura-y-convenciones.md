@@ -179,7 +179,7 @@ Cada `<recurso>Api.js` exporta funciones que devuelven `data` (`obtenerEventos(f
 
 ### Estado
 
-Sin librería global. `AuthContext` para sesión; datos de pantalla con hooks locales (`useCargar(fn, deps)` → `{ datos, cargando, error, recargar }`). Si aparece cache compartido real, evaluar TanStack Query con ADR.
+Sin librería global. `AuthContext` para sesión; datos de pantalla con hooks locales (`useCargar(fn)` → `{ datos, cargando, error, recargar }`; `fn` tiene que ser estable, memoizada con `useCallback` en la pantalla, porque el hook vuelve a cargar cada vez que cambia). Si aparece cache compartido real, evaluar TanStack Query con ADR.
 
 ## Formato y lint
 
