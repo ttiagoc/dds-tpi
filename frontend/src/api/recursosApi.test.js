@@ -1,5 +1,5 @@
 import { cliente } from "./cliente";
-import { buscarEventos, listarComprasDelEvento, obtenerEvento } from "./eventosApi";
+import { buscarEventos, crearEvento, listarComprasDelEvento, obtenerEvento } from "./eventosApi";
 import { listarCategorias } from "./categoriasApi";
 import { listarMisEventos, obtenerReseniasDeOrganizador } from "./organizadoresApi";
 import { agregarFavorito, listarFavoritos, quitarFavorito } from "./favoritosApi";
@@ -129,5 +129,13 @@ describe("marcarUtilizada", () => {
   it("hace POST /compras/:id/uso y devuelve data", async () => {
     expect(await marcarUtilizada(7)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/compras/7/uso");
+  });
+});
+
+describe("crearEvento", () => {
+  it("hace POST /eventos con el body y devuelve data", async () => {
+    const evento = { nombre: "Stand-up" };
+    expect(await crearEvento(evento)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/eventos", evento);
   });
 });

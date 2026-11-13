@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Card, Divider, Snackbar, Text, useTheme } from "react-native-paper";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { useAuth } from "../../auth/AuthContext";
 import { ChipEstado } from "../../components/ChipEstado";
 import { ConCompra } from "../../components/ConCompra";
@@ -9,6 +9,7 @@ import { FechaYLugar } from "../../components/FechaYLugar";
 import { ImagenEvento } from "../../components/ImagenEvento";
 import { LineaDeTiempo } from "../../components/LineaDeTiempo";
 import { Pantalla } from "../../components/Pantalla";
+import { useAvisoDeRuta } from "../../hooks/useAvisoDeRuta";
 import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio, textoDiasRestantes } from "../../utils/formato";
@@ -81,13 +82,12 @@ function SeccionResenia({ resenia }) {
 const AVISOS_DE_RUTA = { resenia: "¡Gracias por tu reseña!" };
 
 function useAviso(acciones) {
-  const { aviso: deRuta } = useLocalSearchParams();
-  const texto = acciones.aviso ?? AVISOS_DE_RUTA[deRuta] ?? null;
+  const deRuta = useAvisoDeRuta(AVISOS_DE_RUTA);
   const cerrar = () => {
     acciones.cerrarAviso();
-    if (deRuta) router.setParams({ aviso: undefined });
+    deRuta.cerrar();
   };
-  return { texto, cerrar };
+  return { texto: acciones.aviso ?? deRuta.texto, cerrar };
 }
 
 function Contenido({ compra, carga }) {

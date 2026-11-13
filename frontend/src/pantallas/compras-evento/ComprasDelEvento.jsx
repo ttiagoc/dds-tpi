@@ -1,17 +1,12 @@
-import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
-import { Text, useTheme } from "react-native-paper";
+import { useLocalSearchParams } from "expo-router";
+import { Text } from "react-native-paper";
 import { listarComprasDelEvento } from "../../api/eventosApi";
 import { EstadoVacio } from "../../components/EstadoVacio";
-import { FiltroEstadoCompra } from "../../components/FiltroEstadoCompra";
-import { ListaPaginada } from "../../components/ListaPaginada";
+import { ListaDeCompras } from "../../components/ListaDeCompras";
 import { Pantalla } from "../../components/Pantalla";
-import { TarjetaCompra } from "../../components/TarjetaCompra";
-import { useListaPaginada } from "../../hooks/useListaPaginada";
-import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { espaciado } from "../../tema/espaciado";
-import { Disponibilidad } from "./Disponibilidad";
+import { TipoDisponible } from "./Disponibilidad";
 
 const pedirCompras = ({ id, ...criterio }, pagina) =>
   listarComprasDelEvento(id, { ...criterio, ...pagina }).then((respuesta) => ({
@@ -21,54 +16,39 @@ const pedirCompras = ({ id, ...criterio }, pagina) =>
     extra: { evento: respuesta.evento, disponibilidad: respuesta.disponibilidad },
   }));
 
-function Encabezado({ extra, estado, onElegir }) {
+const VACIO = {
+  textoFiltrada: (etiqueta) => `No hay compras en estado ${etiqueta}`,
+  sinFiltro: <EstadoVacio icono="ticket-outline" texto="Este evento todavía no tiene compras" />,
+};
+
+function Encabezado({ extra, filtro }) {
   if (!extra) return null;
   return (
     <View style={estilos.encabezado}>
       <Text variant="headlineSmall">{extra.evento.nombre}</Text>
-      <Disponibilidad tipos={extra.disponibilidad} />
+      {extra.disponibilidad.map((tipo) => (
+        <TipoDisponible key={tipo.tipoEntradaId} tipo={tipo} />
+      ))}
       <Text variant="titleMedium">Compras</Text>
-      <FiltroEstadoCompra estado={estado} onElegir={onElegir} />
+      {filtro}
     </View>
-  );
-}
-
-function SinCompras({ estado, onVerTodas }) {
-  const { estados } = useTheme();
-  if (!estado) {
-    return <EstadoVacio icono="ticket-outline" texto="Este evento todavía no tiene compras" />;
-  }
-  return (
-    <EstadoVacio
-      icono="filter-remove-outline"
-      texto={`No hay compras en estado ${estados[estado].etiqueta}`}
-      accion={{ etiqueta: "Ver todas", onPress: onVerTodas, testID: "ver-todas" }}
-    />
   );
 }
 
 export default function ComprasDelEvento() {
   const { id } = useLocalSearchParams();
-  const [estado, setEstado] = useState(null);
-  const lista = useListaPaginada(pedirCompras, { id, estado: estado ?? undefined });
-  useRecargarAlVolver(lista.recargar);
   return (
     <Pantalla>
-      <ListaPaginada
+      <ListaDeCompras
         testID="lista-compras-evento"
-        lista={lista}
-        renderItem={(compra) => (
-          <TarjetaCompra
-            compra={compra}
-            conComprador
-            onPress={() => router.push(`/compras/${compra.id}`)}
-          />
-        )}
-        encabezado={<Encabezado extra={lista.extra} estado={estado} onElegir={setEstado} />}
-        vacio={<SinCompras estado={estado} onVerTodas={() => setEstado(null)} />}
+        pedir={pedirCompras}
+        criterio={{ id }}
+        conComprador
+        vacio={VACIO}
+        encabezado={Encabezado}
       />
     </Pantalla>
   );
 }
 
-const estilos = StyleSheet.create({ encabezado: { gap: espaciado.md } });
+const estilos = StyleSheet.create({ encabezado: { gap: espaciado.sm } });

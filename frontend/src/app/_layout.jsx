@@ -23,6 +23,7 @@ function Navegacion() {
           name="eventos/[id]/compras"
           options={{ headerShown: true, title: "Compras" }}
         />
+        <Stack.Screen name="eventos/nuevo" options={{ headerShown: true, title: "Nuevo evento" }} />
       </Stack.Protected>
       <Stack.Protected guard={!!usuario}>
         <Stack.Screen name="eventos/[id]/index" options={{ headerShown: true, title: "Evento" }} />

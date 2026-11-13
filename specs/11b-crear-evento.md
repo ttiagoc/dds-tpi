@@ -1,6 +1,6 @@
 # Spec 11b — Crear evento
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/crear-evento`
 - **Casos de uso:** CU4 (ver `planes/00-indice.md`)
 - **Iteración:** It4
@@ -112,3 +112,8 @@ Escenario: las categorías no cargan
 
 - Preguntas a la IA, el usuario eligió las opciones recomendadas: fecha y hora con `react-native-paper-dates` (anda en Expo Go y en web, para Cypress); en el front solo completitud y las reglas de R8 en el back con su 422; al publicar vuelve a Mis eventos con el aviso "Evento publicado"; de 1 a 10 tipos y una sola imagen opcional.
 - La IA agregó sin preguntar (revisable): FAB también en el estado vacío; textos "Nuevo evento", "Publicar evento", "Agregar tipo", "Evento publicado"; testIDs `evento-*`, `tipo-<i>-*`, `categoria-<id>`, `evento-error`, `mis-eventos-aviso`; extraer el aviso por parámetro de ruta de DetalleCompra a `useAvisoDeRuta`; hook `useFormularioEvento` y componente `TiposDeEntrada`; mandar `descripcion` del tipo solo si no está vacía.
+- Implementación: `react-native-paper-dates` se mockea a mano en `frontend/__mocks__/react-native-paper-dates.js` (botones `modal-fecha-ok` y `modal-hora-ok` que confirman el 5/12/2026 a las 22:00), porque los modales reales no se pueden manejar en RNTL. La lógica de armado del body quedó en `armarEvento.js` (`estaCompleto`, `armarEvento`, `formularioVacio`, `tipoVacio`, `MAXIMO_TIPOS`) y el formulario en `useFormularioEvento` (expone `valores`).
+- El test de "hasta 10 tipos" pasó de `CrearEvento.test.jsx` a `useFormularioEvento.test.js`: con diez grupos de inputs renderizados superaba el timeout de 5 s al correr en paralelo. La pantalla conserva el caso de agregar y quitar.
+- Revisión de calidad (hallazgos 1-5, aplicados): (1) `components/ListaDeCompras` concentra lista, filtro y vacío que repetían MisCompras y ComprasDelEvento; (2) las tarjetas de disponibilidad pasan al encabezado de la lista en ComprasDelEvento; (3) `ListaPaginada` recibe `espacioInferior` y el tema exporta `ESPACIO_FAB` para que el FAB no tape el último evento; (4) `useFormularioEvento` agrupa los campos en `valores`; (5) `SelectorCategoria` muestra un indicador de carga mientras llegan las categorías.
+- jscpd: tras la normalización de fin de línea (CRLF) aparecieron 2 clones entre pantallas de la spec 11 que antes no detectaba; se resolvieron con `ListaDeCompras` (hallazgo 1). Quedan 0 clones en el front y los 7 conocidos del back.
+- Verificado: 312 tests front en verde, `npm run calidad` sin errores, Cypress temporal (Fénix publica un evento y lo ve en Mis eventos) 1/1 y borrado. Expo Go: pendiente del usuario (selectores de fecha y hora).
