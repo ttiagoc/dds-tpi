@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 13 |
-| Features cerradas | 19 (It1, It2 e It3 cerradas) |
+| Sesiones | 14 |
+| Features cerradas | 20 (It1, It2 e It3 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -21,6 +21,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 7. Diseños escritos en la spec que fallan en una configuración que los tests no ejercitan: el servidor de Socket.io se integró con Express de una forma que solo funcionaba por websocket, y los tests se conectaban únicamente por ese transporte.
 8. Acciones fuera del alcance pedido y tests con dependencias inestables: formatear documentos de planificación que no correspondía tocar, y un test de hook que creaba la función a cargar en cada render, lo que disparaba recargas sin fin y colgaba la suite.
 9. Nombres de archivo que solo difieren en mayúsculas de otro del mismo directorio (`accionesCompra.js` junto a `AccionesCompra.jsx`): en Windows la importación resolvía al archivo equivocado y rompió la suite; la IA lo detectó al correr los tests y lo renombró.
+10. Tests que verifican el mecanismo interno y no el comportamiento: un test de limpieza contaba los oyentes registrados en el socket y siguió pasando ante un refactor que cambiaba cómo se registraban; se reescribió para comprobar que un evento posterior ya no llega.
 
 ---
 
@@ -293,3 +294,18 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Mock manual de la librería de fechas para Jest — publica módulos que Jest no transforma y sus modales no se pueden operar desde los tests — surgió de la IA al correr la suite.
   - El caso de agregar hasta 10 tipos se prueba en el hook y no en la pantalla — con diez grupos de campos el test superaba el tiempo límite al correr en paralelo — propuesta de la IA, aceptada.
 - **Aprendizaje:** en Expo Web las pestañas inactivas permanecen montadas, por lo que las aserciones e2e deben acotarse al contenedor de la pantalla visible para no dar falsos negativos.
+
+## Sesión 14 — 2026-11-13 — Chat de la compra en la app (It4)
+
+- **Objetivo:** cerrar la creación de eventos (registrada en la sesión 13) y especificar e implementar el chat de la compra en la app (CU5 y CU6), último ítem de la Iteración 4.
+- **Avances:**
+  - Spec 12 escrita y aprobada sin partir (8 escenarios). Los huecos (aparición del mensaje propio, contenido de cada burbuja, comportamiento sin conexión y límite del texto) se resolvieron en una sola tanda de preguntas. El plan de pantallas se actualizó con los identificadores de prueba.
+  - Implementación con TDD: pantalla Chat para los dos roles, con burbujas propias y ajenas, contador, envío por REST y recepción en vivo por Socket.io con deduplicación por id; un hook compartido administra la conexión, el room de la compra y la recarga tras perder la conexión. DetalleCompra suma el botón Chat y se actualiza cuando la otra parte cambia el estado de la compra.
+  - Revisión de calidad con 6 hallazgos aplicados (1 de severidad media, 5 bajas): una recarga fallida ya no reemplaza la conversación por el error, el contador de caracteres pasó a un componente compartido con Reseñar, se simplificó el registro de eventos del socket y su mock, y se compartieron los datos de prueba del chat.
+  - Verificación con una spec temporal de Cypress contra el back real (Ana escribe en una compra y Fénix ve el mensaje en su chat, en dos sesiones), eliminada al cerrar. Suite del front en 364 tests en verde y sin clones en el front; rama mergeada a `develop`.
+- **Decisiones:**
+  - El mensaje propio aparece al confirmarse el envío (201) y no de forma optimista; el que llega también por el socket se descarta por id — menos estado y una sola fuente de verdad — propuesta de la IA, aceptada.
+  - Aviso "Sin conexión en vivo" con actualización manual y recarga automática al reconectar; escribir sigue funcionando por REST — aplica el patrón de ADR-005 — propuesta de la IA, aceptada.
+  - El botón Chat se declara en el catálogo de acciones de la compra: las entradas pueden navegar a una ruta y el permiso pasa a ser opcional, porque R7 permite el chat en cualquier estado; Reseñar se migró al mismo esquema — una sola forma de declarar botones — propuesta de la IA, aceptada.
+  - Un socket por pantalla en lugar de uno compartido — el chat y el detalle pueden estar abiertos a la vez en la pila de navegación, y salir del room desde uno sacaría también al otro — propuesta de la IA, aceptada.
+- **Aprendizaje:** un test que verifica el mecanismo interno (cantidad de oyentes registrados) en lugar del comportamiento observable pasó sin cambios ante un refactor que lo debía afectar; se reescribió para comprobar que, tras salir de la pantalla, un evento ya no llega a su destinatario.
