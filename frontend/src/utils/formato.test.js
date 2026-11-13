@@ -1,5 +1,6 @@
 import {
   formatearFecha,
+  formatearFechaCorta,
   formatearPrecio,
   textoDiasRestantes,
   textoDisponibilidad,
@@ -65,5 +66,19 @@ describe("textoDiasRestantes", () => {
     [null, null],
   ])("con %p dice %p", (dias, texto) => {
     expect(textoDiasRestantes(dias)).toBe(texto);
+  });
+});
+
+describe("formatearFechaCorta", () => {
+  it("muestra día/mes y hora de 24 h en la zona pedida", () => {
+    expect(formatearFechaCorta("2026-11-13T01:05:00.000Z", { zonaHoraria: BUENOS_AIRES })).toBe(
+      "12/11 22:05",
+    );
+  });
+
+  it("completa con cero el día, el mes y la hora", () => {
+    expect(formatearFechaCorta("2026-03-04T07:09:00.000Z", { zonaHoraria: "UTC" })).toBe(
+      "04/03 07:09",
+    );
   });
 });

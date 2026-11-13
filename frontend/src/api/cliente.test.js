@@ -5,6 +5,7 @@ import {
   alExpirarSesion,
   mensajeDeError,
   codigoDeError,
+  obtenerToken,
 } from "./cliente";
 
 let pedidos;
@@ -30,6 +31,12 @@ describe("cliente", () => {
     establecerToken("abc");
     await cliente.get("/compras");
     expect(pedidos[0].headers.Authorization).toBe("Bearer abc");
+  });
+
+  it("obtenerToken devuelve el token de la sesión o null", () => {
+    expect(obtenerToken()).toBeNull();
+    establecerToken("abc");
+    expect(obtenerToken()).toBe("abc");
   });
 
   it("no agrega Authorization sin sesión", async () => {

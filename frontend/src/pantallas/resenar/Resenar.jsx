@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText, Text, TextInput } from "react-native-paper";
 import { AvisoConVolver } from "../../components/AvisoConVolver";
 import { ConCompra } from "../../components/ConCompra";
+import { Contador } from "../../components/Contador";
 import { EncabezadoEvento } from "../../components/EncabezadoEvento";
 import { Estrellas } from "../../components/Estrellas";
 import { Pantalla } from "../../components/Pantalla";
@@ -31,9 +32,7 @@ function Comentario({ resenia }) {
         disabled={resenia.enviando}
         testID="resenia-detalle"
       />
-      <HelperText type="info" visible style={estilos.contador}>
-        {`${resenia.detalle.length}/${MAXIMO_DETALLE}`}
-      </HelperText>
+      <Contador largo={resenia.detalle.length} maximo={MAXIMO_DETALLE} />
     </View>
   );
 }
@@ -82,6 +81,4 @@ export default function Resenar() {
   );
 }
 
-const estilos = StyleSheet.create({
-  contador: { textAlign: "right" },
-});
+const estilos = StyleSheet.create({});

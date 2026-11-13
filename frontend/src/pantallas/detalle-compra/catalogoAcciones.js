@@ -10,6 +10,14 @@ function textoDeCancelacion({ estado, cantidad, total }) {
 
 export const ACCIONES_COMPRA = [
   {
+    nombre: "resenar",
+    permiso: "puedeReseniar",
+    etiqueta: "Reseñar",
+    icono: "star-outline",
+    testID: "compra-resenar",
+    ruta: (compra) => `/compras/${compra.id}/resenia`,
+  },
+  {
     nombre: "utilizar",
     permiso: "puedeMarcarUtilizada",
     etiqueta: "Marcar utilizada",
@@ -38,6 +46,7 @@ export const ACCIONES_COMPRA = [
     permiso: "puedeCancelar",
     etiqueta: "Cancelar compra",
     testID: "compra-cancelar",
+    modo: "outlined",
     destructiva: true,
     pedir: cancelarCompra,
     aviso: (compra) =>
@@ -49,6 +58,17 @@ export const ACCIONES_COMPRA = [
       testID: "confirmar-cancelacion",
     },
   },
+  {
+    nombre: "chat",
+    etiqueta: "Chat",
+    icono: "chat-outline",
+    testID: "compra-chat",
+    modo: "outlined",
+    ruta: (compra) => `/compras/${compra.id}/chat`,
+  },
 ];
+
+export const accionVisible = (accion, permitidas) =>
+  !accion.permiso || !!permitidas[accion.permiso];
 
 export const accionDeCompra = (nombre) => ACCIONES_COMPRA.find((a) => a.nombre === nombre);

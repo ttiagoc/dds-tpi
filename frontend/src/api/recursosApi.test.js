@@ -6,6 +6,8 @@ import { agregarFavorito, listarFavoritos, quitarFavorito } from "./favoritosApi
 import {
   cancelarCompra,
   crearCompra,
+  enviarMensaje,
+  listarMensajes,
   listarMisCompras,
   marcarUtilizada,
   obtenerCompra,
@@ -137,5 +139,17 @@ describe("crearEvento", () => {
     const evento = { nombre: "Stand-up" };
     expect(await crearEvento(evento)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/eventos", evento);
+  });
+});
+
+describe("mensajes", () => {
+  it("listarMensajes hace GET /compras/:id/mensajes y devuelve data", async () => {
+    expect(await listarMensajes(7)).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/compras/7/mensajes");
+  });
+
+  it("enviarMensaje hace POST /compras/:id/mensajes con { mensaje } y devuelve data", async () => {
+    expect(await enviarMensaje(7, "Hola")).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras/7/mensajes", { mensaje: "Hola" });
   });
 });
