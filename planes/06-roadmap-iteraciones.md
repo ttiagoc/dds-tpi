@@ -54,7 +54,7 @@ Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `1
 **Aceptación:** todos los CU recorribles en Expo Go en el celular; tests RNTL de Explorar, Comprar, MisCompras, DetalleCompra.
 
 ## It5 — Calidad (26-29/11)
-- [ ] `chore/e2e-cypress`: setup + 3 flujos. Cypress 16 quitó `Cypress.env()`: migrar `cy.resetDatos()` (`e2e/cypress/support/commands.js`) a `Cypress.expose()`.
+- [x] `chore/e2e-cypress` (spec 13): setup + 3 flujos. Cypress 16 quitó `Cypress.env()`: migrar `cy.resetDatos()` (`e2e/cypress/support/commands.js`) a `Cypress.expose()`.
 - [ ] `chore/docker-back`: Dockerfile + `.dockerignore`.
 - [ ] `fix/pulido-ui`: revisión con `sistema-diseno`, modo oscuro, accesibilidad.
 - [ ] Revisión con subagente `revisor-reglas-negocio` y `/code-review`.

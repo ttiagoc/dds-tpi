@@ -43,7 +43,7 @@ Ejemplo de nombre: `describe("Compra") > describe("cancelar") > it("pasa a REEMB
 ```
 e2e/
   cypress.config.js     baseUrl http://localhost:8081, expose.apiUrl http://localhost:3000 (raíz de la config)
-  cypress/support/commands.js   cy.resetDatos(), cy.ingresar(email), cy.salir(), cy.tid(id) → cy.get(`[data-testid="${id}"]`)
+  cypress/support/commands.js   cy.resetDatos(), cy.ingresar(email), cy.salir(), cy.irATab(tab), cy.abrirMiCompra(evento), cy.abrirCompraDelEvento(evento, comprador), cy.enviarMensajeComo(email, compraId, texto), cy.tid(id) → cy.get(`[data-testid="${id}"]`)
   cypress/e2e/
     comprar-entrada.cy.js       Ana busca → detalle → compra → ve la compra PENDIENTE en Mis compras
     utilizada-y-resenia.cy.js   Fénix marca utilizada la compra de Ana → Ana la reseña y ve su reseña

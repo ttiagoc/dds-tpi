@@ -1,6 +1,6 @@
 # Spec 13 — Flujos e2e con Cypress
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `chore/e2e-cypress`
 - **Casos de uso:** CU1, CU3, CU12 (flujo de compra); CU9 (utilizada y reseña); CU5, CU6 (chat) (ver `planes/00-indice.md`)
 - **Iteración:** It5
@@ -39,10 +39,10 @@ Sin cambios. Usa:
 | Pieza | Cambio |
 |---|---|
 | `e2e/cypress.config.js` | `env: { apiUrl }` → clave raíz `expose: { apiUrl: "http://localhost:3000" }`. Sin `viewport` por test: queda el `viewportWidth/Height` 375×812 de la config. |
-| `e2e/cypress/support/commands.js` | `cy.resetDatos()` usa `Cypress.expose("apiUrl")`. Nuevos: `cy.ingresar(email)` (visita `/`, completa `login-email` y `login-password` con la contraseña demo del seed, `login-ingresar`, espera que desaparezca el login); `cy.salir()` (tab Perfil/Cuenta → `cerrar-sesion`, espera `login-email`); `cy.tid(id)` se mantiene. Un helper `iniciarSesionApi(email)` para `cy.request` del chat. |
+| `e2e/cypress/support/commands.js` | `cy.resetDatos()` usa `Cypress.expose("apiUrl")`. Nuevos: `cy.ingresar(email)` (visita `/`, completa `login-email` y `login-password` con la contraseña demo del seed, `login-ingresar`, espera que desaparezca el login); `cy.salir()` (tab Perfil/Cuenta → `cerrar-sesion`, espera `login-email`); `cy.irATab(tab)` (`cy.visit("/")` + click en `tab-<tab>`, la sesión sigue en `localStorage`); `cy.abrirMiCompra(evento)` y `cy.abrirCompraDelEvento(evento, comprador)` (navegación repetida entre flujos); `cy.enviarMensajeComo(email, compraId, texto)` (login + mensaje por `cy.request`); `cy.tid(id)` se mantiene. |
 | `e2e/cypress/e2e/` | Un archivo por flujo: `comprar-entrada.cy.js`, `utilizada-y-resenia.cy.js`, `chat-compra.cy.js`. |
-| `e2e/correr-cypress.mjs` | Corre en Windows desde PowerShell, cmd y Git Bash (hoy falla desde Git Bash). |
-| `package.json` (raíz) | `e2e` sigue corriendo solo Cypress. Nuevo `e2e:servidores`: back con `NODE_ENV=test` + `expo start --web` con `EXPO_PUBLIC_API_URL=http://localhost:3000`, multiplataforma (sin `VAR=x` de shell). |
+| `e2e/correr-cypress.mjs` | Sin cambios: verificado que corre desde PowerShell y Git Bash (ya borra `ELECTRON_RUN_AS_NODE`, que heredan las terminales de VS Code). |
+| `package.json` (raíz) | `e2e` sigue corriendo solo Cypress. Nuevo `e2e:servidores` → `e2e/servidores.mjs`: API de `concurrently` con `env` y `cwd` por proceso (back con `NODE_ENV=test` + `expo start --web` con `EXPO_PUBLIC_API_URL=http://localhost:3000`), multiplataforma (sin `VAR=x` de shell). |
 
 Datos: los flujos usan el seed (`Demo1234!` para todos). Compra `ana-primavera` (Festival Primavera Sonora, CONFIRMADA, organizador Fénix). Para el flujo de compra, un evento futuro del seed sin compras previas de Ana, así la tarjeta nueva se distingue sin ambigüedad.
 
@@ -93,6 +93,8 @@ Escenario: el back no está en modo test
 
 Verificación: `npm run e2e` 3/3 desde la raíz en Windows, con `npm run e2e:servidores` en otra terminal; `npm test` de back y front; `npm run calidad` (lint y prettier incluyen `e2e/`; quedan los 7 clones conocidos del back).
 
+Verificación del último escenario (manual, una vez): back en development (`JWT_SECRET` local, sin `NODE_ENV=test`) → `POST /test/reset` 404 y Cypress falla en el `before each` con `Status: 404 - Not Found`, sin tocar datos. Sin test automático.
+
 ## Fuera de alcance
 
 - Que `npm run e2e` levante y baje los servidores (decidido: servidores aparte).
@@ -105,4 +107,6 @@ Verificación: `npm run e2e` 3/3 desde la raíz en Windows, con `npm run e2e:ser
 
 - La IA verificó la API de `Cypress.expose` en la documentación oficial y en los tipos de la versión instalada, no de memoria: `expose` va en la raíz de la config (no dentro de `e2e`) y `CYPRESS_*` no alimenta `expose`.
 - La IA señaló que el pedido difería de `planes/05-testing.md` (flujos distintos y `cy.login` por `localStorage`); se actualizó el plan.
+- Revisión de calidad (5 hallazgos, aplicados todos): comandos `cy.abrirMiCompra`/`cy.abrirCompraDelEvento` para la navegación repetida; `cy.irATab` en vez de encadenar `cy.go("back")` (dependía de la profundidad del historial); se sacó un `.filter(":visible")` especulativo; se verificó a mano el escenario sin modo test; `CLAUDE.md` documenta `npm run e2e:servidores`.
+- En el primer intento el flujo de compra eligió `tipo-entrada-1` del detalle del evento, que sigue montado debajo de Comprar en web: se filtra con `:visible`.
 - Decisiones del usuario: el flujo de compra termina en PENDIENTE; el chat combina UI + respuesta de Fénix por API (prueba el socket) + verificación secuencial con login de Fénix; cambio de usuario cerrando sesión por la UI; servidores aparte con `npm run e2e:servidores`.
