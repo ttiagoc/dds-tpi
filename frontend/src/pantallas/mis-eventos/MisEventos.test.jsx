@@ -17,6 +17,7 @@ const PASADO = eventoPropio({
   vendidas: 150,
   cupo: 150,
   recaudado: 6000000,
+  finalizado: true,
 });
 const FUTURO = eventoPropio({ id: 1 });
 const enfocar = () => act(() => useFocusEffect.mock.calls.at(-1)[0]());
@@ -64,6 +65,16 @@ describe("MisEventos: lista", () => {
         /^Rock en el Parque, .+, 150 de 150 vendidas, recaudado \$\s6\.000\.000, finalizado$/,
       ),
     ).toBeTruthy();
+  });
+
+  it("Finalizado sale del back y no de la fecha del dispositivo", async () => {
+    listarMisEventos.mockResolvedValue(
+      paginaDeEventos([
+        eventoPropio({ id: 1, fecha: "2026-11-11T11:59:59.000Z", finalizado: false }),
+      ]),
+    );
+    await abrir();
+    expect(screen.getByTestId("evento-propio-1")).not.toHaveTextContent(/Finalizado/);
   });
 
   it("tocar un evento abre sus compras", async () => {

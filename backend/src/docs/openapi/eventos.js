@@ -131,6 +131,10 @@ export default {
           },
         },
         esFavorito: { type: "boolean", description: "Siempre false sin sesión de comprador" },
+        finalizado: {
+          type: "boolean",
+          description: "El evento ya ocurrió: no se puede comprar (R1)",
+        },
       },
     },
     EventoDetalle: extiende("EventoResumen", {

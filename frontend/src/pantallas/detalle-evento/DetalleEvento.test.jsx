@@ -1,5 +1,5 @@
 import { screen, fireEvent, waitFor, act } from "@testing-library/react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import DetalleEvento from "./DetalleEvento";
 import { obtenerEvento } from "../../api/eventosApi";
 import { obtenerReseniasDeOrganizador } from "../../api/organizadoresApi";
@@ -145,6 +145,26 @@ describe("DetalleEvento: comprar y permisos", () => {
     expect(screen.getByTestId("tipo-entrada-10")).toHaveTextContent(/Agotado/);
     expect(screen.getByTestId("tipo-entrada-11")).toHaveTextContent(/Agotado/);
     expect(screen.queryByText(/Quedan/)).toBeNull();
+  });
+
+  it("en un evento finalizado no ofrece comprar", async () => {
+    obtenerEvento.mockResolvedValue(eventoDetalle({ finalizado: true }));
+    await abrir();
+    expect(screen.queryByTestId("evento-comprar")).toBeNull();
+    expect(screen.getByTestId("evento-finalizado")).toBeDisabled();
+    expect(screen.getByTestId("evento-finalizado")).toHaveTextContent(/Evento finalizado/);
+  });
+
+  it("al volver a la pantalla recarga el evento con lo que queda", async () => {
+    await abrir();
+    const enfocar = () => act(() => useFocusEffect.mock.calls.at(-1)[0]());
+    await enfocar();
+    const sinCampo = eventoDetalle();
+    sinCampo.tiposEntrada = sinCampo.tiposEntrada.map((t) => ({ ...t, disponibles: 0 }));
+    obtenerEvento.mockResolvedValue(sinCampo);
+    await enfocar();
+    await waitFor(() => expect(screen.getByTestId("evento-comprar")).toHaveTextContent("Agotado"));
+    expect(obtenerEvento).toHaveBeenCalledTimes(2);
   });
 
   it("un organizador no ve el favorito ni Comprar", async () => {

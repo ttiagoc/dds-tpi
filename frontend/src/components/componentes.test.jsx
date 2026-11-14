@@ -4,9 +4,11 @@ import { screen, fireEvent, within } from "@testing-library/react-native";
 import { renderConProviders } from "../test-utils/renderConProviders";
 import { BarraDeVentas } from "./BarraDeVentas";
 import { ChipEstado } from "./ChipEstado";
+import { ConCarga } from "./ConCarga";
 import { ChipsFiltro } from "./ChipsFiltro";
 import { Contador } from "./Contador";
 import { ErrorCarga } from "./ErrorCarga";
+import { ErrorEnLinea } from "./ErrorEnLinea";
 import { EstadoVacio } from "./EstadoVacio";
 import { Cargando } from "./Cargando";
 import { Pantalla } from "./Pantalla";
@@ -139,5 +141,58 @@ describe("ChipsFiltro", () => {
       expect(noElegido.backgroundColor).not.toBe(elegido.backgroundColor);
     }
     expect(elegido.borderColor).toBe("transparent");
+  });
+});
+
+describe("ConCarga", () => {
+  const carga = (cambios) => ({
+    datos: null,
+    cargando: false,
+    error: null,
+    codigoError: null,
+    recargar: jest.fn(),
+    ...cambios,
+  });
+  const contenido = (datos) => <Text>{`Datos: ${datos}`}</Text>;
+
+  it("si falla una recarga con datos sigue mostrando los datos", async () => {
+    await renderConProviders(
+      <ConCarga carga={carga({ datos: "compra", error: "Sin conexión" })}>{contenido}</ConCarga>,
+    );
+    expect(screen.getByText("Datos: compra")).toBeTruthy();
+    expect(screen.queryByText("Reintentar")).toBeNull();
+  });
+
+  it("sin datos muestra el error con Reintentar", async () => {
+    await renderConProviders(
+      <ConCarga carga={carga({ error: "Sin conexión" })}>{contenido}</ConCarga>,
+    );
+    expect(screen.getByText("Sin conexión")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Reintentar" })).toBeTruthy();
+  });
+
+  it("un 404 muestra el aviso aunque haya datos", async () => {
+    await renderConProviders(
+      <ConCarga
+        carga={carga({ datos: "compra", error: "No existe la compra", codigoError: 404 })}
+        iconoInexistente="ticket-outline"
+        testIDInexistente="compra-inexistente"
+      >
+        {contenido}
+      </ConCarga>,
+    );
+    expect(screen.getByTestId("compra-inexistente")).toHaveTextContent(/No existe la compra/);
+  });
+});
+
+describe("ErrorEnLinea", () => {
+  it("muestra el mensaje y Reintentar llama a la acción", async () => {
+    const onReintentar = jest.fn();
+    await renderConProviders(
+      <ErrorEnLinea mensaje="Sin conexión" onReintentar={onReintentar} testID="algo-error" />,
+    );
+    expect(screen.getByTestId("algo-error")).toHaveTextContent("Sin conexión");
+    await fireEvent.press(screen.getByRole("button", { name: "Reintentar" }));
+    expect(onReintentar).toHaveBeenCalledTimes(1);
   });
 });

@@ -57,7 +57,7 @@ Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `1
 - [x] `chore/e2e-cypress` (spec 13): setup + 3 flujos. Cypress 16 quitó `Cypress.env()`: migrar `cy.resetDatos()` (`e2e/cypress/support/commands.js`) a `Cypress.expose()`.
 - [x] `chore/docker-back` (spec 14, ADR-010): Dockerfile + `.dockerignore`.
 - [x] `fix/pulido-ui` (spec 15): revisión con `sistema-diseno`, modo oscuro, accesibilidad.
-- [ ] Revisión con subagente `revisor-reglas-negocio` y `/code-review`.
+- [x] Revisión con subagente `revisor-reglas-negocio` y `/code-review` (spec 16).
 
 **Aceptación:** `npm test` (back y front) y `npm run e2e` verdes; demo completa en celular sin errores.
 

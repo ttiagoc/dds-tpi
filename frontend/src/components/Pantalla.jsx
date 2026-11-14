@@ -1,9 +1,9 @@
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "react-native-paper";
 import { espaciado, ANCHO_MAXIMO } from "../tema/espaciado";
 
-function Contenido({ children, scroll, refreshing, onRefresh, testID }) {
+function Contenido({ children, scroll, testID }) {
   const contenido = <View style={estilos.contenido}>{children}</View>;
   if (!scroll) {
     return (
@@ -12,16 +12,8 @@ function Contenido({ children, scroll, refreshing, onRefresh, testID }) {
       </View>
     );
   }
-  const refresco = onRefresh ? (
-    <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} />
-  ) : undefined;
   return (
-    <ScrollView
-      style={estilos.pantalla}
-      refreshControl={refresco}
-      keyboardShouldPersistTaps="handled"
-      testID={testID}
-    >
+    <ScrollView style={estilos.pantalla} keyboardShouldPersistTaps="handled" testID={testID}>
       {contenido}
     </ScrollView>
   );

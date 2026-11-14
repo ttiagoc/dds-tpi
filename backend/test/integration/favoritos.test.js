@@ -43,7 +43,9 @@ describe("favoritos de Ana", () => {
 
   it("admite un evento que ya ocurrió y lo lista primero", async () => {
     expect((await agregar(await idDeEvento(ROCK))).status).toBe(204);
-    expect(nombres(await listar())).toEqual([ROCK, HAMLET, ELECTRO]);
+    const lista = await listar();
+    expect(nombres(lista)).toEqual([ROCK, HAMLET, ELECTRO]);
+    expect(lista.body.map((e) => e.finalizado)).toEqual([true, false, false]);
   });
 
   it("quitar Hamlet dos veces responde 204 y deja de ser favorito en el detalle", async () => {
