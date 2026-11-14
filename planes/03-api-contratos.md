@@ -23,10 +23,11 @@ Leyenda: 🔓 público · 🔐 logueado · 🅒 solo COMPRADOR · 🅞 solo ORGA
   "categoria": { "id": 1, "nombre": "Recitales" },
   "precioDesde": 45000, "imagen": "https://...",
   "organizador": { "id": 3, "nombre": "Fénix Producciones", "puntajePromedio": 4.5 },
-  "esFavorito": false
+  "esFavorito": false,
+  "finalizado": false
 }
 ```
-`esFavorito` solo si hay sesión de comprador; si no, `false`.
+`esFavorito` solo si hay sesión de comprador; si no, `false`. `finalizado` = el evento ya ocurrió (`Evento.yaOcurrio(ahora)`, `fecha <= ahora`); lo usa el front para no ofrecer comprar (spec 16).
 
 ### EventoDetalle
 EventoResumen + `descripcion`, `multimedia: string[]`, `tiposEntrada: [{ id, nombre, descripcion, precio, cupo, disponibles }]`.
