@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { codigoDeError, mensajeDeError } from "../api/cliente";
 
+const conCambios = (cargar, version, cambios) => (anterior) => ({
+  cargar,
+  version,
+  datos: anterior.cargar === cargar ? anterior.datos : null,
+  error: null,
+  ...cambios,
+});
+
 export function useCargar(cargar) {
   const [version, setVersion] = useState(0);
   const [resultado, setResultado] = useState({ cargar: null, version: -1, datos: null });
@@ -8,10 +16,10 @@ export function useCargar(cargar) {
   useEffect(() => {
     let vigente = true;
     const terminar = (cambios) => {
-      if (vigente) setResultado({ cargar, version, datos: null, error: null, ...cambios });
+      if (vigente) setResultado(conCambios(cargar, version, cambios));
     };
     cargar().then(
-      (datos) => terminar({ datos }),
+      (datos) => terminar({ datos, codigoError: null }),
       (error) =>
         terminar({
           error: mensajeDeError(error),

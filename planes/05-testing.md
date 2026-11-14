@@ -54,7 +54,7 @@ e2e/
 - Cypress 16 quitó `Cypress.env()`: valores públicos en `expose` y `Cypress.expose("apiUrl")`.
 - `cy.ingresar(email)` hace el login por la UI con la contraseña demo del seed; `cy.salir()` cierra sesión desde Perfil/Cuenta.
 - Viewport mobile 375×812 desde la config.
-- En web las tabs inactivas siguen montadas: acotar aserciones al contenedor (`cy.tid("lista-...").within`). Navegar por la UI (el deep link en frío cae a las tabs).
+- En web las tabs inactivas siguen montadas: acotar aserciones al contenedor (`cy.tid("lista-...").within`). Navegar por la UI (los flujos prueban lo que hace el usuario); desde la spec 16 una recarga o deep link en frío conserva la ruta.
 - react-native-web traduce `testID` → `data-testid`.
 
 ## Comandos

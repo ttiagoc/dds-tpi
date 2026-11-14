@@ -11,15 +11,18 @@ export function useEnvio({ recargar } = {}) {
     ocupado.current = true;
     setEnCurso(nombre);
     setError(null);
+    let respuesta;
     try {
-      alResolver(await pedir());
+      respuesta = await pedir();
     } catch (e) {
       setError(mensajeDeError(e));
       if (codigoDeError(e) === 422) recargar?.();
+      return;
     } finally {
       ocupado.current = false;
       setEnCurso(null);
     }
+    alResolver(respuesta);
   };
 
   return { enCurso, error, enviar };

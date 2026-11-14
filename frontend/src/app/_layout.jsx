@@ -3,10 +3,12 @@ import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider, useAuth } from "../auth/AuthContext";
+import { Cargando } from "../components/Cargando";
 import { temaClaro, temaOscuro, navegacionClara, navegacionOscura } from "../tema/tema";
 
 function Navegacion() {
-  const { usuario } = useAuth();
+  const { usuario, cargando } = useAuth();
+  if (cargando) return <Cargando />;
   const rol = usuario?.rol;
   return (
     <Stack screenOptions={{ headerShown: false }}>

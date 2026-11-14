@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { StyleSheet, View } from "react-native";
-import { ActivityIndicator, Button, HelperText, Surface, Text, useTheme } from "react-native-paper";
+import { ActivityIndicator, Surface, Text, useTheme } from "react-native-paper";
 import { obtenerReseniasDeOrganizador } from "../../api/organizadoresApi";
+import { ErrorEnLinea } from "../../components/ErrorEnLinea";
 import { Estrellas } from "../../components/Estrellas";
 import { useCargar } from "../../hooks/useCargar";
 import { espaciado, radios } from "../../tema/espaciado";
@@ -39,18 +40,7 @@ function Resumen({ organizador }) {
 
 function Contenido({ datos, cargando, error, recargar }) {
   if (cargando) return <ActivityIndicator accessibilityLabel="Cargando reseñas" />;
-  if (error) {
-    return (
-      <View>
-        <HelperText type="error" visible>
-          {error}
-        </HelperText>
-        <Button mode="text" onPress={recargar}>
-          Reintentar
-        </Button>
-      </View>
-    );
-  }
+  if (error) return <ErrorEnLinea mensaje={error} onReintentar={recargar} />;
   return (
     <>
       <Resumen organizador={datos.organizador} />

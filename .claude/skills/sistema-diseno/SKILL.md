@@ -42,7 +42,7 @@ export const temaClaro = {
 
 | Componente | Props | Notas |
 |---|---|---|
-| `Pantalla` | `children, scroll?, refreshing?, onRefresh?, bordes?` | `SafeAreaView` con `edges={bordes}` (`["top", "bottom"]` en pantallas sin header, como Login), `keyboardShouldPersistTaps="handled"` con scroll, padding `lg`, `maxWidth: 480` centrado en web |
+| `Pantalla` | `children, scroll?, bordes?, testID?` | `SafeAreaView` con `edges={bordes}` (`["top", "bottom"]` en pantallas sin header, como Login), `keyboardShouldPersistTaps="handled"` con scroll, padding `lg`, `maxWidth: 480` centrado en web |
 | `Cargando` | — | `ActivityIndicator` centrado |
 | `ErrorCarga` | `mensaje, onReintentar` | ícono + texto + botón |
 | `Aviso` | `icono, texto, color?, accion?, testID?` | base interna de `EstadoVacio` y `ErrorCarga`; no usar directo en pantallas |
@@ -58,6 +58,7 @@ export const temaClaro = {
 | `ListaDeCompras` | `pedir, criterio, testID, vacio: { textoFiltrada, sinFiltro, testID }, conComprador?, encabezado?({ extra, filtro })` | `ListaPaginada` de `TarjetaCompra` con `FiltroEstadoCompra`; vacío filtrado con "Ver todas"; recarga al volver; la usan MisCompras y ComprasDelEvento |
 | `BarraDeVentas` | `vendidas, cupo` | `ProgressBar` + "N de M vendidas"; la barra va en una pista de alto fijo (`espaciado.xs`, `testID="barra-ventas-pista"`) porque en web el `ProgressBar` de Paper toma `height: '100%'` del contenedor y el texto se superpone con lo que sigue |
 | `EncabezadoEvento` | `evento` | nombre (`headlineSmall`) + `FechaYLugar`; encabeza Comprar, Reseñar y Chat |
+| `ErrorEnLinea` | `mensaje, onReintentar, testID?` | `HelperText` de error + "Reintentar" (texto) dentro de una sección, sin reemplazar la pantalla (categorías de Nuevo evento, reseñas del organizador); para la pantalla entera, `ErrorCarga` |
 | `Contador` | `largo, maximo, testID` | `HelperText` "N/M" alineado a la derecha; Reseñar y Chat |
 | `FechaYLugar` | `fecha, lugar, variant?, atenuado?` | "dom 20 dic · 20:00 · Lugar" |
 | `TarjetaCompra` | `compra, onPress` | evento, tipo × cantidad · total, `ChipEstado`, días restantes; `testID="compra-<id>"` |

@@ -11,6 +11,7 @@ export function eventoResumen(cambios = {}) {
     imagen: "https://imagenes.test/piojos.jpg",
     organizador: { id: 2, nombre: "Fénix Producciones", puntajePromedio: 4.5 },
     esFavorito: false,
+    finalizado: false,
     ...cambios,
   };
 }

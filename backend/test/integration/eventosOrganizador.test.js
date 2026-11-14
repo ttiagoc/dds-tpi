@@ -129,6 +129,14 @@ describe("GET /organizadores/yo/eventos", () => {
     });
     expect(evento("Los Piojos en River")).toMatchObject({ vendidas: 2, cupo: 700, recaudado: 0 });
     expect(evento("Clásico de Básquet")).toMatchObject({ vendidas: 0, recaudado: 0 });
+    expect(res.body.eventos.map((e) => e.finalizado)).toEqual([
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ]);
   });
 
   it("pagina con limit y page", async () => {

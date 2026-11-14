@@ -5,9 +5,7 @@ import { FechaYLugar } from "../../components/FechaYLugar";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio } from "../../utils/formato";
 
-const yaOcurrio = (fecha) => new Date(fecha).getTime() < Date.now();
-
-const etiquetaDe = ({ nombre, fecha, lugar, vendidas, cupo, recaudado }, finalizado) =>
+const etiquetaDe = ({ nombre, fecha, lugar, vendidas, cupo, recaudado, finalizado }) =>
   [
     nombre,
     formatearFecha(fecha),
@@ -19,14 +17,13 @@ const etiquetaDe = ({ nombre, fecha, lugar, vendidas, cupo, recaudado }, finaliz
 
 export function TarjetaEventoPropio({ evento, onPress }) {
   const { colors } = useTheme();
-  const { id, nombre, fecha, lugar, vendidas, cupo, recaudado } = evento;
-  const finalizado = yaOcurrio(fecha);
+  const { id, nombre, fecha, lugar, vendidas, cupo, recaudado, finalizado } = evento;
   return (
     <Card
       mode="elevated"
       onPress={onPress}
       testID={`evento-propio-${id}`}
-      accessibilityLabel={etiquetaDe(evento, finalizado)}
+      accessibilityLabel={etiquetaDe(evento)}
     >
       <Card.Content style={estilos.contenido}>
         <View style={estilos.titulo}>

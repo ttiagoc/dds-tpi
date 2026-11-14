@@ -8,6 +8,7 @@ import { ConEvento } from "../../components/ConEvento";
 import { FechaYLugar } from "../../components/FechaYLugar";
 import { ImagenEvento } from "../../components/ImagenEvento";
 import { PuntajeOrganizador } from "../../components/PuntajeOrganizador";
+import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { espaciado } from "../../tema/espaciado";
 import { BotonFavorito } from "./BotonFavorito";
 import { ReseniasOrganizador } from "./ReseniasOrganizador";
@@ -43,6 +44,13 @@ function Encabezado({ evento, esComprador, onErrorFavorito }) {
 }
 
 function BotonComprar({ evento }) {
+  if (evento.finalizado) {
+    return (
+      <Button mode="contained" icon="flag-checkered" disabled testID="evento-finalizado">
+        Evento finalizado
+      </Button>
+    );
+  }
   const agotado = evento.tiposEntrada.every((tipo) => tipo.disponibles === 0);
   return (
     <Button
@@ -57,8 +65,9 @@ function BotonComprar({ evento }) {
   );
 }
 
-function Contenido({ evento }) {
+function Contenido({ evento, recargar }) {
   const { usuario } = useAuth();
+  useRecargarAlVolver(recargar);
   const esComprador = usuario?.rol === "COMPRADOR";
   const [aviso, setAviso] = useState(null);
   return (
@@ -77,7 +86,11 @@ function Contenido({ evento }) {
 }
 
 export default function DetalleEvento() {
-  return <ConEvento>{(evento) => <Contenido evento={evento} />}</ConEvento>;
+  return (
+    <ConEvento>
+      {(evento, carga) => <Contenido evento={evento} recargar={carga.recargar} />}
+    </ConEvento>
+  );
 }
 
 const estilos = StyleSheet.create({

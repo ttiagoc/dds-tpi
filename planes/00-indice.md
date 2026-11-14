@@ -16,10 +16,10 @@
 ## Estado
 
 - [x] It0 — Setup, planes, skills, ADRs
-- [ ] It1 — Backend base, dominio, auth
-- [ ] It2 — API completa + Swagger
-- [ ] It3 — Chat Socket.io (back)
-- [ ] It4 — App Expo
+- [x] It1 — Backend base, dominio, auth
+- [x] It2 — API completa + Swagger
+- [x] It3 — Chat Socket.io (back)
+- [x] It4 — App Expo
 - [ ] It5 — E2E, Docker, pulido
 - [ ] It6 — Video
 
@@ -33,7 +33,7 @@
 | CU4 | Organizador crea evento con tipos de entrada (precio + cupo) | `POST /eventos` | CrearEvento | dominio `Evento`/`TipoEntrada`, validación zod |
 | CU5 | Comprador envía mensajes en el chat de la compra | `POST /compras/:id/mensajes` + socket | Chat | service mensajes, socket |
 | CU6 | Organizador responde mensajes en el chat | ídem | Chat | permisos chat |
-| CU7 | Comprador cancela para obtener reembolso | `POST /compras/:id/cancelacion` | DetalleCompra | transiciones, libera cupo, e2e cancelar |
+| CU7 | Comprador cancela para obtener reembolso | `POST /compras/:id/cancelacion` | DetalleCompra | transiciones, libera cupo, integración `compras.test.js`, RNTL `AccionesCompra.test.jsx` |
 | CU8 | Cancelación solo si no UTILIZADA y evento no realizado | ídem (422) | DetalleCompra (botón oculto/deshabilitado) | `Compra.puedeCancelarse` |
 | CU9 | Con entrada utilizada, comprador puntúa y comenta | `POST /compras/:id/uso`, `POST /compras/:id/resenia` | DetalleCompra, Reseñar | reglas de reseña |
 | CU10 | Reseñas del organizador visibles en sus eventos | `GET /organizadores/:id/resenias`, `GET /eventos/:id` | DetalleEvento | promedio organizador |

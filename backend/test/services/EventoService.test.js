@@ -138,6 +138,18 @@ describe("EventoService.resumenes", () => {
     ]);
     expect(repos.reseniaRepository.findAll).toHaveBeenCalledTimes(1);
   });
+
+  it("marca finalizado según el reloj del servicio", async () => {
+    const lista = [
+      crearEvento({ id: 20, fecha: AHORA }),
+      crearEvento({ id: 21, fecha: enDias(1) }),
+    ];
+    const resultado = await service.resumenes(lista, null);
+    expect(resultado.map((e) => [e.id, e.finalizado])).toEqual([
+      [20, true],
+      [21, false],
+    ]);
+  });
 });
 
 describe("EventoService.obtener", () => {
@@ -151,6 +163,7 @@ describe("EventoService.obtener", () => {
       descripcion: "Vuelven los Piojos",
       organizador: { id: 2, nombre: "Fénix Producciones", puntajePromedio: 4.5 },
       esFavorito: false,
+      finalizado: true,
       tiposEntrada: [
         { id: 1, nombre: "Campo", descripcion: "", precio: 45000, cupo: 10, disponibles: 6 },
         { id: 2, nombre: "Platea", descripcion: "", precio: 80000, cupo: 5, disponibles: 5 },
@@ -184,6 +197,7 @@ describe("EventoService.toResumen y toDetalle", () => {
       imagen: "https://img/1",
       organizador: { id: 2, nombre: "Fénix Producciones", puntajePromedio: 4.5 },
       esFavorito: true,
+      finalizado: false,
     });
   });
 

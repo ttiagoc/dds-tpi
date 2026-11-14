@@ -151,7 +151,15 @@ describe("GET /eventos/:id", () => {
       imagen: "https://picsum.photos/seed/rock/800/450",
       organizador: { nombre: "Fénix Producciones", puntajePromedio: 4.5 },
       tiposEntrada: [{ nombre: "Campo", precio: 40000, cupo: 600, disponibles: 594 }],
+      finalizado: true,
     });
+  });
+
+  it("un evento futuro no está finalizado, tampoco en la búsqueda", async () => {
+    const res = await get(`/eventos/${await idDelEvento("Los Piojos en River")}`);
+    expect(res.body.finalizado).toBe(false);
+    const busqueda = await get("/eventos");
+    expect(busqueda.body.eventos.every((e) => e.finalizado === false)).toBe(true);
   });
 
   it("marca esFavorito con el token de Ana", async () => {

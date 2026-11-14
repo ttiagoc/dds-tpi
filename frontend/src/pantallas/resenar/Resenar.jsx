@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { Button, HelperText, Text, TextInput } from "react-native-paper";
 import { AvisoConVolver } from "../../components/AvisoConVolver";
 import { ConCompra } from "../../components/ConCompra";
@@ -80,5 +80,3 @@ export default function Resenar() {
     </ConCompra>
   );
 }
-
-const estilos = StyleSheet.create({});
