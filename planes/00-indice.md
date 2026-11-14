@@ -20,7 +20,7 @@
 - [x] It2 — API completa + Swagger
 - [x] It3 — Chat Socket.io (back)
 - [x] It4 — App Expo
-- [ ] It5 — E2E, Docker, pulido
+- [x] It5 — E2E, Docker, pulido
 - [ ] It6 — Video
 
 ## Trazabilidad casos de uso → implementación
