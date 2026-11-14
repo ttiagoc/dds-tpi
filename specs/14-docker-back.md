@@ -1,6 +1,6 @@
 # Spec 14 — Imagen Docker del back
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `chore/docker-back`
 - **Casos de uso:** ninguno (infraestructura)
 - **Iteración:** It5
@@ -87,4 +87,6 @@ Escenario: los flujos e2e pasan contra el contenedor
 ## Notas de IA
 
 - La IA comparó con la cátedra (clase12: `node:20-alpine`, `npm ci --omit=dev`, `CMD node`) y el TP grupal (misma base + compose con Mongo), y señaló que Node 20 está fuera de soporte y que `bcryptjs` es JS puro (Alpine sin toolchain).
+- Verificado: build ok (69 MB de contenido); `/healthcheck` 200, login 200 con token, contenedor `healthy`; `/test/reset` 404 en producción; sin `JWT_SECRET` termina con exit 1 y "Falta la variable de entorno JWT_SECRET"; `whoami` = `node`, `/app` solo con `node_modules`, `package*.json` y `src`, sin jest; e2e 3/3 contra el contenedor con `NODE_ENV=test` (incluido el chat por socket). Decisión registrada en ADR-010.
+- Revisión de calidad: 2 hallazgos bajos; se aplicó la aclaración del README sobre `NODE_ENV=development` de `.env.example` al usar `--env-file`; levantar solo la web para el e2e contra el contenedor queda como receta manual.
 - Decisiones del usuario: `node:24-alpine`; sin compose; usuario no root + `HEALTHCHECK` + `NODE_ENV=production` por defecto; verificación con smoke y e2e contra el contenedor.

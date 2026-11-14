@@ -48,14 +48,30 @@ cd frontend && npx expo start --web
 ```bash
 cd backend && npm test
 cd frontend && npm test
-npm run e2e            # desde la raíz, con back y web levantados
+npm run e2e:servidores # terminal 1: back (NODE_ENV=test) + web
+npm run e2e            # terminal 2, desde la raíz
 ```
 
 ### Docker (solo back)
 
 ```bash
 docker build -t ai-ticket-it-back ./backend
-docker run -p 3000:3000 --env-file backend/.env ai-ticket-it-back
+docker run -p 3000:3000 -e JWT_SECRET=<secreto> ai-ticket-it-back
+# o con un archivo: docker run -p 3000:3000 --env-file backend/.env ai-ticket-it-back
+```
+
+Ojo: `.env.example` trae `NODE_ENV=development`, que pisa el `production` de la imagen. Para correrla en producción usá `-e JWT_SECRET=…` o sacá `NODE_ENV` del `.env`.
+
+La imagen (`node:24-alpine`) corre como usuario `node`, con `NODE_ENV=production` y un `HEALTHCHECK` contra `GET /healthcheck`. Sin `JWT_SECRET` no arranca. Los datos viven en memoria y se re-siembran en cada arranque.
+
+E2E contra el contenedor:
+
+```bash
+docker run -p 3000:3000 -e NODE_ENV=test ai-ticket-it-back
+# otra terminal (PowerShell)
+cd frontend; $env:EXPO_PUBLIC_API_URL="http://localhost:3000"; npx expo start --web
+# otra terminal
+npm run e2e
 ```
 
 ## Usuarios de demo
