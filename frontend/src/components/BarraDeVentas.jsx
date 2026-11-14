@@ -5,13 +5,18 @@ import { espaciado } from "../tema/espaciado";
 export function BarraDeVentas({ vendidas, cupo }) {
   return (
     <View style={estilos.barra}>
-      <ProgressBar
-        progress={cupo > 0 ? vendidas / cupo : 0}
-        accessibilityLabel={`${vendidas} de ${cupo} vendidas`}
-      />
+      <View style={estilos.pista} testID="barra-ventas-pista">
+        <ProgressBar
+          progress={cupo > 0 ? vendidas / cupo : 0}
+          accessibilityLabel={`${vendidas} de ${cupo} vendidas`}
+        />
+      </View>
       <Text variant="bodySmall">{`${vendidas} de ${cupo} vendidas`}</Text>
     </View>
   );
 }
 
-const estilos = StyleSheet.create({ barra: { gap: espaciado.xs } });
+const estilos = StyleSheet.create({
+  barra: { gap: espaciado.xs },
+  pista: { height: espaciado.xs },
+});

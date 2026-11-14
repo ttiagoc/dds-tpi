@@ -143,6 +143,7 @@ export class EventoService {
       imagen: multimedia[0] ?? null,
       organizador: { id: organizador.id, nombre: organizador.nombreCompleto(), puntajePromedio },
       esFavorito,
+      finalizado: evento.yaOcurrio(this.reloj.ahora()),
     };
   }
 

@@ -42,16 +42,24 @@ export const temaClaro = {
 
 | Componente | Props | Notas |
 |---|---|---|
-| `Pantalla` | `children, scroll?, refreshing?, onRefresh?, bordes?` | `SafeAreaView` con `edges={bordes}` (`["top", "bottom"]` en pantallas sin header, como Login), `keyboardShouldPersistTaps="handled"` con scroll, padding `lg`, `maxWidth: 480` centrado en web |
+| `Pantalla` | `children, scroll?, bordes?, testID?` | `SafeAreaView` con `edges={bordes}` (`["top", "bottom"]` en pantallas sin header, como Login), `keyboardShouldPersistTaps="handled"` con scroll, padding `lg`, `maxWidth: 480` centrado en web |
 | `Cargando` | — | `ActivityIndicator` centrado |
 | `ErrorCarga` | `mensaje, onReintentar` | ícono + texto + botón |
 | `Aviso` | `icono, texto, color?, accion?, testID?` | base interna de `EstadoVacio` y `ErrorCarga`; no usar directo en pantallas |
 | `EstadoVacio` | `icono, texto, accion?` | |
 | `ConCarga` | `carga, iconoInexistente, testIDInexistente, children(datos)` | estados de un `useCargar`: `Cargando` solo si no hay datos previos (una recarga conserva la pantalla), 403/404 → `EstadoVacio` con "Volver", otro error → `ErrorCarga` |
 | `ConRecursoDeRuta` | `obtener, iconoInexistente, testIDInexistente, children(datos, carga)` | `ConCarga` del recurso cuyo id viene en la ruta; `obtener` tiene que ser estable (función de `src/api/`) |
+| `ConCompra` | `children(compra, carga)` | `ConRecursoDeRuta` con `obtenerCompra` (`testIDInexistente="compra-inexistente"`); lo usan DetalleCompra, Reseñar y Chat |
+| `AvisoConVolver` | `icono, texto, testID` | `Aviso` con acción "Volver" (`testID="volver"`); cuando la pantalla no aplica al recurso (Comprar sin entradas, Reseñar no disponible) |
 | `ConEvento` | `children(evento, carga)` | `ConRecursoDeRuta` con `obtenerEvento`; lo usan DetalleEvento y Comprar |
 | `ListaPaginada` | `lista, renderItem, encabezado, vacio, testID` | `FlatList` sobre `useListaPaginada(paginaDe(listar, campo), criterio)`: pull-to-refresh, `Cargando`/`ErrorCarga`/`vacio` y `PieDeLista` ("Cargar más", errores al pie) |
-| `ChipsFiltro` | `opciones: [{ valor, etiqueta }], seleccionada, onElegir, prefijoTestID` | chip "Todas" + selección única; tocar el elegido lo quita; testIDs `<prefijo>-todas` y `<prefijo>-<valor>` |
+| `ChipsFiltro` | `opciones: [{ valor, etiqueta }], seleccionada, onElegir, prefijoTestID` | chip "Todas" + selección única; tocar el elegido lo quita; no elegidos `outlined`, elegido `flat` con ✓ (filtro MD3); testIDs `<prefijo>-todas` y `<prefijo>-<valor>` |
+| `FiltroEstadoCompra` | `estado, onElegir` | `ChipsFiltro` con los estados de compra (`ESTADOS_COMPRA`) |
+| `ListaDeCompras` | `pedir, criterio, testID, vacio: { textoFiltrada, sinFiltro, testID }, conComprador?, encabezado?({ extra, filtro })` | `ListaPaginada` de `TarjetaCompra` con `FiltroEstadoCompra`; vacío filtrado con "Ver todas"; recarga al volver; la usan MisCompras y ComprasDelEvento |
+| `BarraDeVentas` | `vendidas, cupo` | `ProgressBar` + "N de M vendidas"; la barra va en una pista de alto fijo (`espaciado.xs`, `testID="barra-ventas-pista"`) porque en web el `ProgressBar` de Paper toma `height: '100%'` del contenedor y el texto se superpone con lo que sigue |
+| `EncabezadoEvento` | `evento` | nombre (`headlineSmall`) + `FechaYLugar`; encabeza Comprar, Reseñar y Chat |
+| `ErrorEnLinea` | `mensaje, onReintentar, testID?` | `HelperText` de error + "Reintentar" (texto) dentro de una sección, sin reemplazar la pantalla (categorías de Nuevo evento, reseñas del organizador); para la pantalla entera, `ErrorCarga` |
+| `Contador` | `largo, maximo, testID` | `HelperText` "N/M" alineado a la derecha; Reseñar y Chat |
 | `FechaYLugar` | `fecha, lugar, variant?, atenuado?` | "dom 20 dic · 20:00 · Lugar" |
 | `TarjetaCompra` | `compra, onPress` | evento, tipo × cantidad · total, `ChipEstado`, días restantes; `testID="compra-<id>"` |
 | `ChipEstado` | `estado` | color + ícono + texto desde `theme.estados` |

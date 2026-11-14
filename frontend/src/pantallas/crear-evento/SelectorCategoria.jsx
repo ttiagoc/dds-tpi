@@ -1,27 +1,16 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { ActivityIndicator, Button, HelperText, Menu, Text } from "react-native-paper";
+import { ActivityIndicator, Button, Menu, Text } from "react-native-paper";
 import { listarCategorias } from "../../api/categoriasApi";
+import { ErrorEnLinea } from "../../components/ErrorEnLinea";
 import { useCargar } from "../../hooks/useCargar";
 import { espaciado } from "../../tema/espaciado";
-
-function SinCategorias({ error, onReintentar }) {
-  return (
-    <View>
-      <HelperText type="error" visible testID="categorias-error">
-        {error}
-      </HelperText>
-      <Button mode="text" onPress={onReintentar}>
-        Reintentar
-      </Button>
-    </View>
-  );
-}
 
 export function SelectorCategoria({ categoria, onElegir, deshabilitado }) {
   const [abierto, setAbierto] = useState(false);
   const { datos: categorias, error, recargar } = useCargar(listarCategorias);
-  if (error) return <SinCategorias error={error} onReintentar={recargar} />;
+  if (error)
+    return <ErrorEnLinea mensaje={error} onReintentar={recargar} testID="categorias-error" />;
   if (!categorias)
     return <ActivityIndicator size="small" accessibilityLabel="Cargando categorías" />;
   return (

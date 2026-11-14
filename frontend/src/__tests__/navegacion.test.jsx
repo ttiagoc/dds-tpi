@@ -187,6 +187,13 @@ describe("detalle del evento", () => {
     expect(await screen.findByTestId("linea-de-tiempo")).toBeTruthy();
   });
 
+  it("abrir en frío la ruta de una compra la conserva mientras se restaura la sesión", async () => {
+    conSesion(ANA);
+    await abrirApp("/compras/7");
+    expect(await screen.findByTestId("linea-de-tiempo")).toBeTruthy();
+    expect(screen).toHavePathname("/compras/7");
+  });
+
   it("un organizador puede abrir el detalle de un evento", async () => {
     conSesion(FENIX);
     await abrirApp();

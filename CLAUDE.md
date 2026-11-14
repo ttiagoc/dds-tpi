@@ -37,7 +37,8 @@ cd frontend && npx expo start --web
 cd frontend && npm test
 # calidad (raíz): eslint + duplicados
 npm run calidad
-# e2e (con back y web levantados)
+# e2e: terminal 1 levanta back (NODE_ENV=test) + web; terminal 2 corre Cypress
+npm run e2e:servidores
 npm run e2e
 ```
 

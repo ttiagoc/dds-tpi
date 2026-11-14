@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 14 |
-| Features cerradas | 20 (It1, It2 e It3 cerradas) |
+| Sesiones | 15 |
+| Features cerradas | 24 (It1 a It4 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -22,6 +22,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 8. Acciones fuera del alcance pedido y tests con dependencias inestables: formatear documentos de planificación que no correspondía tocar, y un test de hook que creaba la función a cargar en cada render, lo que disparaba recargas sin fin y colgaba la suite.
 9. Nombres de archivo que solo difieren en mayúsculas de otro del mismo directorio (`accionesCompra.js` junto a `AccionesCompra.jsx`): en Windows la importación resolvía al archivo equivocado y rompió la suite; la IA lo detectó al correr los tests y lo renombró.
 10. Tests que verifican el mecanismo interno y no el comportamiento: un test de limpieza contaba los oyentes registrados en el socket y siguió pasando ante un refactor que cambiaba cómo se registraban; se reescribió para comprobar que un evento posterior ya no llega.
+11. Selectores e2e por prefijo que coinciden con elementos de otra pantalla: en la versión web, las pantallas inferiores de la pila siguen montadas, y un selector de tipo de entrada eligió el del detalle del evento, oculto debajo de la pantalla de compra. Se acotó a elementos visibles.
 
 ---
 
@@ -309,3 +310,25 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - El botón Chat se declara en el catálogo de acciones de la compra: las entradas pueden navegar a una ruta y el permiso pasa a ser opcional, porque R7 permite el chat en cualquier estado; Reseñar se migró al mismo esquema — una sola forma de declarar botones — propuesta de la IA, aceptada.
   - Un socket por pantalla en lugar de uno compartido — el chat y el detalle pueden estar abiertos a la vez en la pila de navegación, y salir del room desde uno sacaría también al otro — propuesta de la IA, aceptada.
 - **Aprendizaje:** un test que verifica el mecanismo interno (cantidad de oyentes registrados) en lugar del comportamiento observable pasó sin cambios ante un refactor que lo debía afectar; se reescribió para comprobar que, tras salir de la pantalla, un evento ya no llega a su destinatario.
+
+## Sesión 15 — 2026-11-14 — Flujos e2e, imagen Docker, pulido de UI y revisión final (It5)
+
+- **Objetivo:** iniciar la Iteración 5 (Calidad) con tres flujos e2e permanentes contra el back real, adecuar la infraestructura de Cypress a la versión 16 empaquetar el back en una imagen Docker hacer la revisión visual de la app y la revisión final de reglas y código.
+- **Avances:**
+  - Spec 13 escrita y aprobada. Los huecos (alcance del flujo de compra, forma de verificar el chat, cambio de usuario dentro de un flujo y responsabilidad del comando de e2e) se resolvieron en una sola tanda de preguntas. El plan de testing se actualizó: cambiaron los flujos y el inicio de sesión pasó a hacerse por la interfaz.
+  - Tres flujos, uno por archivo, con reinicio de datos antes de cada uno: Ana busca un evento, compra y ve la compra pendiente; Fénix marca utilizada una compra de Ana y Ana la reseña; Ana escribe en el chat, recibe en vivo la respuesta de Fénix enviada por la API y Fénix ve el mensaje al ingresar.
+  - Comandos compartidos de Cypress para ingresar, cerrar sesión, volver a una pestaña y abrir una compra como comprador u organizador. Un comando nuevo levanta el back en modo test y la app web con sus variables de entorno, de forma multiplataforma.
+  - Revisión de calidad con 5 hallazgos aplicados (2 de severidad media y 3 bajas): la navegación repetida entre flujos pasó a comandos, la vuelta a las pestañas dejó de depender de la profundidad del historial y se verificó manualmente que, con el back fuera de modo test, los flujos fallan en el reinicio sin tocar datos.
+  - Verificación: 3/3 flujos, 799 tests del back y 364 del front en verde, sin clones nuevos; rama mergeada a `develop`.
+  - Spec 14 e imagen Docker del back: una sola etapa sobre Node 24 Alpine, solo dependencias de producción y el código fuente, usuario sin privilegios, modo producción por defecto y chequeo de salud contra el endpoint existente. Se verificó que responde y queda saludable, que en producción no expone el reinicio de datos, que sin secreto no arranca, que la imagen no incluye tests ni secretos y que los tres flujos e2e pasan contra el contenedor en modo test. La revisión de calidad dejó una aclaración en el README sobre el archivo de entorno de ejemplo.
+  - Revisión visual con la skill del sistema de diseño: capturas de las 14 pantallas en modo claro y oscuro sobre la versión web, forzando el esquema de color desde una spec temporal de Cypress, más un análisis estático de colores, tipografía y etiquetas de accesibilidad. El modo oscuro no tenía colores rotos. Spec 15 con tres hallazgos aprobados y corregidos con TDD: en la web la barra de ventas del organizador superponía su texto con lo recaudado; los chips de filtro no distinguían bien el activo, sobre todo en modo oscuro; y la tarjeta de los eventos propios no tenía etiqueta para lectores de pantalla. La revisión de calidad puso al día el catálogo de componentes de la skill, al que le faltaban siete componentes compartidos.
+  - Revisión final con dos revisores independientes: el subagente de reglas de negocio no encontró reglas violadas ni contratos rotos y confirmó la cobertura de los doce casos de uso, salvo la compra de un evento ya ocurrido; la revisión de código encontró diez problemas del front, verificados uno por uno. Spec 16 con ocho arreglos: el contrato de eventos informa si el evento ya ocurrió y la app deja de ofrecer comprarlo; la navegación espera a restaurar la sesión, lo que resolvió que una recarga o un enlace directo en web llevara a las pestañas; una recarga fallida conserva los datos en pantalla; el detalle del evento se actualiza al volver; un error posterior a una compra exitosa ya no se informa como error de conexión; y se unificó un componente de error en línea repetido.
+- **Decisiones:**
+  - Migración de `Cypress.env()` a `Cypress.expose()`, con la clave en la raíz de la configuración y no dentro de `e2e` — la versión 16 eliminó `Cypress.env()` — la IA verificó la API en la documentación oficial y en los tipos de la versión instalada en lugar de usar conocimiento previo.
+  - El flujo de chat combina la interfaz con una respuesta enviada por la API — Cypress controla un solo navegador, y así se prueba la recepción en vivo por el socket — propuesta de la IA, aceptada.
+  - Los servidores se levantan con un comando aparte y `npm run e2e` solo ejecuta Cypress — evita procesos colgados en Windows — propuesta de la IA, aceptada.
+  - Imagen sobre Node 24 y no Node 20 como la referencia de la cátedra, sin compose — Node 20 está fuera de soporte y los tests corren con la versión 24; con persistencia en memoria no hay servicios que orquestar — la IA comparó las referencias y propuso las opciones; el usuario eligió (ADR-010).
+  - Los chips de filtro siguen el patrón de Material 3 (no elegidos delineados, elegido con relleno) — el relleno casi igual hacía depender la selección de la marca de verificación — propuesta de la IA, aceptada.
+  - Se agrega `finalizado` al contrato de eventos — el front no podía saber si un evento ya ocurrió sin repetir una regla del dominio — propuesta de la IA a partir del revisor, aceptada por el usuario al delegar la selección.
+  - Se descartan dos hallazgos de la revisión de código (cambiar el tipo de entrada agotado tras un error de cupo y recargar la reseña ante un conflicto) — contradecían decisiones explícitas de specs anteriores y sus tests — la IA los detectó al ir a cambiar esos tests, aunque el usuario había delegado la selección.
+- **Aprendizaje:** en la versión web, una pantalla cubierta por otra sigue en el documento; los selectores e2e deben acotarse a un contenedor o a elementos visibles, igual que con las pestañas inactivas. En la revisión visual, dos de las tres anomalías iniciales eran capturas tomadas antes de que la pantalla terminara de cargar; medir el DOM separó esos falsos positivos del defecto real, cuya causa estaba en el componente de barra de progreso de la biblioteca de UI, que en web ocupa todo el alto de su contenedor. Un comportamiento anotado durante semanas como limitación de la versión web (los enlaces directos caían a las pestañas) resultó ser un defecto propio, detectado por la revisión de código y no por los tests, que navegaban siempre por la interfaz.

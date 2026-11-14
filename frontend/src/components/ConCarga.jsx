@@ -9,7 +9,7 @@ export function ConCarga({ carga, iconoInexistente, testIDInexistente, children 
   if (codigoError === 403 || codigoError === 404) {
     return <AvisoConVolver icono={iconoInexistente} texto={error} testID={testIDInexistente} />;
   }
-  if (error) {
+  if (error && !datos) {
     return (
       <Pantalla>
         <ErrorCarga mensaje={error} onReintentar={recargar} />

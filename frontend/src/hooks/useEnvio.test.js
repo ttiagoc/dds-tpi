@@ -62,4 +62,18 @@ describe("useEnvio", () => {
     await act(() => result.current.enviar("pagar", () => Promise.resolve("ok"), jest.fn()));
     expect(result.current.error).toBeNull();
   });
+
+  it("un error después de una respuesta exitosa no se muestra como error del pedido", async () => {
+    const recargar = jest.fn();
+    const result = await montar({ recargar });
+    const fallaAlNavegar = () => {
+      throw new Error("navegación");
+    };
+    await expect(
+      act(() => result.current.enviar("comprar", () => Promise.resolve("ok"), fallaAlNavegar)),
+    ).rejects.toThrow("navegación");
+    expect(result.current.error).toBeNull();
+    expect(result.current.enCurso).toBeNull();
+    expect(recargar).not.toHaveBeenCalled();
+  });
 });

@@ -3,21 +3,34 @@ import { Card, Chip, Text, useTheme } from "react-native-paper";
 import { BarraDeVentas } from "../../components/BarraDeVentas";
 import { FechaYLugar } from "../../components/FechaYLugar";
 import { espaciado } from "../../tema/espaciado";
-import { formatearPrecio } from "../../utils/formato";
+import { formatearFecha, formatearPrecio } from "../../utils/formato";
 
-const yaOcurrio = (fecha) => new Date(fecha).getTime() < Date.now();
+const etiquetaDe = ({ nombre, fecha, lugar, vendidas, cupo, recaudado, finalizado }) =>
+  [
+    nombre,
+    formatearFecha(fecha),
+    lugar,
+    `${vendidas} de ${cupo} vendidas`,
+    `recaudado ${formatearPrecio(recaudado)}`,
+    ...(finalizado ? ["finalizado"] : []),
+  ].join(", ");
 
 export function TarjetaEventoPropio({ evento, onPress }) {
   const { colors } = useTheme();
-  const { id, nombre, fecha, lugar, vendidas, cupo, recaudado } = evento;
+  const { id, nombre, fecha, lugar, vendidas, cupo, recaudado, finalizado } = evento;
   return (
-    <Card mode="elevated" onPress={onPress} testID={`evento-propio-${id}`}>
+    <Card
+      mode="elevated"
+      onPress={onPress}
+      testID={`evento-propio-${id}`}
+      accessibilityLabel={etiquetaDe(evento)}
+    >
       <Card.Content style={estilos.contenido}>
         <View style={estilos.titulo}>
           <Text variant="titleMedium" style={estilos.nombre}>
             {nombre}
           </Text>
-          {yaOcurrio(fecha) && (
+          {finalizado && (
             <Chip compact icon="flag-checkered">
               Finalizado
             </Chip>
