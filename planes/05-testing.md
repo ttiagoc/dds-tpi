@@ -42,18 +42,19 @@ Ejemplo de nombre: `describe("Compra") > describe("cancelar") > it("pasa a REEMB
 
 ```
 e2e/
-  cypress.config.js     baseUrl http://localhost:8081, env.apiUrl http://localhost:3000
-  cypress/support/commands.js   cy.resetDatos(), cy.login(email), cy.tid(id) → cy.get(`[data-testid="${id}"]`)
+  cypress.config.js     baseUrl http://localhost:8081, expose.apiUrl http://localhost:3000 (raíz de la config)
+  cypress/support/commands.js   cy.resetDatos(), cy.ingresar(email), cy.salir(), cy.irATab(tab), cy.abrirMiCompra(evento), cy.abrirCompraDelEvento(evento, comprador), cy.enviarMensajeComo(email, compraId, texto), cy.tid(id) → cy.get(`[data-testid="${id}"]`)
   cypress/e2e/
-    comprar-entrada.cy.js       buscar → filtrar → detalle → comprar → ver en Mis compras (PENDIENTE) → pagar
-    cancelar-compra.cy.js       compra CONFIRMADA → cancelar → REEMBOLSADA y cupo liberado
-    organizador-compras.cy.js   login organizador → evento → disponibilidad + compras por estado → marcar utilizada
-    chat.cy.js (opcional)       enviar mensaje y verlo en la lista
+    comprar-entrada.cy.js       Ana busca → detalle → compra → ve la compra PENDIENTE en Mis compras
+    utilizada-y-resenia.cy.js   Fénix marca utilizada la compra de Ana → Ana la reseña y ve su reseña
+    chat-compra.cy.js           Ana escribe en el chat → Fénix responde por API y Ana lo ve en vivo → Fénix entra y ve el mensaje
 ```
 
-- Back levantado con `NODE_ENV=test` para habilitar `POST /test/reset`; `beforeEach(cy.resetDatos)`.
-- `cy.login` hace `POST /auth/login` y guarda la sesión en `localStorage` (la key que usa `src/auth/sesion.js` en web) para no pasar por la UI en cada test (salvo el test de login).
-- Viewport mobile: `cy.viewport("iphone-x")`.
+- Spec 13. Back levantado con `NODE_ENV=test` para habilitar `POST /test/reset`; `beforeEach(cy.resetDatos)`.
+- Cypress 16 quitó `Cypress.env()`: valores públicos en `expose` y `Cypress.expose("apiUrl")`.
+- `cy.ingresar(email)` hace el login por la UI con la contraseña demo del seed; `cy.salir()` cierra sesión desde Perfil/Cuenta.
+- Viewport mobile 375×812 desde la config.
+- En web las tabs inactivas siguen montadas: acotar aserciones al contenedor (`cy.tid("lista-...").within`). Navegar por la UI (el deep link en frío cae a las tabs).
 - react-native-web traduce `testID` → `data-testid`.
 
 ## Comandos
@@ -61,12 +62,10 @@ e2e/
 ```bash
 cd backend && npm test
 cd frontend && npm test
-# e2e: terminal 1
-cd backend && NODE_ENV=test npm start
+# e2e: terminal 1 (back NODE_ENV=test + expo web)
+npm run e2e:servidores
 # terminal 2
-cd frontend && npx expo start --web
-# terminal 3
 npm run e2e
 ```
 
-(En PowerShell: `$env:NODE_ENV="test"; npm start`.)
+(`e2e:servidores` es multiplataforma: no hace falta `$env:NODE_ENV` en PowerShell.)

@@ -7,6 +7,7 @@
     "test": "npm test --prefix backend && npm test --prefix frontend",
     "e2e": "node e2e/correr-cypress.mjs run",
     "e2e:open": "node e2e/correr-cypress.mjs open",
+    "e2e:servidores": "node e2e/servidores.mjs",
     "lint": "eslint .",
     "format": "prettier . --write",
     "duplicados": "jscpd",
