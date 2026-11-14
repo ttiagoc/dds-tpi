@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 15 |
-| Features cerradas | 21 (It1 a It4 cerradas) |
+| Features cerradas | 22 (It1 a It4 cerradas) |
 | Correcciones relevantes a la IA | 6 |
 | Skills creadas / mejoradas | 10 / 1 |
 
@@ -311,17 +311,19 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Un socket por pantalla en lugar de uno compartido — el chat y el detalle pueden estar abiertos a la vez en la pila de navegación, y salir del room desde uno sacaría también al otro — propuesta de la IA, aceptada.
 - **Aprendizaje:** un test que verifica el mecanismo interno (cantidad de oyentes registrados) en lugar del comportamiento observable pasó sin cambios ante un refactor que lo debía afectar; se reescribió para comprobar que, tras salir de la pantalla, un evento ya no llega a su destinatario.
 
-## Sesión 15 — 2026-11-14 — Flujos e2e con Cypress (It5)
+## Sesión 15 — 2026-11-14 — Flujos e2e con Cypress e imagen Docker del back (It5)
 
-- **Objetivo:** iniciar la Iteración 5 (Calidad) con tres flujos e2e permanentes contra el back real y adecuar la infraestructura de Cypress a la versión 16.
+- **Objetivo:** iniciar la Iteración 5 (Calidad) con tres flujos e2e permanentes contra el back real, adecuar la infraestructura de Cypress a la versión 16 y empaquetar el back en una imagen Docker.
 - **Avances:**
   - Spec 13 escrita y aprobada. Los huecos (alcance del flujo de compra, forma de verificar el chat, cambio de usuario dentro de un flujo y responsabilidad del comando de e2e) se resolvieron en una sola tanda de preguntas. El plan de testing se actualizó: cambiaron los flujos y el inicio de sesión pasó a hacerse por la interfaz.
   - Tres flujos, uno por archivo, con reinicio de datos antes de cada uno: Ana busca un evento, compra y ve la compra pendiente; Fénix marca utilizada una compra de Ana y Ana la reseña; Ana escribe en el chat, recibe en vivo la respuesta de Fénix enviada por la API y Fénix ve el mensaje al ingresar.
   - Comandos compartidos de Cypress para ingresar, cerrar sesión, volver a una pestaña y abrir una compra como comprador u organizador. Un comando nuevo levanta el back en modo test y la app web con sus variables de entorno, de forma multiplataforma.
   - Revisión de calidad con 5 hallazgos aplicados (2 de severidad media y 3 bajas): la navegación repetida entre flujos pasó a comandos, la vuelta a las pestañas dejó de depender de la profundidad del historial y se verificó manualmente que, con el back fuera de modo test, los flujos fallan en el reinicio sin tocar datos.
   - Verificación: 3/3 flujos, 799 tests del back y 364 del front en verde, sin clones nuevos; rama mergeada a `develop`.
+  - Spec 14 e imagen Docker del back: una sola etapa sobre Node 24 Alpine, solo dependencias de producción y el código fuente, usuario sin privilegios, modo producción por defecto y chequeo de salud contra el endpoint existente. Se verificó que responde y queda saludable, que en producción no expone el reinicio de datos, que sin secreto no arranca, que la imagen no incluye tests ni secretos y que los tres flujos e2e pasan contra el contenedor en modo test. La revisión de calidad dejó una aclaración en el README sobre el archivo de entorno de ejemplo.
 - **Decisiones:**
   - Migración de `Cypress.env()` a `Cypress.expose()`, con la clave en la raíz de la configuración y no dentro de `e2e` — la versión 16 eliminó `Cypress.env()` — la IA verificó la API en la documentación oficial y en los tipos de la versión instalada en lugar de usar conocimiento previo.
   - El flujo de chat combina la interfaz con una respuesta enviada por la API — Cypress controla un solo navegador, y así se prueba la recepción en vivo por el socket — propuesta de la IA, aceptada.
   - Los servidores se levantan con un comando aparte y `npm run e2e` solo ejecuta Cypress — evita procesos colgados en Windows — propuesta de la IA, aceptada.
+  - Imagen sobre Node 24 y no Node 20 como la referencia de la cátedra, sin compose — Node 20 está fuera de soporte y los tests corren con la versión 24; con persistencia en memoria no hay servicios que orquestar — la IA comparó las referencias y propuso las opciones; el usuario eligió (ADR-010).
 - **Aprendizaje:** en la versión web, una pantalla cubierta por otra sigue en el documento; los selectores e2e deben acotarse a un contenedor o a elementos visibles, igual que con las pestañas inactivas.
