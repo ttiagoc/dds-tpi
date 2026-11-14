@@ -1,6 +1,6 @@
 # Spec 15 — Pulido de UI
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `fix/pulido-ui`
 - **Casos de uso:** CU2 (disponibilidad en Compras del evento), CU1, CU3 (filtros de Mis compras y Explorar) (ver `planes/00-indice.md`)
 - **Iteración:** It5
@@ -66,5 +66,7 @@ Escenario: la tarjeta de un evento propio se anuncia
 
 ## Notas de IA
 
+- Verificado: 367 tests del front (3 nuevos, en rojo antes del arreglo), `npm run calidad` sin errores (7 clones del back), capturas claro/oscuro después del arreglo sin superposición ni chips confusos, e2e 3/3.
+- Revisión de calidad: 2 hallazgos bajos aplicados: comentario en el test de `ChipsFiltro` (lee el estilo del nodo padre porque Paper no expone `mode`) y catálogo de `sistema-diseno` al día (7 componentes compartidos que faltaban, `BarraDeVentas` con la nota del `ProgressBar` en web).
 - La IA armó una spec temporal de Cypress que fuerza el esquema de color y sacó 28 capturas; dos falsos positivos (etiquetas de Nuevo evento e imágenes) resultaron capturas tomadas antes de terminar de cargar y se descartaron midiendo el DOM y repitiendo con más espera.
 - La causa del hallazgo 1 se encontró leyendo el código de `ProgressBar` en `node_modules` (`webContainer: { height: '100%' }`), después de medir en el DOM que el contenedor tenía menos alto que su contenido.
