@@ -27,7 +27,7 @@ Leyenda: 🔓 público · 🔐 logueado · 🅒 solo COMPRADOR · 🅞 solo ORGA
   "finalizado": false
 }
 ```
-`esFavorito` solo si hay sesión de comprador; si no, `false`. `finalizado` = el evento ya ocurrió (`Evento.yaOcurrio(ahora)`, `fecha <= ahora`); lo usa el front para no ofrecer comprar (spec 16).
+`esFavorito` solo si hay sesión de comprador; si no, `false`. `imagen` (y cada elemento de `multimedia`) es una URL absoluta o una ruta relativa al back (`/imagenes/rock.jpg`, servida por `GET /imagenes/<archivo>`); el front resuelve las relativas contra `EXPO_PUBLIC_API_URL` (spec 17). `finalizado` = el evento ya ocurrió (`Evento.yaOcurrio(ahora)`, `fecha <= ahora`); lo usa el front para no ofrecer comprar (spec 16).
 
 ### EventoDetalle
 EventoResumen + `descripcion`, `multimedia: string[]`, `tiposEntrada: [{ id, nombre, descripcion, precio, cupo, disponibles }]`.
