@@ -5,6 +5,7 @@ import { espaciado } from "../tema/espaciado";
 function ChipFiltro({ seleccionado, onPress, testID, children }) {
   return (
     <Chip
+      mode={seleccionado ? "flat" : "outlined"}
       selected={seleccionado}
       showSelectedOverlay
       onPress={onPress}

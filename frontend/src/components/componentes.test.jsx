@@ -1,12 +1,16 @@
 import { Text } from "react-native-paper";
-import { screen, fireEvent } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
+import { screen, fireEvent, within } from "@testing-library/react-native";
 import { renderConProviders } from "../test-utils/renderConProviders";
+import { BarraDeVentas } from "./BarraDeVentas";
 import { ChipEstado } from "./ChipEstado";
+import { ChipsFiltro } from "./ChipsFiltro";
 import { Contador } from "./Contador";
 import { ErrorCarga } from "./ErrorCarga";
 import { EstadoVacio } from "./EstadoVacio";
 import { Cargando } from "./Cargando";
 import { Pantalla } from "./Pantalla";
+import { espaciado } from "../tema/espaciado";
 
 describe("ChipEstado", () => {
   it.each([
@@ -99,5 +103,41 @@ describe("Contador", () => {
   it("muestra los caracteres usados sobre el máximo", async () => {
     await renderConProviders(<Contador largo={12} maximo={500} testID="contador" />);
     expect(screen.getByTestId("contador")).toHaveTextContent("12/500");
+  });
+});
+
+describe("BarraDeVentas", () => {
+  it("muestra vendidas sobre cupo con la barra en una pista de alto fijo", async () => {
+    await renderConProviders(<BarraDeVentas vendidas={60} cupo={150} />);
+    expect(screen.getByText("60 de 150 vendidas")).toBeTruthy();
+    const pista = screen.getByTestId("barra-ventas-pista");
+    expect(StyleSheet.flatten(pista.props.style).height).toBe(espaciado.xs);
+    expect(within(pista).getByLabelText("60 de 150 vendidas")).toBeTruthy();
+  });
+});
+
+describe("ChipsFiltro", () => {
+  // Paper no expone el mode del Chip: el borde y el relleno quedan en el padre del nodo con testID.
+  const estiloDe = (testID) => StyleSheet.flatten(screen.getByTestId(testID).parent.props.style);
+
+  it("los no elegidos van delineados y el elegido con relleno", async () => {
+    await renderConProviders(
+      <ChipsFiltro
+        opciones={[
+          { valor: "A", etiqueta: "Uno" },
+          { valor: "B", etiqueta: "Dos" },
+        ]}
+        seleccionada="A"
+        onElegir={jest.fn()}
+        prefijoTestID="filtro"
+      />,
+    );
+    const elegido = estiloDe("filtro-A");
+    for (const testID of ["filtro-todas", "filtro-B"]) {
+      const noElegido = estiloDe(testID);
+      expect(noElegido.borderColor).not.toBe("transparent");
+      expect(noElegido.backgroundColor).not.toBe(elegido.backgroundColor);
+    }
+    expect(elegido.borderColor).toBe("transparent");
   });
 });

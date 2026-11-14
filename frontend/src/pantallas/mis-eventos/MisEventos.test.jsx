@@ -52,6 +52,20 @@ describe("MisEventos: lista", () => {
     expect(screen.getByTestId("evento-propio-1")).not.toHaveTextContent(/Finalizado/);
   });
 
+  it("cada tarjeta se anuncia con su contenido para lectores de pantalla", async () => {
+    await abrir();
+    expect(
+      screen.getByLabelText(
+        /^Los Piojos en River, .+, Estadio River Plate, 60 de 150 vendidas, recaudado \$\s2\.700\.000$/,
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.getByLabelText(
+        /^Rock en el Parque, .+, 150 de 150 vendidas, recaudado \$\s6\.000\.000, finalizado$/,
+      ),
+    ).toBeTruthy();
+  });
+
   it("tocar un evento abre sus compras", async () => {
     await abrir();
     await fireEvent.press(screen.getByTestId("evento-propio-4"));
