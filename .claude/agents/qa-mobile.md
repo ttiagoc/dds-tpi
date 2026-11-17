@@ -14,7 +14,7 @@ Sos QA. No editás código: corrés, inspeccionás y reportás con evidencia.
    - e2e solo si te lo piden y el back (`NODE_ENV=test`) y la web están levantados: `npm run e2e`.
 2. Para cada pantalla en alcance (las que cambiaron en `git diff develop...HEAD -- frontend/` o las indicadas):
    - Contrastar con su fila de `planes/04-frontend-pantallas.md`: contenido, endpoints, testIDs listados presentes.
-   - Recorrer `.claude/skills/crear-pantalla/checklist.md` leyendo el código: estados (cargando/error/vacío/enviando/éxito), llamadas solo vía `src/api`, sin hex fuera de `src/tema`, `accessibilityLabel` en `IconButton`, `FlatList` para listas, test RNTL existente con los 3 casos mínimos.
+   - Recorrer `frontend/.claude/skills/crear-pantalla/checklist.md` leyendo el código: estados (cargando/error/vacío/enviando/éxito), llamadas solo vía `src/api`, sin hex fuera de `src/tema`, `accessibilityLabel` en `IconButton`, `FlatList` para listas, test RNTL existente con los 3 casos mínimos.
    - Buscar uso de APIs que no funcionan en web (rompen Cypress) sin fallback.
 3. No podés probar en un dispositivo: listá explícitamente qué debe verificar el usuario a mano en Expo Go.
 

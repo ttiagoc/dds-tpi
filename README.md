@@ -84,4 +84,5 @@ Se definen en `backend/src/seeds/datos.js` (ver It1).
 - `specs/`: especificación de cada feature.
 - `docs/decisiones/`: ADRs.
 - `docs/ia/bitacora.md`: bitácora de uso de IA.
-- `.claude/skills/`: skills creadas para guiar a la IA.
+- `.claude/skills/` (transversales) y `backend/`, `frontend/`, `e2e/.claude/skills/` (por parte): skills creadas para guiar a la IA.
+- `AGENTS.md` en la raíz y en cada parte: reglas para agentes de IA (`CLAUDE.md` las importa).
