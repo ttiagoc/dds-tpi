@@ -6,10 +6,10 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 15 |
+| Sesiones | 16 |
 | Features cerradas | 24 (It1 a It4 cerradas) |
 | Correcciones relevantes a la IA | 6 |
-| Skills creadas / mejoradas | 10 / 1 |
+| Skills creadas / mejoradas | 12 / 2 |
 
 ### Errores típicos de la IA (se actualiza)
 1. Expectativas de test mal planteadas (un caso de búsqueda que daba por ausente un texto que sí estaba en el dato).
@@ -332,3 +332,18 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Se agrega `finalizado` al contrato de eventos — el front no podía saber si un evento ya ocurrió sin repetir una regla del dominio — propuesta de la IA a partir del revisor, aceptada por el usuario al delegar la selección.
   - Se descartan dos hallazgos de la revisión de código (cambiar el tipo de entrada agotado tras un error de cupo y recargar la reseña ante un conflicto) — contradecían decisiones explícitas de specs anteriores y sus tests — la IA los detectó al ir a cambiar esos tests, aunque el usuario había delegado la selección.
 - **Aprendizaje:** en la versión web, una pantalla cubierta por otra sigue en el documento; los selectores e2e deben acotarse a un contenedor o a elementos visibles, igual que con las pestañas inactivas. En la revisión visual, dos de las tres anomalías iniciales eran capturas tomadas antes de que la pantalla terminara de cargar; medir el DOM separó esos falsos positivos del defecto real, cuya causa estaba en el componente de barra de progreso de la biblioteca de UI, que en web ocupa todo el alto de su contenedor. Un comportamiento anotado durante semanas como limitación de la versión web (los enlaces directos caían a las pestañas) resultó ser un defecto propio, detectado por la revisión de código y no por los tests, que navegaban siempre por la interfaz.
+
+## Sesión 16 — 2026-11-17 — Ajustes para el celular y organización del contexto de IA
+
+- **Objetivo:** integrar los ajustes surgidos de la primera prueba en un iPhone (spec 17) y reorganizar los archivos de instrucciones y las skills para que cada sesión cargue solo el contexto de la parte del repo en la que trabaja.
+- **Avances:**
+  - Spec 17 integrada a `develop`: el contenido ya no queda debajo del encabezado translúcido de iOS 26, las imágenes de los eventos las sirve el back (el servicio externo estaba caído), el teclado de la búsqueda se cierra al deslizar o confirmar, se agregó un logo y Explorar funciona como pantalla de inicio. Queda pendiente la verificación en el dispositivo.
+  - Skills por carpeta: las de back (`crear-endpoint`, `modelar-dominio`) y front (`crear-pantalla`, `sistema-diseno`) pasaron a `backend/` y `frontend/`; `escribir-tests` se dividió en tres (back, front y e2e), y la del front incorporó lo aprendido sobre RNTL 14, mocks y helpers. Las transversales quedaron en la raíz. Se comprobó que Claude Code las carga recién al trabajar sobre archivos de esa carpeta.
+  - Reglas por carpeta: el `AGENTS.md` raíz se redujo a lo común y cada parte (`backend/`, `frontend/`, `e2e/`) tiene el suyo, importado por un `CLAUDE.md` de una línea.
+  - CodeGraph incorporado como servidor MCP del proyecto, con el índice local fuera de git. Una prueba desde otra sesión ubicó la regla de cancelación en el dominio, quién la invoca y su test en una sola consulta, sin leer archivos.
+  - Se apagaron en el proyecto los plugins sin uso (Postman y Canva).
+- **Decisiones:**
+  - `AGENTS.md` por carpeta en lugar de un `RULES.md` — es el nombre que leen varios agentes y Claude Code lo incorpora mediante `CLAUDE.md`; `RULES.md` no lo lee ninguna herramienta por convención — propuesta de la IA, aceptada (ADR-011).
+  - Mover skills por carpeta y apagar plugins — el diagnóstico de la IA mostró que de cada skill solo se carga la descripción hasta usarla, por lo que el ahorro principal estaba en los plugins sin uso; el usuario eligió apagar Postman y Canva y mantener gstack por su uso selectivo (ADR-011).
+  - Se descarta el hook de CodeGraph que agrega contexto a cada mensaje — inyectaba código en todos los pedidos, en contra del objetivo, y en la prueba trajo código del front en lugar de la regla de dominio — decisión de la IA tras probar su salida (ADR-011).
+- **Aprendizaje:** el índice de código responde mejor cuando se nombran los símbolos (`Compra.cancelar`) que con preguntas en lenguaje natural, donde palabras genéricas del dominio arrastran resultados de otras capas.

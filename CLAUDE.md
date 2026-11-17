@@ -30,6 +30,7 @@ Subagentes del proyecto: `revisor-reglas-negocio` (verifica código contra `plan
 El repo está indexado con CodeGraph (`.codegraph/`, local y fuera de git; se mantiene solo mientras corre el MCP). Para ubicar o entender código, usarlo **antes** de grep o de leer archivos:
 
 - MCP: `codegraph_explore` devuelve en una llamada el código de los símbolos relevantes y los caminos de llamadas entre ellos.
+- Nombrar símbolos (`CompraController.cancelar`, `Compra.cancelar`) en vez de preguntar en lenguaje natural: palabras genéricas como "compra" traen ruido del front.
 - Shell: `codegraph explore "<símbolos o pregunta>"` da la misma salida (sirve en subagentes).
 
 Si no existe `.codegraph/`, ignorar esta sección (se crea con `codegraph init --local-only`).
