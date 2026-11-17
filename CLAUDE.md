@@ -4,26 +4,35 @@
 
 ## Cómo trabajar en este repo (Claude Code)
 
-Respondé en castellano rioplatense. Antes de escribir código, usá la skill que corresponda:
+Respondé en castellano rioplatense. Antes de escribir código, usá la skill que corresponda. Las skills de una carpeta se cargan cuando trabajás en esa carpeta: si todavía no aparecen, abrí primero un archivo de ahí.
 
-| Situación | Skill |
-|---|---|
-| Arranca una feature nueva | `escribir-spec` (y después `superpowers:writing-plans` si es grande) |
-| Clase o regla de dominio | `modelar-dominio` |
-| Endpoint nuevo o cambio de contrato | `crear-endpoint` |
-| Pantalla nueva o cambios de UI | `crear-pantalla` (+ `sistema-diseno` si hace falta un componente nuevo) |
-| Colores, tema, componente compartido | `sistema-diseno` |
-| Chat / Socket.io | `tiempo-real-socket` |
-| Tests (unit, integración, RNTL, Cypress) | `escribir-tests` |
-| Revisar repetición, capas y modularización | `revisar-calidad` |
-| Terminar una feature / commitear | `cerrar-feature` (incluye `revisar-calidad`) |
-| Fin de sesión | `bitacora-ia` |
+| Situación | Skill | Carpeta |
+|---|---|---|
+| Arranca una feature nueva | `escribir-spec` (y después `superpowers:writing-plans` si es grande) | raíz |
+| Clase o regla de dominio | `modelar-dominio` | `backend/` |
+| Endpoint nuevo o cambio de contrato | `crear-endpoint` | `backend/` |
+| Pantalla nueva o cambios de UI | `crear-pantalla` (+ `sistema-diseno` si hace falta un componente nuevo) | `frontend/` |
+| Colores, tema, componente compartido | `sistema-diseno` | `frontend/` |
+| Chat / Socket.io | `tiempo-real-socket` | raíz |
+| Tests | `escribir-tests` (una por parte: back, front, e2e) | `backend/`, `frontend/`, `e2e/` |
+| Revisar repetición, capas y modularización | `revisar-calidad` | raíz |
+| Terminar una feature / commitear | `cerrar-feature` (incluye `revisar-calidad`) | raíz |
+| Fin de sesión | `bitacora-ia` | raíz |
 
-Para APIs de Expo / React Native usar además las skills de los plugins `expo`, `building-react-native-apps` y `testing-react-native-apps`, y seguir `frontend/AGENTS.md` (Expo SDK 58: no confiar en conocimiento previo, instalar paquetes con `npx expo install`).
+Para APIs de Expo / React Native usar además las skills de los plugins `expo`, `building-react-native-apps` y `testing-react-native-apps`.
 
 gstack: solo las skills y momentos de la tabla "gstack: uso selectivo" de `planes/07-ia-skills-y-evidencia.md`. Nunca `/ship` ni `/land-and-deploy`.
 
 Subagentes del proyecto: `revisor-reglas-negocio` (verifica código contra `planes/02-dominio.md`) y `qa-mobile` (corre tests y checklist de pantallas).
+
+## Explorar el código: CodeGraph
+
+El repo está indexado con CodeGraph (`.codegraph/`, local y fuera de git; se mantiene solo mientras corre el MCP). Para ubicar o entender código, usarlo **antes** de grep o de leer archivos:
+
+- MCP: `codegraph_explore` devuelve en una llamada el código de los símbolos relevantes y los caminos de llamadas entre ellos.
+- Shell: `codegraph explore "<símbolos o pregunta>"` da la misma salida (sirve en subagentes).
+
+Si no existe `.codegraph/`, ignorar esta sección (se crea con `codegraph init --local-only`).
 
 ## Comandos
 

@@ -7,7 +7,8 @@ La consigna evalúa **criterio** en el uso de IA: usarla intensivamente pero sab
 | Herramienta | Uso principal | Gratis |
 |---|---|---|
 | Claude Code (VS Code) | Agente principal: planificación, back, front, tests | plan del usuario |
-| Skills del proyecto (`.claude/skills/`) | Estandarizar cómo la IA hace cada tipo de tarea | sí |
+| Skills del proyecto (`.claude/skills/` transversales; `backend/`, `frontend/` y `e2e/.claude/skills/` por parte) | Estandarizar cómo la IA hace cada tipo de tarea | sí |
+| CodeGraph (MCP `codegraph`, `.mcp.json`) | Índice local del código (símbolos y llamadas) para ubicar código sin grep ni lecturas de archivos enteros | sí |
 | Skills externas (plugins habilitados en `.claude/settings.json`): `expo` (oficial de Expo), `building-react-native-apps` y `testing-react-native-apps` (Callstack) | Conocimiento actualizado de Expo SDK 58, buenas prácticas y testing de React Native | sí |
 | superpowers (brainstorming, writing-plans, TDD, verification) | Proceso | sí |
 | Opcional para comparar: v0 / Google Antigravity / Copilot free | Prototipar 1 pantalla y comparar con Claude Code | sí |
@@ -16,17 +17,20 @@ Antes de incorporar una skill externa se revisa su `SKILL.md`, porque sus instru
 
 ## Skills del proyecto
 
-| Skill | Cuándo | Salida |
-|---|---|---|
-| `escribir-spec` | inicio de cada feature | `specs/NN-<feature>.md` aprobada |
-| `modelar-dominio` | clases/reglas | clase + test unitario |
-| `crear-endpoint` | endpoint nuevo | ruta→controller→service→repo + zod + swagger + tests |
-| `crear-pantalla` | pantalla nueva | pantalla + api + test RNTL + checklist |
-| `sistema-diseno` | tema/componentes | tokens y componentes consistentes |
-| `tiempo-real-socket` | chat | server + cliente socket |
-| `escribir-tests` | cualquier test | tests siguiendo `planes/05` |
-| `cerrar-feature` | fin de feature | DoD verificada + commit sugerido |
-| `bitacora-ia` | fin de sesión | entrada en bitácora |
+| Skill | Carpeta | Cuándo | Salida |
+|---|---|---|---|
+| `escribir-spec` | raíz | inicio de cada feature | `specs/NN-<feature>.md` aprobada |
+| `modelar-dominio` | `backend/` | clases/reglas | clase + test unitario |
+| `crear-endpoint` | `backend/` | endpoint nuevo | ruta→controller→service→repo + zod + swagger + tests |
+| `crear-pantalla` | `frontend/` | pantalla nueva | pantalla + api + test RNTL + checklist |
+| `sistema-diseno` | `frontend/` | tema/componentes | tokens y componentes consistentes |
+| `tiempo-real-socket` | raíz | chat | server + cliente socket |
+| `escribir-tests` | `backend/`, `frontend/`, `e2e/` (una por parte) | cualquier test | tests siguiendo `planes/05` |
+| `revisar-calidad` | raíz | cierre de cada rama | hallazgos de repetición, capas y modularización |
+| `cerrar-feature` | raíz | fin de feature | DoD verificada + commit sugerido |
+| `bitacora-ia` | raíz | fin de sesión | entrada en bitácora |
+
+Las skills de una carpeta solo se cargan cuando el agente trabaja sobre archivos de esa carpeta, y lo mismo pasa con su `AGENTS.md` (importado por un `CLAUDE.md` de una línea). Así una sesión del back no carga las reglas del front y viceversa (ADR-011).
 
 Subagentes: `revisor-reglas-negocio` (auditoría de reglas, solo lectura) y `qa-mobile` (tests + checklist).
 
