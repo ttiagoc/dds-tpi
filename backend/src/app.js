@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
@@ -7,10 +8,13 @@ import { notFoundHandler } from "./middlewares/notFoundHandler.js";
 import { crearErrorLogger } from "./middlewares/errorLogger.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 
+const CARPETA_IMAGENES = fileURLToPath(new URL("../public/imagenes", import.meta.url));
+
 export function crearApp(contenedor, { nodeEnv = process.env.NODE_ENV } = {}) {
   const app = express();
   app.use(cors());
   app.use(express.json());
+  app.use("/imagenes", express.static(CARPETA_IMAGENES));
   app.get("/api-docs.json", (_req, res) => res.json(openapi));
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapi));
   app.use(crearRouter(contenedor, { nodeEnv }));

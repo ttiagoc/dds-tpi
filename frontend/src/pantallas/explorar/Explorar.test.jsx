@@ -1,4 +1,5 @@
 import { screen, fireEvent, waitFor, act, within } from "@testing-library/react-native";
+import { Keyboard } from "react-native";
 import { router } from "expo-router";
 import Explorar from "./Explorar";
 import { buscarEventos } from "../../api/eventosApi";
@@ -34,6 +35,29 @@ beforeEach(() => {
   jest.clearAllMocks();
   listarCategorias.mockResolvedValue(CATEGORIAS);
   buscarEventos.mockResolvedValue(paginaDeEventos([PIOJOS]));
+});
+
+describe("Explorar: inicio", () => {
+  it("saluda al usuario y titula la lista como próximos eventos", async () => {
+    await abrir();
+    expect(screen.getByText("Hola, Ana")).toBeTruthy();
+    expect(screen.getByTestId("titulo-lista")).toHaveTextContent("Próximos eventos");
+  });
+
+  it("con búsqueda o filtro el título pasa a Resultados", async () => {
+    await abrir();
+    await fireEvent.changeText(screen.getByTestId("buscador"), "piojos");
+    expect(screen.getByTestId("titulo-lista")).toHaveTextContent("Resultados");
+  });
+
+  it("tocar Buscar en el teclado lo cierra", async () => {
+    const cerrar = jest.spyOn(Keyboard, "dismiss");
+    await abrir();
+    expect(screen.getByTestId("buscador").props.returnKeyType).toBe("search");
+    await fireEvent(screen.getByTestId("buscador"), "submitEditing");
+    expect(cerrar).toHaveBeenCalled();
+    cerrar.mockRestore();
+  });
 });
 
 describe("Explorar: carga y criterios", () => {

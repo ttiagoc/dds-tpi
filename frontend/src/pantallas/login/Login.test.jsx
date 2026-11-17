@@ -21,6 +21,12 @@ const botonIngresar = () => screen.getByTestId("login-ingresar");
 beforeEach(() => jest.clearAllMocks());
 
 describe("Login", () => {
+  it("muestra la marca: ícono de ticket y nombre de la app", async () => {
+    await renderConProviders(<Login />);
+    expect(screen.getByTestId("login-logo")).toBeTruthy();
+    expect(screen.getByText("AI Ticket It")).toBeTruthy();
+  });
+
   it("Ingresar está deshabilitado mientras falte un campo", async () => {
     await renderConProviders(<Login />);
     expect(botonIngresar()).toBeDisabled();

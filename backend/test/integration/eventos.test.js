@@ -147,8 +147,8 @@ describe("GET /eventos/:id", () => {
     expect(res.body).toMatchObject({
       id,
       descripcion: "Tarde de rock nacional al aire libre.",
-      multimedia: ["https://picsum.photos/seed/rock/800/450"],
-      imagen: "https://picsum.photos/seed/rock/800/450",
+      multimedia: ["/imagenes/rock.jpg"],
+      imagen: "/imagenes/rock.jpg",
       organizador: { nombre: "Fénix Producciones", puntajePromedio: 4.5 },
       tiposEntrada: [{ nombre: "Campo", precio: 40000, cupo: 600, disponibles: 594 }],
       finalizado: true,

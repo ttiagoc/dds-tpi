@@ -1,4 +1,4 @@
-import { ok } from "./comun.js";
+import { error, ok } from "./comun.js";
 
 export default {
   tags: [{ name: "Sistema", description: "Estado del servidor" }],
@@ -12,6 +12,27 @@ export default {
             type: "object",
             properties: { status: { type: "string", example: "ok" } },
           }),
+        },
+      },
+    },
+    "/imagenes/{archivo}": {
+      get: {
+        tags: ["Sistema"],
+        summary: "Imagen de un evento del seed (archivo estático)",
+        parameters: [
+          {
+            name: "archivo",
+            in: "path",
+            required: true,
+            schema: { type: "string", example: "rock.jpg" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "La imagen",
+            content: { "image/jpeg": { schema: { type: "string", format: "binary" } } },
+          },
+          404: error("NotFound"),
         },
       },
     },

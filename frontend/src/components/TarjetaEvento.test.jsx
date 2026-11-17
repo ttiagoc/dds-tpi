@@ -1,6 +1,7 @@
 import { screen, fireEvent } from "@testing-library/react-native";
 import { renderConProviders } from "../test-utils/renderConProviders";
 import { eventoResumen } from "../test-utils/fixtures";
+import { cliente } from "../api/cliente";
 import { TarjetaEvento } from "./TarjetaEvento";
 
 describe("TarjetaEvento", () => {
@@ -47,5 +48,28 @@ describe("TarjetaEvento", () => {
     expect(screen.queryByTestId("imagen-placeholder")).toBeNull();
     await fireEvent(screen.getByLabelText("Imagen de Los Piojos en River"), "error");
     expect(screen.getByTestId("imagen-placeholder")).toBeTruthy();
+  });
+});
+
+it("no recorta la Card (Paper avisa que se pierde la sombra)", async () => {
+  const avisos = jest.spyOn(console, "warn").mockImplementation(() => {});
+  await renderConProviders(<TarjetaEvento evento={eventoResumen()} onPress={jest.fn()} />);
+  const sobreSurface = avisos.mock.calls.filter(([texto]) =>
+    /overflow to hidden on Surface/.test(texto),
+  );
+  avisos.mockRestore();
+  expect(sobreSurface).toHaveLength(0);
+});
+
+it("muestra la imagen del back completando su ruta", async () => {
+  cliente.defaults.baseURL = "http://back.test";
+  await renderConProviders(
+    <TarjetaEvento
+      evento={eventoResumen({ imagen: "/imagenes/piojos.jpg" })}
+      onPress={jest.fn()}
+    />,
+  );
+  expect(screen.getByLabelText("Imagen de Los Piojos en River").props.source).toEqual({
+    uri: "http://back.test/imagenes/piojos.jpg",
   });
 });

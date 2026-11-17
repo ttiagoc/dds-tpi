@@ -65,7 +65,7 @@ async function sembrarEventos(repo, { usuarios, categorias, ahora }) {
         fecha: desplazar(ahora, enDias * DIA),
         categoria: categorias[categoria],
         organizador: usuarios[organizador],
-        multimedia: [`https://picsum.photos/seed/${clave}/800/450`],
+        multimedia: [`/imagenes/${clave}.jpg`],
       }),
     ]),
   );
