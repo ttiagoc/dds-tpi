@@ -33,37 +33,50 @@ function SinConexion({ onActualizar }) {
   );
 }
 
-function Mensajes({ chat }) {
-  const { usuario } = useAuth();
-  const lista = useRef(null);
-  if (!chat.cargado && chat.error) {
-    return <ErrorCarga mensaje={chat.error} onReintentar={chat.recargar} />;
-  }
-  if (!chat.cargado) return <Cargando />;
+function CabeceraDeMensajes({ encabezado, error }) {
   return (
     <>
-      {chat.error && (
+      {encabezado}
+      {error && (
         <HelperText type="error" visible testID="chat-carga-error">
-          {chat.error}
+          {error}
         </HelperText>
       )}
-      <FlatList
-        ref={lista}
-        data={chat.mensajes}
-        keyExtractor={(m) => String(m.id)}
-        renderItem={({ item }) => (
-          <Burbuja mensaje={item} propia={item.usuario.id === usuario?.id} />
-        )}
-        contentContainerStyle={estilos.mensajes}
-        onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
-        ListEmptyComponent={
-          <Text variant="bodyMedium" style={estilos.vacio} testID="chat-vacio">
-            Todavía no hay mensajes
-          </Text>
-        }
-        testID="lista-mensajes"
-      />
     </>
+  );
+}
+
+function SinMensajesCargados({ chat, encabezado }) {
+  return (
+    <>
+      {encabezado}
+      {chat.error ? <ErrorCarga mensaje={chat.error} onReintentar={chat.recargar} /> : <Cargando />}
+    </>
+  );
+}
+
+function Mensajes({ chat, encabezado }) {
+  const { usuario } = useAuth();
+  const lista = useRef(null);
+  if (!chat.cargado) return <SinMensajesCargados chat={chat} encabezado={encabezado} />;
+  return (
+    <FlatList
+      ref={lista}
+      ListHeaderComponent={<CabeceraDeMensajes encabezado={encabezado} error={chat.error} />}
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardDismissMode="interactive"
+      data={chat.mensajes}
+      keyExtractor={(m) => String(m.id)}
+      renderItem={({ item }) => <Burbuja mensaje={item} propia={item.usuario.id === usuario?.id} />}
+      contentContainerStyle={estilos.mensajes}
+      onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
+      ListEmptyComponent={
+        <Text variant="bodyMedium" style={estilos.vacio} testID="chat-vacio">
+          Todavía no hay mensajes
+        </Text>
+      }
+      testID="lista-mensajes"
+    />
   );
 }
 
@@ -75,10 +88,16 @@ function Conversacion({ compra }) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <Pantalla bordes={["bottom"]}>
-        <EncabezadoEvento evento={compra.evento} />
-        {!chat.conectado && <SinConexion onActualizar={chat.recargar} />}
         <View style={estilos.pantalla}>
-          <Mensajes chat={chat} />
+          <Mensajes
+            chat={chat}
+            encabezado={
+              <View style={estilos.encabezado}>
+                <EncabezadoEvento evento={compra.evento} />
+                {!chat.conectado && <SinConexion onActualizar={chat.recargar} />}
+              </View>
+            }
+          />
         </View>
         <Redactor chat={chat} />
       </Pantalla>
@@ -92,6 +111,7 @@ export default function Chat() {
 
 const estilos = StyleSheet.create({
   pantalla: { flex: 1 },
+  encabezado: { gap: espaciado.md, paddingBottom: espaciado.sm },
   mensajes: { gap: espaciado.sm, paddingVertical: espaciado.sm },
   vacio: { textAlign: "center", paddingVertical: espaciado.xl },
   sinConexion: {

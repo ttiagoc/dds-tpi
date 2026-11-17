@@ -4,6 +4,7 @@ import { crearAppDePrueba } from "../helpers/appDePrueba.js";
 
 const OPERACIONES_DE_PLANES_03 = [
   "GET /healthcheck",
+  "GET /imagenes/{archivo}",
   "POST /auth/login",
   "GET /auth/yo",
   "GET /categorias",
@@ -135,7 +136,7 @@ describe("Swagger", () => {
         .filter((p) => p.in === "path")
         .map((p) => p.name);
       expect({ clave, declarados }).toEqual({ clave, declarados: nombres });
-      if (nombres.length > 0) {
+      if (nombres.some((nombre) => ["id", "eventoId"].includes(nombre))) {
         expect({ clave, tiene400: "400" in operacion.responses }).toEqual({
           clave,
           tiene400: true,

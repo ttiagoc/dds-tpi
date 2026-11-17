@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Button, HelperText, Text, TextInput } from "react-native-paper";
+import { Button, HelperText, Icon, Text, TextInput, useTheme } from "react-native-paper";
 import { useAuth } from "../../auth/AuthContext";
 import { mensajeDeError } from "../../api/cliente";
 import { Pantalla } from "../../components/Pantalla";
@@ -73,16 +73,26 @@ function useFormularioLogin() {
   return { credenciales, setCredenciales, cambiar, enviando, error, completo, ingresar };
 }
 
+function Marca() {
+  const { colors } = useTheme();
+  return (
+    <View style={estilos.encabezado}>
+      <View testID="login-logo">
+        <Icon source="ticket-confirmation" size={56} color={colors.primary} />
+      </View>
+      <Text variant="headlineMedium">AI Ticket It</Text>
+      <Text variant="bodyMedium">Ingresá para comprar o gestionar entradas</Text>
+    </View>
+  );
+}
+
 export default function Login({ mostrarDemo = __DEV__ }) {
   const formulario = useFormularioLogin();
   const { credenciales, cambiar, enviando, error, completo } = formulario;
   const password = useRef(null);
   return (
     <Pantalla scroll bordes={["top", "bottom"]}>
-      <View style={estilos.encabezado}>
-        <Text variant="headlineMedium">AI Ticket It</Text>
-        <Text variant="bodyMedium">Ingresá para comprar o gestionar entradas</Text>
-      </View>
+      <Marca />
       <CampoEmail
         valor={credenciales.email}
         onCambiar={cambiar("email")}

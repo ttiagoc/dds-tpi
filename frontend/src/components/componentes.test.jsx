@@ -9,6 +9,7 @@ import { ChipsFiltro } from "./ChipsFiltro";
 import { Contador } from "./Contador";
 import { ErrorCarga } from "./ErrorCarga";
 import { ErrorEnLinea } from "./ErrorEnLinea";
+import { Logo } from "./Logo";
 import { EstadoVacio } from "./EstadoVacio";
 import { Cargando } from "./Cargando";
 import { Pantalla } from "./Pantalla";
@@ -98,6 +99,15 @@ describe("Cargando y Pantalla", () => {
       </Pantalla>,
     );
     expect(screen.getByTestId("pantalla").props.keyboardShouldPersistTaps).toBe("handled");
+  });
+
+  it("con scroll arranca debajo del encabezado translúcido de iOS", async () => {
+    await renderConProviders(
+      <Pantalla scroll testID="pantalla">
+        <Text>Detalle</Text>
+      </Pantalla>,
+    );
+    expect(screen.getByTestId("pantalla").props.contentInsetAdjustmentBehavior).toBe("automatic");
   });
 });
 
@@ -194,5 +204,13 @@ describe("ErrorEnLinea", () => {
     expect(screen.getByTestId("algo-error")).toHaveTextContent("Sin conexión");
     await fireEvent.press(screen.getByRole("button", { name: "Reintentar" }));
     expect(onReintentar).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("Logo", () => {
+  it("muestra el ticket y el nombre, y se anuncia como AI Ticket It", async () => {
+    await renderConProviders(<Logo />);
+    expect(screen.getByLabelText("AI Ticket It")).toBeTruthy();
+    expect(screen.getByTestId("logo")).toHaveTextContent(/AI\s*Ticket It/);
   });
 });

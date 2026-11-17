@@ -36,7 +36,7 @@ No agrega reglas.
 | 3 | `ListaPaginada`, buscador de Explorar | `keyboardDismissMode="on-drag"`; el buscador con `returnKeyType="search"` cierra el teclado al confirmar |
 | 4 | `TarjetaEvento` | El recorte va en un `View` interno, no en la `Card` |
 | 5 | `components/Logo` (nuevo), encabezado de Explorar y Mis eventos, `assets/` (ícono, splash, favicon) | Logo: ícono de ticket + "AI Ticket It" en el primario del tema (claro y oscuro) |
-| 6 | Explorar | Saludo "Hola, <nombre>" y fila horizontal "Próximos eventos" (5, por fecha, con `GET /eventos` existente) cuando no hay búsqueda ni filtro |
+| 6 | Explorar | Saludo "Hola, <nombre>" + "Encontrá tu próximo evento" y título de sección sobre la lista: "Próximos eventos" (orden por defecto), "Todos los eventos" (otro orden) o "Resultados" (con búsqueda o filtro) |
 
 ## Criterios de aceptación
 
@@ -57,9 +57,9 @@ Escenario: cerrar el teclado de la búsqueda
 
 Escenario: Explorar como inicio
   Dado Ana sin búsqueda ni filtro
-  Entonces ve el logo, "Hola, Ana" y la fila "Próximos eventos"
+  Entonces ve el logo, "Hola, Ana" y el título "Próximos eventos"
   Cuando escribe en la búsqueda
-  Entonces la fila se oculta
+  Entonces el título pasa a "Resultados"
 ```
 
 ## Plan de tests
@@ -77,6 +77,11 @@ Escenario: Explorar como inicio
 - Rediseño de navegación (tabs nativas de iOS 26).
 
 ## Notas de IA
+
+- Cambio respecto de lo hablado: en vez de una fila horizontal de "Próximos eventos" (repetía los primeros de la lista, que ya se ordena por fecha, y sumaba un pedido al back) se usa un título de sección sobre la misma lista.
+- Imágenes: 12 JPG de 800×450 (13 a 21 KB) generadas con Python/Pillow para el proyecto: color por categoría, ícono de Material Design Icons (Apache 2.0, ya incluido en el proyecto) y nombre del evento. Ícono de la app, favicon y adaptativos de Android generados igual (ticket blanco sobre el violeta `#8E2DA8`).
+- `Login` y `Mensajes` (Chat) pasaron el máximo de 40 líneas por función al sumar cambios; se extrajeron `Marca`, `CabeceraDeMensajes` y `SinMensajesCargados` sin bajar el umbral. El test de Swagger exigía 400 a todo parámetro de ruta; se acotó a `{id}`/`{eventoId}`, como dice su nombre.
+- Verificado: back 803, front 390, `npm run calidad` (7 clones del back), e2e 3/3, capturas web (logo, saludo, imágenes, chat con el evento dentro de la lista). El inset de iOS solo se puede comprobar en el iPhone.
 
 - Los dos síntomas de diseño "cortado" (Evento y Compra) eran una sola causa: el encabezado translúcido de iOS 26; se confirmó en la referencia de Expo Router antes de cambiar código.
 - La falta de imágenes no era un bug de la app: el servicio externo respondía 522.

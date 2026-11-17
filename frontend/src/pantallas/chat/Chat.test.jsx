@@ -89,6 +89,15 @@ describe("Chat: conversación", () => {
   });
 });
 
+describe("Chat: diseño en iOS", () => {
+  it("el evento va dentro de la lista, que arranca debajo del encabezado", async () => {
+    await abrir();
+    const lista = screen.getByTestId("lista-mensajes");
+    expect(lista.props.contentInsetAdjustmentBehavior).toBe("automatic");
+    expect(within(lista).getByText("Los Piojos en River")).toBeTruthy();
+  });
+});
+
 describe("Chat: escribir", () => {
   it("Enviar está deshabilitado sin texto y el contador muestra los caracteres", async () => {
     await abrir();

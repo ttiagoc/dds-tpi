@@ -102,6 +102,7 @@ describe("navegación según la sesión", () => {
     }
     expect(screen.queryByTestId("tab-mis-eventos")).toBeNull();
     expect(await screen.findByTestId("buscador")).toBeTruthy();
+    expect(screen.getByTestId("logo")).toBeTruthy();
   });
 
   it("un organizador con sesión entra a sus tabs", async () => {
@@ -111,6 +112,7 @@ describe("navegación según la sesión", () => {
     expect(screen.getByTestId("tab-mis-eventos")).toBeTruthy();
     expect(screen.getByTestId("tab-perfil")).toBeTruthy();
     expect(screen.queryByTestId("tab-explorar")).toBeNull();
+    expect(await screen.findByTestId("logo")).toBeTruthy();
   });
 
   it("con la sesión vencida vuelve al login", async () => {

@@ -13,7 +13,12 @@ function Contenido({ children, scroll, testID }) {
     );
   }
   return (
-    <ScrollView style={estilos.pantalla} keyboardShouldPersistTaps="handled" testID={testID}>
+    <ScrollView
+      style={estilos.pantalla}
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+      testID={testID}
+    >
       {contenido}
     </ScrollView>
   );

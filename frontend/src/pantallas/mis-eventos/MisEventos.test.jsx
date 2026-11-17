@@ -77,6 +77,13 @@ describe("MisEventos: lista", () => {
     expect(screen.getByTestId("evento-propio-1")).not.toHaveTextContent(/Finalizado/);
   });
 
+  it("la lista arranca debajo del encabezado y cierra el teclado al deslizar", async () => {
+    await abrir();
+    const { props } = screen.getByTestId("lista-mis-eventos");
+    expect(props.contentInsetAdjustmentBehavior).toBe("automatic");
+    expect(props.keyboardDismissMode).toBe("on-drag");
+  });
+
   it("tocar un evento abre sus compras", async () => {
     await abrir();
     await fireEvent.press(screen.getByTestId("evento-propio-4"));

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { Icon, useTheme } from "react-native-paper";
+import { urlDeImagen } from "../api/imagenes";
 import { radios } from "../tema/espaciado";
 
 export function ImagenEvento({ uri, nombre, redondeada = false }) {
@@ -21,7 +22,7 @@ export function ImagenEvento({ uri, nombre, redondeada = false }) {
   }
   return (
     <Image
-      source={{ uri }}
+      source={{ uri: urlDeImagen(uri) }}
       style={[...forma, { backgroundColor: colors.surfaceVariant }]}
       resizeMode="cover"
       onError={() => setFallo(true)}

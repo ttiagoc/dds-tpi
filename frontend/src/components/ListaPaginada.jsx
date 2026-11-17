@@ -25,7 +25,9 @@ export function ListaPaginada({ lista, renderItem, encabezado, vacio, testID, es
       refreshing={refrescando}
       onRefresh={refrescar}
       contentContainerStyle={[estilos.lista, espacioInferior && { paddingBottom: espacioInferior }]}
+      contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
     />
   );
 }

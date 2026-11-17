@@ -56,7 +56,7 @@ export const propiedadesEvento = {
   nombre: texto("Los Piojos en River"),
   fecha,
   lugar: texto("Estadio River Plate"),
-  imagen: texto("https://picsum.photos/seed/piojos/800/450", { nullable: true }),
+  imagen: texto("/imagenes/piojos.jpg", { nullable: true }),
 };
 
 function conAviso(operacion, aviso) {

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Searchbar } from "react-native-paper";
+import { Keyboard, StyleSheet, View } from "react-native";
+import { Searchbar, Text, useTheme } from "react-native-paper";
 import { router } from "expo-router";
 import { buscarEventos } from "../../api/eventosApi";
+import { useAuth } from "../../auth/AuthContext";
 import { Pantalla } from "../../components/Pantalla";
 import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaPaginada } from "../../components/ListaPaginada";
@@ -47,13 +48,34 @@ function useFiltros() {
   };
 }
 
+function Saludo() {
+  const { usuario } = useAuth();
+  const { colors } = useTheme();
+  return (
+    <View>
+      <Text variant="headlineSmall">{`Hola, ${usuario?.nombre ?? ""}`}</Text>
+      <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
+        Encontrá tu próximo evento
+      </Text>
+    </View>
+  );
+}
+
+const tituloDeLista = ({ hayFiltros, orden }) => {
+  if (hayFiltros) return "Resultados";
+  return orden === OPCIONES_ORDEN[0] ? "Próximos eventos" : "Todos los eventos";
+};
+
 function Filtros({ filtros }) {
   return (
     <View style={estilos.filtros}>
+      <Saludo />
       <Searchbar
         placeholder="Buscar eventos"
         value={filtros.texto}
         onChangeText={filtros.setTexto}
+        returnKeyType="search"
+        onSubmitEditing={Keyboard.dismiss}
         testID="buscador"
         accessibilityLabel="Buscar eventos"
       />
@@ -61,6 +83,9 @@ function Filtros({ filtros }) {
       <View style={estilos.orden}>
         <MenuOrden seleccionada={filtros.orden} onElegir={filtros.setOrden} />
       </View>
+      <Text variant="titleMedium" testID="titulo-lista">
+        {tituloDeLista(filtros)}
+      </Text>
     </View>
   );
 }

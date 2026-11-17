@@ -15,6 +15,19 @@ describe("app base", () => {
     expect(res.body).toEqual({ status: "ok" });
   });
 
+  it("sirve las imágenes de los eventos del seed", async () => {
+    const res = await request(app).get("/imagenes/rock.jpg");
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toBe("image/jpeg");
+    expect(res.body.length).toBeGreaterThan(0);
+  });
+
+  it("una imagen inexistente responde 404 con el formato de error", async () => {
+    const res = await request(app).get("/imagenes/nada.jpg");
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe("No existe la ruta GET /imagenes/nada.jpg");
+  });
+
   it("responde 404 con el formato de error ante una ruta inexistente", async () => {
     const res = await request(app).get("/nada");
     expect(res.status).toBe(404);
