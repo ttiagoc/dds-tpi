@@ -81,7 +81,7 @@ beforeEach(() => {
   obtenerReseniasDeOrganizador.mockResolvedValue(reseniasDe([]));
   listarMisCompras.mockResolvedValue(paginaDeCompras([compraResumen()]));
   obtenerCompra.mockResolvedValue(compraDetalle());
-  listarMensajes.mockResolvedValue([]);
+  listarMensajes.mockResolvedValue({ mensajes: [], hayMas: false });
   listarMisEventos.mockResolvedValue(paginaDeEventos([eventoPropio()]));
   listarComprasDelEvento.mockResolvedValue(comprasDelEvento([compraResumen()]));
 });

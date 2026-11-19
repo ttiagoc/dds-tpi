@@ -1,7 +1,7 @@
 import { cliente } from "./cliente";
 
-export const listarFavoritos = () =>
-  cliente.get("/usuarios/yo/favoritos").then((respuesta) => respuesta.data);
+export const listarFavoritos = (paginado = {}) =>
+  cliente.get("/usuarios/yo/favoritos", { params: paginado }).then((respuesta) => respuesta.data);
 
 const ruta = (eventoId) => `/usuarios/yo/favoritos/${eventoId}`;
 

@@ -3,7 +3,7 @@ import { router, useFocusEffect } from "expo-router";
 import Favoritos from "./Favoritos";
 import { listarFavoritos } from "../../api/favoritosApi";
 import { renderConProviders, ANA } from "../../test-utils/renderConProviders";
-import { errorHttp, eventoResumen } from "../../test-utils/fixtures";
+import { errorHttp, eventoResumen, paginaDeEventos } from "../../test-utils/fixtures";
 
 jest.mock("../../api/favoritosApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
@@ -19,7 +19,7 @@ async function abrir() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  listarFavoritos.mockResolvedValue([DIVIDIDOS, PIOJOS]);
+  listarFavoritos.mockResolvedValue(paginaDeEventos([DIVIDIDOS, PIOJOS]));
 });
 
 describe("Favoritos", () => {
@@ -40,7 +40,7 @@ describe("Favoritos", () => {
     await abrir();
     await enfocar();
     expect(listarFavoritos).toHaveBeenCalledTimes(1);
-    listarFavoritos.mockResolvedValue([PIOJOS]);
+    listarFavoritos.mockResolvedValue(paginaDeEventos([PIOJOS]));
     await enfocar();
     expect(listarFavoritos).toHaveBeenCalledTimes(2);
     await screen.findByTestId("tarjeta-evento-1");
@@ -48,7 +48,7 @@ describe("Favoritos", () => {
   });
 
   it("sin favoritos invita a explorar eventos", async () => {
-    listarFavoritos.mockResolvedValue([]);
+    listarFavoritos.mockResolvedValue(paginaDeEventos([]));
     await renderConProviders(<Favoritos />, { usuario: ANA });
     expect(await screen.findByTestId("sin-favoritos")).toHaveTextContent(
       /Todavía no guardaste eventos/,
@@ -67,8 +67,15 @@ describe("Favoritos", () => {
     expect(listarFavoritos).toHaveBeenCalledTimes(2);
   });
 
-  it("no ofrece cargar más porque la lista no se pagina", async () => {
+  it("pide de a 10 y con más páginas ofrece cargar más", async () => {
+    listarFavoritos
+      .mockResolvedValueOnce(paginaDeEventos([PIOJOS], { totalPages: 2, total: 2 }))
+      .mockResolvedValueOnce(paginaDeEventos([DIVIDIDOS], { page: 2, totalPages: 2, total: 2 }));
     await abrir();
+    expect(listarFavoritos).toHaveBeenCalledWith({ page: 1, limit: 10 });
+    await fireEvent.press(screen.getByTestId("cargar-mas"));
+    expect(await screen.findByTestId("tarjeta-evento-2")).toBeTruthy();
+    expect(listarFavoritos).toHaveBeenLastCalledWith({ page: 2, limit: 10 });
     expect(screen.queryByTestId("cargar-mas")).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import { NotFoundError } from "../errors/AppError.js";
 import { MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
 import { Evento } from "../domain/Evento.js";
+import { paginar } from "./paginacion.js";
 
 export class FavoritoService {
   constructor({ usuarioRepository, eventoRepository, eventoService }) {
@@ -9,12 +10,13 @@ export class FavoritoService {
     this.eventoService = eventoService;
   }
 
-  async listar(usuario) {
+  async listar(usuario, paginacion) {
     const comprador = await this.usuarioRepository.findById(usuario.id);
     const eventos = await Promise.all(
       comprador.favoritos.map((id) => this.eventoRepository.findById(id)),
     );
-    return this.eventoService.resumenes(eventos.sort(Evento.compararPorFecha), usuario);
+    const { items, ...pagina } = paginar(eventos.sort(Evento.compararPorFecha), paginacion);
+    return { eventos: await this.eventoService.resumenes(items, usuario), ...pagina };
   }
 
   async agregar(eventoId, usuario) {

@@ -1,15 +1,22 @@
 import { describe, it, expect, jest } from "@jest/globals";
 import { FavoritoController } from "../../src/controllers/FavoritoController.js";
-import { llamarController, probarIdYErrores, usuarioComprador } from "../helpers/http.js";
+import {
+  llamarController,
+  probarIdYErrores,
+  probarQueryInvalida,
+  responderCon,
+  usuarioComprador,
+} from "../helpers/http.js";
 
 describe("FavoritoController", () => {
-  it("listar delega con el usuario y responde 200", async () => {
-    const servicio = { listar: jest.fn().mockResolvedValue([{ id: 1 }]) };
-    const { res } = await llamarController(FavoritoController, "listar", {}, servicio);
-    expect(servicio.listar).toHaveBeenCalledWith(usuarioComprador);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([{ id: 1 }]);
+  it("listar valida la paginación, delega con el usuario y responde 200", async () => {
+    const pagina = { eventos: [{ id: 1 }], total: 1, page: 2, totalPages: 1 };
+    const req = { query: { page: "2" } };
+    const listar = await responderCon(FavoritoController, "listar", req, pagina);
+    expect(listar).toHaveBeenCalledWith(usuarioComprador, { page: 2, limit: 20 });
   });
+
+  probarQueryInvalida(FavoritoController, "listar", { query: { limit: "0" } });
 
   it.each(["agregar", "quitar"])(
     "%s parsea el eventoId, delega y responde 204 sin cuerpo",

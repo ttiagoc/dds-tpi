@@ -1,7 +1,13 @@
 import { act, renderHook } from "@testing-library/react-native";
 import { ultimoSocket } from "socket.io-client";
 import { enviarMensaje, listarMensajes } from "../../api/comprasApi";
-import { conversacion, errorHttp, mensaje, promesaManual } from "../../test-utils/fixtures";
+import {
+  conversacion,
+  errorHttp,
+  mensaje,
+  paginaDeMensajes,
+  promesaManual,
+} from "../../test-utils/fixtures";
 import { unirMensajes, useChatCompra } from "./useChatCompra";
 
 jest.mock("../../api/comprasApi");
@@ -17,7 +23,7 @@ const ids = (result) => result.current.mensajes.map((m) => m.id);
 
 beforeEach(() => {
   jest.clearAllMocks();
-  listarMensajes.mockResolvedValue([PREGUNTA, RESPUESTA]);
+  listarMensajes.mockResolvedValue(paginaDeMensajes([PREGUNTA, RESPUESTA]));
   enviarMensaje.mockResolvedValue(NUEVO);
 });
 
@@ -32,7 +38,7 @@ describe("unirMensajes", () => {
 
 describe("useChatCompra: historial", () => {
   it("carga los mensajes de la compra en orden", async () => {
-    listarMensajes.mockResolvedValue([RESPUESTA, PREGUNTA]);
+    listarMensajes.mockResolvedValue(paginaDeMensajes([RESPUESTA, PREGUNTA]));
     const { result } = await montar();
     expect(listarMensajes).toHaveBeenCalledWith(7);
     expect(ids(result)).toEqual([1, 2]);
@@ -61,6 +67,47 @@ describe("useChatCompra: historial", () => {
     await act(async () => socket.simular("disconnect"));
     await act(async () => socket.simular("connect"));
     expect(listarMensajes).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("useChatCompra: mensajes anteriores", () => {
+  const VIEJO = mensaje({ id: 0, mensaje: "Viejo", enviado: "2026-10-30T10:00:00.000Z" });
+
+  beforeEach(() => {
+    listarMensajes.mockResolvedValueOnce(paginaDeMensajes([PREGUNTA, RESPUESTA], true));
+  });
+
+  it("expone si hay mensajes anteriores", async () => {
+    const { result } = await montar();
+    expect(result.current.hayAnteriores).toBe(true);
+  });
+
+  it("cargarAnteriores pide los previos al más viejo y los antepone", async () => {
+    listarMensajes.mockResolvedValueOnce(paginaDeMensajes([VIEJO]));
+    const { result } = await montar();
+    await act(async () => result.current.cargarAnteriores());
+    expect(listarMensajes).toHaveBeenLastCalledWith(7, { antesDe: 1 });
+    expect(ids(result)).toEqual([0, 1, 2]);
+    expect(result.current.hayAnteriores).toBe(false);
+  });
+
+  it("al recargar conserva los anteriores ya cargados", async () => {
+    listarMensajes.mockResolvedValueOnce(paginaDeMensajes([VIEJO]));
+    const { result } = await montar();
+    await act(async () => result.current.cargarAnteriores());
+    listarMensajes.mockResolvedValueOnce(paginaDeMensajes([RESPUESTA, NUEVO], true));
+    await act(async () => result.current.recargar());
+    expect(ids(result)).toEqual([0, 1, 2, 3]);
+    expect(result.current.hayAnteriores).toBe(false);
+  });
+
+  it("si falla expone el error y no cambia la lista", async () => {
+    listarMensajes.mockRejectedValueOnce(errorHttp(500, "Se rompió"));
+    const { result } = await montar();
+    await act(async () => result.current.cargarAnteriores());
+    expect(result.current.errorAnteriores).toBe("Se rompió");
+    expect(ids(result)).toEqual([1, 2]);
+    expect(result.current.hayAnteriores).toBe(true);
   });
 });
 

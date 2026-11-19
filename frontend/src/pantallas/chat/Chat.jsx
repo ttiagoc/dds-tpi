@@ -33,15 +33,39 @@ function SinConexion({ onActualizar }) {
   );
 }
 
-function CabeceraDeMensajes({ encabezado, error }) {
+function VerAnteriores({ chat }) {
+  if (!chat.hayAnteriores) return null;
+  return (
+    <View style={estilos.anteriores}>
+      <Button
+        mode="text"
+        compact
+        onPress={chat.cargarAnteriores}
+        loading={chat.cargandoAnteriores}
+        disabled={chat.cargandoAnteriores}
+        testID="chat-ver-anteriores"
+      >
+        Ver mensajes anteriores
+      </Button>
+      {chat.errorAnteriores && (
+        <HelperText type="error" visible testID="chat-anteriores-error">
+          {chat.errorAnteriores}
+        </HelperText>
+      )}
+    </View>
+  );
+}
+
+function CabeceraDeMensajes({ encabezado, chat }) {
   return (
     <>
       {encabezado}
-      {error && (
+      {chat.error && (
         <HelperText type="error" visible testID="chat-carga-error">
-          {error}
+          {chat.error}
         </HelperText>
       )}
+      <VerAnteriores chat={chat} />
     </>
   );
 }
@@ -62,7 +86,7 @@ function Mensajes({ chat, encabezado }) {
   return (
     <FlatList
       ref={lista}
-      ListHeaderComponent={<CabeceraDeMensajes encabezado={encabezado} error={chat.error} />}
+      ListHeaderComponent={<CabeceraDeMensajes encabezado={encabezado} chat={chat} />}
       contentInsetAdjustmentBehavior="automatic"
       keyboardDismissMode="interactive"
       data={chat.mensajes}
@@ -114,6 +138,7 @@ const estilos = StyleSheet.create({
   encabezado: { gap: espaciado.md, paddingBottom: espaciado.sm },
   mensajes: { gap: espaciado.sm, paddingVertical: espaciado.sm },
   vacio: { textAlign: "center", paddingVertical: espaciado.xl },
+  anteriores: { alignItems: "center" },
   sinConexion: {
     flexDirection: "row",
     alignItems: "center",

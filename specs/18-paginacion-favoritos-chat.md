@@ -1,6 +1,6 @@
 # Spec 18 — Paginación de favoritos y del historial del chat
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/paginacion-favoritos-chat`
 - **Casos de uso:** CU5, CU6 (chat), extra favoritos (ver `planes/00-indice.md`)
 - **Iteración:** It5b (rediseño)

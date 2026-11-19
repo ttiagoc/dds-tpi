@@ -1,4 +1,5 @@
 import { BaseController } from "./BaseController.js";
+import { mensajesQueryValidation } from "../validations/mensajesQueryValidation.js";
 
 export class MensajeController extends BaseController {
   constructor(mensajeService) {
@@ -9,8 +10,9 @@ export class MensajeController extends BaseController {
   listar = async (req, res, next) => {
     try {
       const compraId = this.parsearId(req.params.id);
-      const mensajes = await this.mensajeService.listar(compraId, req.usuario);
-      return res.status(200).json(mensajes);
+      const cursor = this.extraerYValidarQuery(req.query, mensajesQueryValidation);
+      const pagina = await this.mensajeService.listar(compraId, req.usuario, cursor);
+      return res.status(200).json(pagina);
     } catch (error) {
       return next(error);
     }

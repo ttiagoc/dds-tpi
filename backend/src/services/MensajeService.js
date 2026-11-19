@@ -1,6 +1,7 @@
 import { relojSistema } from "../config/reloj.js";
 import { notificadorNulo } from "../sockets/notificador.js";
 import { buscarCompraDelParticipante } from "./compras.js";
+import { MENSAJES_POR_PAGINA } from "../validations/mensajesQueryValidation.js";
 
 const cronologico = (a, b) => a.enviado - b.enviado || a.id - b.id;
 
@@ -17,9 +18,14 @@ export class MensajeService {
     this.notificador = notificador;
   }
 
-  async listar(compraId, usuario) {
+  async listar(compraId, usuario, { antesDe, limit = MENSAJES_POR_PAGINA } = {}) {
     const compra = await buscarCompraDelParticipante(this.compraRepository, compraId, usuario.id);
-    return [...compra.mensajes].sort(cronologico).map((mensaje) => this.toResponse(mensaje));
+    const anteriores = compra.mensajes.filter((mensaje) => antesDe == null || mensaje.id < antesDe);
+    const pagina = [...anteriores].sort(cronologico).slice(-limit);
+    return {
+      mensajes: pagina.map((mensaje) => this.toResponse(mensaje)),
+      hayMas: anteriores.length > limit,
+    };
   }
 
   async enviar(compraId, { mensaje: texto }, usuario) {

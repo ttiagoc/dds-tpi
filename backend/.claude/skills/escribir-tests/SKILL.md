@@ -42,7 +42,9 @@ await sembrar(contenedor, datosDePrueba);
 const app = crearApp(contenedor);
 const token = await loginComo(app, "ana@aiticket.com");
 
-const res = await request(app).post("/compras").set("Authorization", `Bearer ${token}`)
+const res = await request(app)
+  .post("/compras")
+  .set("Authorization", `Bearer ${token}`)
   .send({ eventoId: 1, tipoEntradaId: 1, cantidad: 2 });
 expect(res.status).toBe(201);
 expect(res.body.estado).toBe("PENDIENTE");
@@ -50,7 +52,6 @@ expect(res.body.estado).toBe("PENDIENTE");
 
 - Contenedor nuevo por archivo/`beforeEach` → sin estado compartido entre tests.
 - Por endpoint: feliz + los errores del contrato (400/401/403/404/409/422 que apliquen).
-
 
 ## Antes de dar por terminado
 

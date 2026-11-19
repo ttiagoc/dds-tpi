@@ -15,21 +15,23 @@ beforeEach(async () => {
   ({ app, contenedor } = await crearAppDePrueba());
 });
 
-const listar = (email = ANA) => pedirComo(app, request(app).get("/usuarios/yo/favoritos"), email);
+const listar = (email = ANA, query = "") =>
+  pedirComo(app, request(app).get(`/usuarios/yo/favoritos${query}`), email);
 const agregar = (id, email = ANA) =>
   pedirComo(app, request(app).put(`/usuarios/yo/favoritos/${id}`), email);
 const quitar = (id, email = ANA) =>
   pedirComo(app, request(app).delete(`/usuarios/yo/favoritos/${id}`), email);
 const idDeEvento = async (nombre) => (await eventoDelSeed(contenedor, nombre)).id;
-const nombres = (res) => res.body.map((e) => e.nombre);
+const nombres = (res) => res.body.eventos.map((e) => e.nombre);
 
 describe("favoritos de Ana", () => {
   it("lista Hamlet y la Fiesta Electrónica por fecha, con esFavorito true", async () => {
     const res = await listar();
     expect(res.status).toBe(200);
     expect(nombres(res)).toEqual([HAMLET, ELECTRO]);
-    expect(res.body.every((e) => e.esFavorito)).toBe(true);
-    expect(res.body[0].organizador).toHaveProperty("puntajePromedio");
+    expect(res.body).toMatchObject({ total: 2, page: 1, totalPages: 1 });
+    expect(res.body.eventos.every((e) => e.esFavorito)).toBe(true);
+    expect(res.body.eventos[0].organizador).toHaveProperty("puntajePromedio");
   });
 
   it("agregar Los Piojos dos veces responde 204 y queda primero una sola vez", async () => {
@@ -45,7 +47,7 @@ describe("favoritos de Ana", () => {
     expect((await agregar(await idDeEvento(ROCK))).status).toBe(204);
     const lista = await listar();
     expect(nombres(lista)).toEqual([ROCK, HAMLET, ELECTRO]);
-    expect(lista.body.map((e) => e.finalizado)).toEqual([true, false, false]);
+    expect(lista.body.eventos.map((e) => e.finalizado)).toEqual([true, false, false]);
   });
 
   it("quitar Hamlet dos veces responde 204 y deja de ser favorito en el detalle", async () => {
@@ -55,6 +57,18 @@ describe("favoritos de Ana", () => {
     expect(nombres(await listar())).toEqual([ELECTRO]);
     const detalle = await pedirComo(app, request(app).get(`/eventos/${id}`), ANA);
     expect(detalle.body.esFavorito).toBe(false);
+  });
+
+  it("pagina con page y limit", async () => {
+    await agregar(await idDeEvento(PIOJOS));
+    const res = await listar(ANA, "?page=2&limit=2");
+    expect(res.status).toBe(200);
+    expect(nombres(res)).toEqual([ELECTRO]);
+    expect(res.body).toMatchObject({ total: 3, page: 2, totalPages: 2 });
+  });
+
+  it.each(["?limit=0", "?limit=51", "?orden=asc"])("responde 400 con la query %s", async (q) => {
+    expect((await listar(ANA, q)).status).toBe(400);
   });
 
   it("quitar un evento inexistente responde 204", async () => {

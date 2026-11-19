@@ -162,6 +162,8 @@ export function mensaje(cambios = {}) {
   };
 }
 
+export const paginaDeMensajes = (mensajes, hayMas = false) => ({ mensajes, hayMas });
+
 export function conversacion() {
   return {
     pregunta: mensaje({ id: 1 }),
