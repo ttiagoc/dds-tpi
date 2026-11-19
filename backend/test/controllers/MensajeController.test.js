@@ -1,16 +1,24 @@
 import { describe, it, expect, jest } from "@jest/globals";
 import { MensajeController } from "../../src/controllers/MensajeController.js";
-import { llamarController, probarIdYErrores, usuarioComprador } from "../helpers/http.js";
+import {
+  llamarController,
+  probarIdYErrores,
+  probarQueryInvalida,
+  responderCon,
+  usuarioComprador,
+} from "../helpers/http.js";
 
 describe("MensajeController", () => {
-  it("listar parsea el id, delega el usuario y responde 200", async () => {
-    const mensajes = [{ id: 1 }];
-    const servicio = { listar: jest.fn().mockResolvedValue(mensajes) };
-    const req = { params: { id: "7" } };
-    const { res } = await llamarController(MensajeController, "listar", req, servicio);
-    expect(servicio.listar).toHaveBeenCalledWith(7, usuarioComprador);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mensajes);
+  it("listar parsea el id y el cursor, delega el usuario y responde 200", async () => {
+    const req = { params: { id: "7" }, query: { antesDe: "5" } };
+    const pagina = { mensajes: [{ id: 1 }], hayMas: false };
+    const listar = await responderCon(MensajeController, "listar", req, pagina);
+    expect(listar).toHaveBeenCalledWith(7, usuarioComprador, { antesDe: 5, limit: 30 });
+  });
+
+  probarQueryInvalida(MensajeController, "listar", {
+    params: { id: "7" },
+    query: { antesDe: "abc" },
   });
 
   it("enviar parsea el id, delega el body y el usuario y responde 201", async () => {

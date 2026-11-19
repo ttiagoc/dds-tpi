@@ -23,11 +23,13 @@ Ver `checklist.md` en esta carpeta al terminar.
 2. **Repositorio** (`src/repositories/<Recurso>Repository.js`, extiende `InMemoryRepository`): métodos async de consulta específicos (`findByComprador(id)`, `buscar(filtros)`). Filtrado/orden/paginado en el repo.
 3. **Validación** (`src/validations/<recurso>Validation.js`): zod `.strict()`. Query con `z.coerce`. Mensajes en castellano.
    ```js
-   export const crearCompraValidation = z.object({
-     eventoId: z.number().int().positive(),
-     tipoEntradaId: z.number().int().positive(),
-     cantidad: z.number().int().min(1, "La cantidad mínima es 1"),
-   }).strict();
+   export const crearCompraValidation = z
+     .object({
+       eventoId: z.number().int().positive(),
+       tipoEntradaId: z.number().int().positive(),
+       cantidad: z.number().int().min(1, "La cantidad mínima es 1"),
+     })
+     .strict();
    ```
 4. **Service** (`src/services/<Recurso>Service.js`): DI por constructor con defaults; busca entidades (404 `NotFoundError`), chequea permisos de recurso (403 `ForbiddenError`), delega la regla en el dominio, guarda, emite eventos (notificador) si corresponde, devuelve `this.toResponse(entidad, usuario)`.
 5. **Controller** (`src/controllers/<Recurso>Controller.js`, `extends BaseController`):
@@ -45,8 +47,9 @@ Ver `checklist.md` en esta carpeta al terminar.
    Solo parsea entrada, llama al service y elige status. Sin reglas de negocio.
 6. **Route** (`src/routes/<Recurso>Routes.js`):
    ```js
-   router.post("/:id/cancelacion", autenticar, autorizar(Rol.COMPRADOR),
-     (req, res, next) => compraController.cancelar(req, res, next));
+   router.post("/:id/cancelacion", autenticar, autorizar(Rol.COMPRADOR), (req, res, next) =>
+     compraController.cancelar(req, res, next),
+   );
    ```
    Montar en `src/routes/router.js` si es recurso nuevo.
 7. **Swagger** (`src/docs/openapi/<modulo>.js`): path con parámetros, body, respuestas y errores usando helpers de `comun.js` (`ok`, `error`, `body`, `idPath`, `paginado`). Marcar `security` si requiere auth.
@@ -61,14 +64,14 @@ Probar a mano en `/api-docs` con un token de usuario seed. Repasar `checklist.md
 
 ## Status codes
 
-| Caso | Código | Error |
-|---|---|---|
-| Lectura / acción ok | 200 | |
-| Creación | 201 | |
-| Sin contenido (favoritos, reset) | 204 | |
-| Body/query/params inválidos (zod) | 400 | `BadRequestError` |
-| Sin token o token inválido | 401 | `UnauthorizedError` |
-| Rol o recurso ajeno | 403 | `ForbiddenError` |
-| No existe | 404 | `NotFoundError` |
-| Duplicado (reseña ya hecha) | 409 | `ConflictError` |
-| Regla de negocio | 422 | `UnprocessableEntityError` |
+| Caso                              | Código | Error                      |
+| --------------------------------- | ------ | -------------------------- |
+| Lectura / acción ok               | 200    |                            |
+| Creación                          | 201    |                            |
+| Sin contenido (favoritos, reset)  | 204    |                            |
+| Body/query/params inválidos (zod) | 400    | `BadRequestError`          |
+| Sin token o token inválido        | 401    | `UnauthorizedError`        |
+| Rol o recurso ajeno               | 403    | `ForbiddenError`           |
+| No existe                         | 404    | `NotFoundError`            |
+| Duplicado (reseña ya hecha)       | 409    | `ConflictError`            |
+| Regla de negocio                  | 422    | `UnprocessableEntityError` |

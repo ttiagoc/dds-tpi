@@ -26,9 +26,11 @@ import { UnprocessableEntityError } from "../errors/AppError.js";
 
 export class TipoEntrada {
   constructor({ id = null, nombre, descripcion = "", precio, cupo, vendidas = 0 }) {
-    if (!nombre?.trim()) throw new UnprocessableEntityError("El tipo de entrada necesita un nombre");
+    if (!nombre?.trim())
+      throw new UnprocessableEntityError("El tipo de entrada necesita un nombre");
     if (!(precio >= 0)) throw new UnprocessableEntityError("El precio no puede ser negativo");
-    if (!Number.isInteger(cupo) || cupo < 1) throw new UnprocessableEntityError("El cupo tiene que ser al menos 1");
+    if (!Number.isInteger(cupo) || cupo < 1)
+      throw new UnprocessableEntityError("El cupo tiene que ser al menos 1");
     Object.assign(this, { id, nombre: nombre.trim(), descripcion, precio, cupo, vendidas });
   }
 

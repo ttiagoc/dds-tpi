@@ -4,7 +4,13 @@ import { ultimoSocket } from "socket.io-client";
 import Chat from "./Chat";
 import { enviarMensaje, listarMensajes, obtenerCompra } from "../../api/comprasApi";
 import { ANA, FENIX, renderConProviders } from "../../test-utils/renderConProviders";
-import { compraDetalle, conversacion, errorHttp } from "../../test-utils/fixtures";
+import {
+  compraDetalle,
+  conversacion,
+  errorHttp,
+  mensaje,
+  paginaDeMensajes,
+} from "../../test-utils/fixtures";
 
 jest.mock("../../api/comprasApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
@@ -23,7 +29,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   useLocalSearchParams.mockReturnValue({ id: "7" });
   obtenerCompra.mockResolvedValue(compraDetalle());
-  listarMensajes.mockResolvedValue([PREGUNTA, RESPUESTA]);
+  listarMensajes.mockResolvedValue(paginaDeMensajes([PREGUNTA, RESPUESTA]));
   enviarMensaje.mockResolvedValue(NUEVO);
 });
 
@@ -50,7 +56,7 @@ describe("Chat: conversación", () => {
   });
 
   it("sin mensajes muestra el vacío", async () => {
-    listarMensajes.mockResolvedValue([]);
+    listarMensajes.mockResolvedValue(paginaDeMensajes([]));
     await abrir();
     expect(screen.getByTestId("chat-vacio")).toHaveTextContent("Todavía no hay mensajes");
   });
@@ -128,6 +134,34 @@ describe("Chat: escribir", () => {
       "No tenés permiso para realizar esta acción",
     );
     expect(screen.getByTestId("chat-input").props.value).toBe("Hola");
+  });
+});
+
+describe("Chat: mensajes anteriores", () => {
+  it("sin más mensajes no ofrece ver anteriores", async () => {
+    await abrir();
+    expect(screen.queryByTestId("chat-ver-anteriores")).toBeNull();
+  });
+
+  it("con más mensajes los trae arriba y el botón desaparece", async () => {
+    listarMensajes
+      .mockResolvedValueOnce(paginaDeMensajes([PREGUNTA, RESPUESTA], true))
+      .mockResolvedValueOnce(paginaDeMensajes([mensaje({ id: 0, mensaje: "Viejo" })]));
+    await abrir();
+    await fireEvent.press(screen.getByTestId("chat-ver-anteriores"));
+    expect(await screen.findByTestId("mensaje-0")).toHaveTextContent(/Viejo/);
+    expect(listarMensajes).toHaveBeenLastCalledWith(7, { antesDe: 1 });
+    expect(screen.queryByTestId("chat-ver-anteriores")).toBeNull();
+  });
+
+  it("si falla muestra el error del back", async () => {
+    listarMensajes
+      .mockResolvedValueOnce(paginaDeMensajes([PREGUNTA, RESPUESTA], true))
+      .mockRejectedValueOnce(errorHttp(500, "Se rompió"));
+    await abrir();
+    await fireEvent.press(screen.getByTestId("chat-ver-anteriores"));
+    expect(await screen.findByTestId("chat-anteriores-error")).toHaveTextContent("Se rompió");
+    expect(screen.getByTestId("chat-ver-anteriores")).toBeTruthy();
   });
 });
 

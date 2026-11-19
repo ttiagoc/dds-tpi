@@ -1,4 +1,4 @@
-import { ref, ok, error, eventoId, sinCuerpo, conAuth } from "./comun.js";
+import { ref, ok, error, eventoId, sinCuerpo, conAuth, page, limit, paginado } from "./comun.js";
 
 const COMPRADOR = { rol: "COMPRADOR" };
 
@@ -11,8 +11,12 @@ export default {
           tags: ["Favoritos"],
           summary: "Listar mis favoritos",
           description:
-            "Sin paginar. Incluye los eventos que ya ocurrieron, por fecha del evento asc.",
-          responses: { 200: ok("Mis favoritos", { type: "array", items: ref("EventoResumen") }) },
+            "Paginado. Incluye los eventos que ya ocurrieron, por fecha del evento asc. Un parámetro desconocido responde 400.",
+          parameters: [page, limit],
+          responses: {
+            200: ok("Mis favoritos", paginado("eventos", ref("EventoResumen"))),
+            400: error("BadRequest"),
+          },
         },
         COMPRADOR,
       ),

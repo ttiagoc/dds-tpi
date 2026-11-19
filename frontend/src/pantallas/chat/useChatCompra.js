@@ -11,29 +11,71 @@ export function unirMensajes(...listas) {
   return [...porId.values()].sort(cronologico);
 }
 
+const SIN_HISTORIAL = {
+  pagina: null,
+  cargados: [],
+  hayAnteriores: false,
+  anterioresPedidos: false,
+};
+
+const conPagina = (pagina) => (previo) => ({
+  ...previo,
+  pagina,
+  cargados: unirMensajes(previo.cargados, pagina.mensajes),
+  hayAnteriores: previo.anterioresPedidos ? previo.hayAnteriores : pagina.hayMas,
+});
+
+const conAnteriores = (anteriores) => (previo) => ({
+  ...previo,
+  cargados: unirMensajes(anteriores.mensajes, previo.cargados),
+  hayAnteriores: anteriores.hayMas,
+  anterioresPedidos: true,
+});
+
+function useAnteriores(compraId, historial, setHistorial) {
+  const { enCurso, error, enviar } = useEnvio();
+  const masViejo = Math.min(...historial.cargados.map((m) => m.id));
+  return {
+    hayAnteriores: historial.hayAnteriores,
+    cargandoAnteriores: enCurso !== null,
+    errorAnteriores: error,
+    cargarAnteriores: () =>
+      enviar(
+        "anteriores",
+        () => listarMensajes(compraId, { antesDe: masViejo }),
+        (anteriores) => setHistorial(conAnteriores(anteriores)),
+      ),
+  };
+}
+
 function useConversacion(compraId) {
   const cargar = useCallback(() => listarMensajes(compraId), [compraId]);
   const carga = useCargar(cargar);
-  const [historial, setHistorial] = useState(null);
-  if (carga.datos && carga.datos !== historial) setHistorial(carga.datos);
+  const [historial, setHistorial] = useState(SIN_HISTORIAL);
+  if (carga.datos && carga.datos !== historial.pagina) setHistorial(conPagina(carga.datos));
   const [recibidos, setRecibidos] = useState([]);
   const agregar = useCallback((nuevo) => setRecibidos((actuales) => [...actuales, nuevo]), []);
-  const mensajes = useMemo(() => unirMensajes(historial ?? [], recibidos), [historial, recibidos]);
+  const mensajes = useMemo(
+    () => unirMensajes(historial.cargados, recibidos),
+    [historial.cargados, recibidos],
+  );
   const { conectado } = useSalaDeCompra(
     compraId,
     { "mensaje:nuevo": agregar },
     { alReconectar: carga.recargar },
   );
-  return { carga, cargado: historial !== null, mensajes, agregar, conectado };
+  const anteriores = useAnteriores(compraId, historial, setHistorial);
+  return { carga, cargado: historial.pagina !== null, mensajes, agregar, conectado, anteriores };
 }
 
 export function useChatCompra(compraId) {
-  const { carga, cargado, mensajes, agregar, conectado } = useConversacion(compraId);
+  const { carga, cargado, mensajes, agregar, conectado, anteriores } = useConversacion(compraId);
   const [texto, setTexto] = useState("");
   const { enCurso, error, enviar } = useEnvio();
   const enviando = enCurso !== null;
 
   return {
+    ...anteriores,
     mensajes,
     cargado,
     error: carga.error,

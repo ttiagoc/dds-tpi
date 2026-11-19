@@ -87,9 +87,11 @@ describe("categorías, organizadores y favoritos", () => {
     expect(cliente.delete).toHaveBeenCalledWith("/usuarios/yo/favoritos/7");
   });
 
-  it("listarFavoritos pide los favoritos del usuario y devuelve data", async () => {
-    expect(await listarFavoritos()).toBe("respuesta");
-    expect(cliente.get).toHaveBeenCalledWith("/usuarios/yo/favoritos");
+  it("listarFavoritos pide los favoritos del usuario con paginado y devuelve data", async () => {
+    expect(await listarFavoritos({ page: 2, limit: 10 })).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/usuarios/yo/favoritos", {
+      params: { page: 2, limit: 10 },
+    });
   });
 });
 
@@ -145,7 +147,12 @@ describe("crearEvento", () => {
 describe("mensajes", () => {
   it("listarMensajes hace GET /compras/:id/mensajes y devuelve data", async () => {
     expect(await listarMensajes(7)).toBe("respuesta");
-    expect(cliente.get).toHaveBeenCalledWith("/compras/7/mensajes");
+    expect(cliente.get).toHaveBeenCalledWith("/compras/7/mensajes", { params: {} });
+  });
+
+  it("listarMensajes manda el cursor si lo hay", async () => {
+    await listarMensajes(7, { antesDe: 5 });
+    expect(cliente.get).toHaveBeenCalledWith("/compras/7/mensajes", { params: { antesDe: 5 } });
   });
 
   it("enviarMensaje hace POST /compras/:id/mensajes con { mensaje } y devuelve data", async () => {

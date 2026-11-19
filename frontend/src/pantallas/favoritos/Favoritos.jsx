@@ -4,11 +4,10 @@ import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaPaginada } from "../../components/ListaPaginada";
 import { Pantalla } from "../../components/Pantalla";
 import { TarjetaEvento } from "../../components/TarjetaEvento";
-import { useListaPaginada } from "../../hooks/useListaPaginada";
+import { paginaDe, useListaPaginada } from "../../hooks/useListaPaginada";
 import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 
-const pedirFavoritos = () =>
-  listarFavoritos().then((eventos) => ({ items: eventos, page: 1, totalPages: 1 }));
+const pedirFavoritos = paginaDe(listarFavoritos, "eventos");
 
 const SIN_CRITERIO = {};
 

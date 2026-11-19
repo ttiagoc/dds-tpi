@@ -40,7 +40,6 @@ describe("Comprar una entrada", () => {
 - Si un test falla de forma intermitente: esperar por contenido (`should`) en vez de `cy.wait(ms)`.
 - Correr: `npm run e2e:servidores` en una terminal y `npm run e2e` en otra (anda en PowerShell y Git Bash).
 
-
 ## Antes de dar por terminado
 
 Correr la suite completa del módulo, no solo el archivo nuevo, y mostrar la salida.

@@ -1,4 +1,6 @@
-import { ref, ok, error, body, id, fecha, texto, conAuth } from "./comun.js";
+import { ref, ok, error, body, id, fecha, texto, conAuth, query } from "./comun.js";
+import { LIMITE_POR_PAGINA } from "../../validations/paginacionValidation.js";
+import { MENSAJES_POR_PAGINA } from "../../validations/mensajesQueryValidation.js";
 
 const PARTICIPANTE = { conPermiso: true };
 const errores = { 400: error("BadRequest"), 404: error("NotFound") };
@@ -25,9 +27,29 @@ export default {
         {
           tags: ["Chat"],
           summary: "Leer el chat de una compra",
-          description: "Sin paginar, en orden cronológico (enviado asc, id asc).",
+          description:
+            "Pagina hacia atrás: sin `antesDe` trae los mensajes más recientes; con `antesDe` trae los anteriores a ese id. Cada página va en orden cronológico (enviado asc, id asc). Un parámetro desconocido responde 400.",
+          parameters: [
+            query(
+              "antesDe",
+              { type: "integer", minimum: 1 },
+              "Id del mensaje más viejo que ya tenés: trae los anteriores",
+            ),
+            query("limit", {
+              type: "integer",
+              minimum: 1,
+              maximum: LIMITE_POR_PAGINA,
+              default: MENSAJES_POR_PAGINA,
+            }),
+          ],
           responses: {
-            200: ok("Mensajes de la compra", { type: "array", items: ref("Mensaje") }),
+            200: ok("Página de mensajes de la compra", {
+              type: "object",
+              properties: {
+                mensajes: { type: "array", items: ref("Mensaje") },
+                hayMas: { type: "boolean", description: "Quedan mensajes más viejos" },
+              },
+            }),
             ...errores,
           },
         },

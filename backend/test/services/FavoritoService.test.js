@@ -33,18 +33,37 @@ beforeEach(() => {
   service = new FavoritoService({ ...repos, eventoService });
 });
 
+const TODO = { page: 1, limit: 20 };
+
 describe("FavoritoService.listar", () => {
   it("arma los resúmenes de los favoritos, pasados incluidos, por fecha asc e id asc", async () => {
-    const resultado = await service.listar(usuarioAna);
+    const resultado = await service.listar(usuarioAna, TODO);
     const [lista, usuario] = eventoService.resumenes.mock.calls[0];
     expect(lista.map((e) => e.id)).toEqual([2, 3, 4, 1]);
     expect(usuario).toBe(usuarioAna);
-    expect(resultado.map((e) => e.id)).toEqual([2, 3, 4, 1]);
+    expect(resultado).toEqual({
+      eventos: [2, 3, 4, 1].map((id) => ({ id, esFavorito: true })),
+      total: 4,
+      page: 1,
+      totalPages: 1,
+    });
   });
 
-  it("sin favoritos devuelve la lista vacía", async () => {
+  it("pagina después de ordenar y solo arma los resúmenes de la página", async () => {
+    const resultado = await service.listar(usuarioAna, { page: 2, limit: 3 });
+    expect(eventoService.resumenes.mock.calls[0][0].map((e) => e.id)).toEqual([1]);
+    expect(resultado).toMatchObject({ total: 4, page: 2, totalPages: 2 });
+    expect(resultado.eventos.map((e) => e.id)).toEqual([1]);
+  });
+
+  it("sin favoritos devuelve una página vacía", async () => {
     ana.favoritos = [];
-    expect(await service.listar(usuarioAna)).toEqual([]);
+    expect(await service.listar(usuarioAna, TODO)).toEqual({
+      eventos: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+    });
   });
 });
 

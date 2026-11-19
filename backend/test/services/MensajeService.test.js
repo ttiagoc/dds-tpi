@@ -45,7 +45,7 @@ describe("MensajeService.listar", () => {
     compra.agregarMensaje(ana, "¿A qué hora abren?", AHORA);
     compra.agregarMensaje(fenix, "A las 17 h", DESPUES);
     compras = [compra];
-    expect(await service.listar(7, usuarioFenix)).toEqual([
+    expect((await service.listar(7, usuarioFenix)).mensajes).toEqual([
       {
         id: 1,
         usuario: { id: ana.id, nombre: "Ana Pérez", rol: "COMPRADOR" },
@@ -67,13 +67,47 @@ describe("MensajeService.listar", () => {
     compra.agregarMensaje(ana, "primero", AHORA);
     compra.agregarMensaje(ana, "tercero", DESPUES);
     compras = [compra];
-    const mensajes = await service.listar(7, usuarioAna);
+    const { mensajes } = await service.listar(7, usuarioAna);
     expect(mensajes.map((m) => m.mensaje)).toEqual(["primero", "segundo", "tercero"]);
   });
 
-  it("devuelve [] si la compra no tiene mensajes", async () => {
+  it("devuelve una página vacía si la compra no tiene mensajes", async () => {
     compras = [compraDeAna()];
-    expect(await service.listar(7, usuarioAna)).toEqual([]);
+    expect(await service.listar(7, usuarioAna)).toEqual({ mensajes: [], hayMas: false });
+  });
+
+  describe("paginado por cursor", () => {
+    const textos = (pagina) => pagina.mensajes.map((m) => m.mensaje);
+
+    beforeEach(() => {
+      const compra = compraDeAna();
+      for (let i = 1; i <= 35; i++) compra.agregarMensaje(ana, `m${i}`, AHORA);
+      compras = [compra];
+    });
+
+    it("sin cursor trae los 30 más recientes en orden y avisa que hay más", async () => {
+      const pagina = await service.listar(7, usuarioAna);
+      expect(textos(pagina)).toEqual(Array.from({ length: 30 }, (_, i) => `m${i + 6}`));
+      expect(pagina.hayMas).toBe(true);
+    });
+
+    it("con antesDe trae los anteriores a ese id", async () => {
+      const pagina = await service.listar(7, usuarioAna, { antesDe: 6, limit: 30 });
+      expect(textos(pagina)).toEqual(["m1", "m2", "m3", "m4", "m5"]);
+      expect(pagina.hayMas).toBe(false);
+    });
+
+    it("si quedan justo limit mensajes no hay más", async () => {
+      const pagina = await service.listar(7, usuarioAna, { antesDe: 6, limit: 5 });
+      expect(textos(pagina)).toHaveLength(5);
+      expect(pagina.hayMas).toBe(false);
+    });
+
+    it("respeta el límite", async () => {
+      const pagina = await service.listar(7, usuarioAna, { antesDe: 11, limit: 3 });
+      expect(textos(pagina)).toEqual(["m8", "m9", "m10"]);
+      expect(pagina.hayMas).toBe(true);
+    });
   });
 
   it("rechaza una compra inexistente con 404", async () => {
@@ -127,7 +161,9 @@ describe("MensajeService.enviar", () => {
     const mensaje = await service.enviar(7, { mensaje: "Hola" }, usuarioAna);
     expect(mensaje.usuario.nombre).toBe("Anita Pérez");
     anaRenombrada.nombre = "Ana María";
-    const [guardado] = await service.listar(7, usuarioAna);
+    const {
+      mensajes: [guardado],
+    } = await service.listar(7, usuarioAna);
     expect(guardado.usuario.nombre).toBe("Anita Pérez");
   });
 

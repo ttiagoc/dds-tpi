@@ -24,8 +24,8 @@ beforeEach(async () => {
 });
 
 const idDeCompra = (nombreEvento) => idDeCompraDelSeed(contenedor, ANA, nombreEvento);
-const leer = (id, email = ANA) =>
-  pedirComo(app, request(app).get(`/compras/${id}/mensajes`), email);
+const leer = (id, email = ANA, query = "") =>
+  pedirComo(app, request(app).get(`/compras/${id}/mensajes${query}`), email);
 const escribir = (id, body, email = ANA) =>
   pedirComo(app, request(app).post(`/compras/${id}/mensajes`).send(body), email);
 const mensajeDe = (nombre, rol, mensaje) => ({
@@ -40,19 +40,39 @@ describe("GET /compras/:id/mensajes", () => {
     const id = await idDeCompra(PRIMAVERA);
     const deAna = await leer(id);
     expect(deAna.status).toBe(200);
-    expect(deAna.body).toEqual([
-      mensajeDe("Ana Pérez", "COMPRADOR", "¿A qué hora abren las puertas?"),
-      mensajeDe("Fénix Producciones", "ORGANIZADOR", "Abrimos a las 17 h. ¡Los esperamos!"),
-    ]);
+    expect(deAna.body).toEqual({
+      mensajes: [
+        mensajeDe("Ana Pérez", "COMPRADOR", "¿A qué hora abren las puertas?"),
+        mensajeDe("Fénix Producciones", "ORGANIZADOR", "Abrimos a las 17 h. ¡Los esperamos!"),
+      ],
+      hayMas: false,
+    });
     const deFenix = await leer(id, FENIX);
     expect(deFenix.status).toBe(200);
     expect(deFenix.body).toEqual(deAna.body);
   });
 
-  it("una compra sin mensajes devuelve []", async () => {
+  it("una compra sin mensajes devuelve una página vacía", async () => {
     const res = await leer(await idDeCompra("Noche de Stand-up"));
     expect(res.status).toBe(200);
-    expect(res.body).toEqual([]);
+    expect(res.body).toEqual({ mensajes: [], hayMas: false });
+  });
+
+  it("pagina hacia atrás con antesDe y limit", async () => {
+    const id = await idDeCompra(PRIMAVERA);
+    for (let i = 1; i <= 3; i++) await escribir(id, { mensaje: `extra ${i}` });
+    const ultimos = await leer(id, ANA, "?limit=2");
+    expect(ultimos.status).toBe(200);
+    expect(ultimos.body.mensajes.map((m) => m.mensaje)).toEqual(["extra 2", "extra 3"]);
+    expect(ultimos.body.hayMas).toBe(true);
+    const anteriores = await leer(id, ANA, "?antesDe=3&limit=5");
+    expect(anteriores.body.mensajes.map((m) => m.id)).toEqual([1, 2]);
+    expect(anteriores.body.hayMas).toBe(false);
+  });
+
+  it.each(["?antesDe=abc", "?limit=0", "?page=2"])("responde 400 con la query %s", async (q) => {
+    const res = await leer(await idDeCompra(PRIMAVERA), ANA, q);
+    expect(res.status).toBe(400);
   });
 });
 
@@ -70,7 +90,7 @@ describe("POST /compras/:id/mensajes", () => {
     expect(deFenix.status).toBe(201);
     expect(deFenix.body).toMatchObject({ id: 4, usuario: { rol: "ORGANIZADOR" } });
     const chat = await leer(id);
-    expect(chat.body.map((m) => m.id)).toEqual([1, 2, 3, 4]);
+    expect(chat.body.mensajes.map((m) => m.id)).toEqual([1, 2, 3, 4]);
   });
 
   it.each([["Hamlet"], ["Clásico de Básquet"], ["Rock en el Parque"]])(
@@ -125,7 +145,7 @@ describe("mensaje inválido", () => {
   ])("responde 400 con %p y el chat no cambia", async (body) => {
     const id = await idDeCompra(PRIMAVERA);
     expect((await escribir(id, body)).status).toBe(400);
-    expect((await leer(id)).body).toHaveLength(2);
+    expect((await leer(id)).body.mensajes).toHaveLength(2);
   });
 
   it("valida el body antes que la existencia de la compra", async () => {

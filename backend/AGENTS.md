@@ -4,22 +4,22 @@ API de AI Ticket It: Node + Express 5, ESM, JavaScript, persistencia en memoria.
 
 ## Estructura `src/`
 
-| Carpeta | Contenido | Archivo ejemplo |
-|---|---|---|
-| `domain/` | Clases con comportamiento; validan en constructor y tiran `UnprocessableEntityError`. Enums `Object.freeze` en archivo propio. | `Compra.js`, `EstadoCompra.js` |
-| `repositories/` | En memoria, **API async** (devuelven Promise) para que se puedan cambiar por Mongo. Base `InMemoryRepository` (Map + nextId). | `CompraRepository.js` |
-| `services/` | Lógica de aplicación. DI por constructor con default. `toResponse(entidad)` es el DTO. | `CompraService.js` |
-| `controllers/` | `extends BaseController` (`parsearId`, `extraerYValidarQuery`). `try { … } catch (e) { next(e) }`. | `CompraController.js` |
-| `routes/` | `XRoutes.js`, `router.js` monta todo. | `CompraRoutes.js` |
-| `validations/` | Zod `.strict()`; middleware `validate(schema)`. | `compraValidation.js` |
-| `middlewares/` | `errorHandler`, `errorLogger`, `notFoundHandler`, `autenticar`, `autenticarOpcional`, `autorizar`, `validate`. | |
-| `errors/` | `AppError` + `BadRequest 400`, `Unauthorized 401`, `Forbidden 403`, `NotFound 404`, `Conflict 409`, `UnprocessableEntity 422`. Mensajes compartidos en `mensajes.js`. | `AppError.js` |
-| `docs/openapi/` | Swagger modular a mano: `<modulo>.js` exporta `{ tags, paths, schemas }`; `comun.js` helpers. | |
-| `sockets/` | Servidor Socket.io (auth JWT en handshake, rooms `compra:<id>`), notificador. | |
-| `seeds/` | `datos.js` + `sembrar.js`. Se siembra al arrancar. | |
-| `config/` | `reloj.js` (`ahora()` inyectable para tests de fechas), `entorno.js`. | |
-| `contenedor.js` | `crearContenedor(overrides)`: repos únicos inyectados explícitamente en los services, `resetear()`. | |
-| `servidor.js` | `crearServidor({ entorno, reloj })`: HTTP + Socket.io; lo usan `server.js` y los tests. | |
+| Carpeta         | Contenido                                                                                                                                                             | Archivo ejemplo                |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `domain/`       | Clases con comportamiento; validan en constructor y tiran `UnprocessableEntityError`. Enums `Object.freeze` en archivo propio.                                        | `Compra.js`, `EstadoCompra.js` |
+| `repositories/` | En memoria, **API async** (devuelven Promise) para que se puedan cambiar por Mongo. Base `InMemoryRepository` (Map + nextId).                                         | `CompraRepository.js`          |
+| `services/`     | Lógica de aplicación. DI por constructor con default. `toResponse(entidad)` es el DTO.                                                                                | `CompraService.js`             |
+| `controllers/`  | `extends BaseController` (`parsearId`, `extraerYValidarQuery`). `try { … } catch (e) { next(e) }`.                                                                    | `CompraController.js`          |
+| `routes/`       | `XRoutes.js`, `router.js` monta todo.                                                                                                                                 | `CompraRoutes.js`              |
+| `validations/`  | Zod `.strict()`; middleware `validate(schema)`.                                                                                                                       | `compraValidation.js`          |
+| `middlewares/`  | `errorHandler`, `errorLogger`, `notFoundHandler`, `autenticar`, `autenticarOpcional`, `autorizar`, `validate`.                                                        |                                |
+| `errors/`       | `AppError` + `BadRequest 400`, `Unauthorized 401`, `Forbidden 403`, `NotFound 404`, `Conflict 409`, `UnprocessableEntity 422`. Mensajes compartidos en `mensajes.js`. | `AppError.js`                  |
+| `docs/openapi/` | Swagger modular a mano: `<modulo>.js` exporta `{ tags, paths, schemas }`; `comun.js` helpers.                                                                         |                                |
+| `sockets/`      | Servidor Socket.io (auth JWT en handshake, rooms `compra:<id>`), notificador.                                                                                         |                                |
+| `seeds/`        | `datos.js` + `sembrar.js`. Se siembra al arrancar.                                                                                                                    |                                |
+| `config/`       | `reloj.js` (`ahora()` inyectable para tests de fechas), `entorno.js`.                                                                                                 |                                |
+| `contenedor.js` | `crearContenedor(overrides)`: repos únicos inyectados explícitamente en los services, `resetear()`.                                                                   |                                |
+| `servidor.js`   | `crearServidor({ entorno, reloj })`: HTTP + Socket.io; lo usan `server.js` y los tests.                                                                               |                                |
 
 ## Convenciones
 

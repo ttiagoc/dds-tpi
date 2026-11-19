@@ -1,4 +1,5 @@
 import { BaseController } from "./BaseController.js";
+import { paginacionQueryValidation } from "../validations/paginacionQueryValidation.js";
 
 export class FavoritoController extends BaseController {
   constructor(favoritoService) {
@@ -8,7 +9,8 @@ export class FavoritoController extends BaseController {
 
   listar = async (req, res, next) => {
     try {
-      return res.status(200).json(await this.favoritoService.listar(req.usuario));
+      const paginacion = this.extraerYValidarQuery(req.query, paginacionQueryValidation);
+      return res.status(200).json(await this.favoritoService.listar(req.usuario, paginacion));
     } catch (error) {
       return next(error);
     }
