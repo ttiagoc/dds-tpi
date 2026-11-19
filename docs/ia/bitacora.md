@@ -6,10 +6,10 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 16 |
-| Features cerradas | 24 (It1 a It4 cerradas) |
+| Sesiones | 17 |
+| Features cerradas | 29 (It1 a It4 cerradas, It5b de rediseño) |
 | Correcciones relevantes a la IA | 6 |
-| Skills creadas / mejoradas | 12 / 2 |
+| Skills creadas / mejoradas | 12 / 3 |
 
 ### Errores típicos de la IA (se actualiza)
 1. Expectativas de test mal planteadas (un caso de búsqueda que daba por ausente un texto que sí estaba en el dato).
@@ -23,6 +23,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 9. Nombres de archivo que solo difieren en mayúsculas de otro del mismo directorio (`accionesCompra.js` junto a `AccionesCompra.jsx`): en Windows la importación resolvía al archivo equivocado y rompió la suite; la IA lo detectó al correr los tests y lo renombró.
 10. Tests que verifican el mecanismo interno y no el comportamiento: un test de limpieza contaba los oyentes registrados en el socket y siguió pasando ante un refactor que cambiaba cómo se registraban; se reescribió para comprobar que un evento posterior ya no llega.
 11. Selectores e2e por prefijo que coinciden con elementos de otra pantalla: en la versión web, las pantallas inferiores de la pila siguen montadas, y un selector de tipo de entrada eligió el del detalle del evento, oculto debajo de la pantalla de compra. Se acotó a elementos visibles.
+12. Verificaciones visuales sobre un servidor desactualizado: la versión web se levantó en modo CI, que no vigila los archivos, y las primeras capturas mostraban el código anterior al cambio; la IA lo detectó al comparar las capturas con lo implementado.
 
 ---
 
@@ -347,3 +348,25 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Mover skills por carpeta y apagar plugins — el diagnóstico de la IA mostró que de cada skill solo se carga la descripción hasta usarla, por lo que el ahorro principal estaba en los plugins sin uso; el usuario eligió apagar Postman y Canva y mantener gstack por su uso selectivo (ADR-011).
   - Se descarta el hook de CodeGraph que agrega contexto a cada mensaje — inyectaba código en todos los pedidos, en contra del objetivo, y en la prueba trajo código del front en lugar de la regla de dominio — decisión de la IA tras probar su salida (ADR-011).
 - **Aprendizaje:** el índice de código responde mejor cuando se nombran los símbolos (`Compra.cancelar`) que con preguntas en lenguaje natural, donde palabras genéricas del dominio arrastran resultados de otras capas.
+
+## Sesión 17 — 2026-11-19 — Rediseño visual, bandeja de mensajes y fotos de eventos (It5b)
+
+- **Objetivo:** responder a tres pedidos del usuario: una pestaña de mensajes con notificaciones para el organizador, la carga de la portada de un evento sin pegar una URL y un rediseño que le diera a la app una identidad propia.
+- **Avances:**
+  - Relevamiento previo: no había bandeja ni registro de lectura (el chat solo se abría desde cada compra), las imágenes eran archivos servidos por el back y no un servicio externo, y dos listados (favoritos e historial del chat) no paginaban.
+  - Maquetas de 8 pantallas en un lienzo de diseño, a partir de dos proyectos de referencia y de las pantallas existentes; el usuario las aprobó antes de escribir código.
+  - Cinco specs (18 a 22) aprobadas en conjunto, con los planes de dominio, contratos y pantallas actualizados, y dos ADR. Se implementaron en cinco ramas mergeadas a `develop`:
+    - Paginación de favoritos (`page`/`limit`) y del chat por cursor (`antesDe`), con "Ver mensajes anteriores" en la app.
+    - Identidad visual: paleta de neutros cálidos con un único acento, tipografía Manrope, tarjetas planas con borde, estados en píldora y la tarjeta de compra con forma de entrada.
+    - Bandeja de mensajes para ambos roles: reglas R11 (no leídos por participante) y R12 (conversaciones), dos endpoints, una sala de socket por usuario y un contador en la pestaña que se actualiza en vivo; nuevo flujo e2e.
+    - Subida de la portada desde la galería al back, con validación de formato y tamaño.
+    - Rediseño de pantallas: encabezados propios en las pestañas, barra inferior con precio y acción en el detalle y en la compra, entrada completa en el detalle de la compra, separadores por día en el chat y un resumen de ventas del organizador calculado en el back.
+  - Verificación: 866 tests del back, 456 del front y 4/4 flujos e2e en verde; capturas de cada pantalla en claro y oscuro; clones de código de 7 a 6.
+- **Decisiones:**
+  - Marca de lectura en el servidor y no en el dispositivo — el contador tiene que coincidir en web y en el celular — propuesta de la IA, elegida por el usuario.
+  - Imágenes subidas al back en lugar de un servicio en la nube — es coherente con la persistencia en memoria y no suma cuentas ni secretos — propuesta de la IA, elegida por el usuario (ADR-013).
+  - Dirección visual "Minimal cálido" entre tres alternativas, validada con maquetas — el usuario eligió la dirección; la IA oscureció el acento para cumplir el contraste mínimo con texto blanco (ADR-012).
+  - Paginar también el historial del chat, por cursor — los mensajes nuevos corren las páginas numeradas — propuesta de la IA, aceptada.
+  - El resumen de Mis eventos se calcula en el back — sumar solo la página visible daba un total incorrecto — detectado por la IA al escribir la spec.
+  - El usuario autorizó encadenar las cinco ramas (commit y merge al cerrar cada una) y aplicar los hallazgos de calidad sin aprobación previa; la revisión unificó tarjetas y barras repetidas en componentes compartidos.
+- **Aprendizaje:** aprobar las cinco specs juntas, con las maquetas ya validadas, permitió encadenar el trabajo sin interrupciones. En la verificación visual hizo falta confirmar que el servidor servía el código actual: con un proceso de una corrida anterior o un servidor sin vigilancia de archivos, las capturas parecían correctas pero mostraban la versión previa.
