@@ -5,6 +5,7 @@ import { crearAppDePrueba } from "../helpers/appDePrueba.js";
 const OPERACIONES_DE_PLANES_03 = [
   "GET /healthcheck",
   "GET /imagenes/{archivo}",
+  "POST /imagenes",
   "POST /auth/login",
   "GET /auth/yo",
   "GET /categorias",

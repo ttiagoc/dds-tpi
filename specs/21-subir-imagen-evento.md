@@ -1,6 +1,6 @@
 # Spec 21 — Subir la foto del evento desde el celular
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/subir-imagen-evento`
 - **Casos de uso:** CU4 (ver `planes/00-indice.md`)
 - **Iteración:** It5b (rediseño)

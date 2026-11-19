@@ -6,9 +6,10 @@ import { crearEventoRoutes } from "./EventoRoutes.js";
 import { crearOrganizadorRoutes } from "./OrganizadorRoutes.js";
 import { crearCompraRoutes } from "./CompraRoutes.js";
 import { crearUsuarioRoutes } from "./UsuarioRoutes.js";
+import { crearImagenRoutes } from "./ImagenRoutes.js";
 import { crearAutenticar, crearAutenticarOpcional } from "../middlewares/autenticar.js";
 
-export function crearRouter(contenedor, { nodeEnv }) {
+export function crearRouter(contenedor, { nodeEnv, carpetaImagenes }) {
   const { authService } = contenedor.servicios;
   const auth = {
     autenticar: crearAutenticar(authService),
@@ -22,6 +23,7 @@ export function crearRouter(contenedor, { nodeEnv }) {
   router.use("/organizadores", crearOrganizadorRoutes(contenedor.servicios, auth));
   router.use("/compras", crearCompraRoutes(contenedor.servicios, auth));
   router.use("/usuarios", crearUsuarioRoutes(contenedor.servicios, auth));
+  router.use("/imagenes", crearImagenRoutes(auth, { carpetaImagenes }));
   if (nodeEnv === "test") router.use("/test", crearTestRoutes(contenedor));
   return router;
 }
