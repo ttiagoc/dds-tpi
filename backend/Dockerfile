@@ -8,6 +8,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY src ./src
 COPY public ./public
+RUN mkdir -p public/imagenes/subidas && chown node:node public/imagenes/subidas
 
 USER node
 EXPOSE 3000

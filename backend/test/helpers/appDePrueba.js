@@ -5,13 +5,13 @@ import { leerEntorno } from "../../src/config/entorno.js";
 import { CONTRASENIA_DEMO } from "../../src/seeds/sembrar.js";
 import { AHORA } from "./domainFactories.js";
 
-export async function crearAppDePrueba({ ahora = AHORA, nodeEnv = "test" } = {}) {
+export async function crearAppDePrueba({ ahora = AHORA, nodeEnv = "test", carpetaImagenes } = {}) {
   const contenedor = crearContenedor({
     reloj: { ahora: () => ahora },
     entorno: leerEntorno({ NODE_ENV: "test" }),
   });
   await contenedor.resetear();
-  return { app: crearApp(contenedor, { nodeEnv }), contenedor };
+  return { app: crearApp(contenedor, { nodeEnv, carpetaImagenes }), contenedor };
 }
 
 export async function loginComo(app, email, password = CONTRASENIA_DEMO) {

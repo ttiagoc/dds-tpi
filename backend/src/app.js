@@ -10,14 +10,17 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 
 const CARPETA_IMAGENES = fileURLToPath(new URL("../public/imagenes", import.meta.url));
 
-export function crearApp(contenedor, { nodeEnv = process.env.NODE_ENV } = {}) {
+export function crearApp(
+  contenedor,
+  { nodeEnv = process.env.NODE_ENV, carpetaImagenes = CARPETA_IMAGENES } = {},
+) {
   const app = express();
   app.use(cors());
   app.use(express.json());
-  app.use("/imagenes", express.static(CARPETA_IMAGENES));
+  app.use("/imagenes", express.static(carpetaImagenes));
   app.get("/api-docs.json", (_req, res) => res.json(openapi));
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapi));
-  app.use(crearRouter(contenedor, { nodeEnv }));
+  app.use(crearRouter(contenedor, { nodeEnv, carpetaImagenes }));
   app.use(notFoundHandler);
   app.use(crearErrorLogger({ nodeEnv }));
   app.use(errorHandler);
