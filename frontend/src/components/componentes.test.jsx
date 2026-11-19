@@ -27,6 +27,7 @@ describe("ChipEstado", () => {
     expect(screen.getByText(etiqueta)).toBeTruthy();
     expect(screen.getByLabelText(`Estado: ${etiqueta}`)).toBeTruthy();
     expect(screen.getByTestId(`chip-estado-${estado}`)).toBeTruthy();
+    expect(screen.getByTestId(`chip-estado-${estado}-punto`)).toBeTruthy();
   });
 });
 
@@ -150,7 +151,7 @@ describe("ChipsFiltro", () => {
       expect(noElegido.borderColor).not.toBe("transparent");
       expect(noElegido.backgroundColor).not.toBe(elegido.backgroundColor);
     }
-    expect(elegido.borderColor).toBe("transparent");
+    expect(elegido.borderColor).toBe(elegido.backgroundColor);
   });
 });
 

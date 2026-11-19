@@ -69,6 +69,24 @@ describe("textoDiasRestantes", () => {
   });
 });
 
+describe("partesDelBloqueFecha", () => {
+  const { partesDelBloqueFecha } = require("./formato");
+
+  it("separa día de la semana, número, mes y hora para el bloque de fecha", () => {
+    expect(partesDelBloqueFecha("2026-12-12T00:00:00.000Z", { zonaHoraria: BUENOS_AIRES })).toEqual(
+      { diaSemana: "VIE", dia: "11", mes: "DIC", hora: "21:00" },
+    );
+  });
+
+  it("no deja puntos de abreviatura", () => {
+    const { diaSemana, mes } = partesDelBloqueFecha("2026-09-05T15:30:00.000Z", {
+      zonaHoraria: "UTC",
+    });
+    expect(diaSemana).toBe("SÁB");
+    expect(mes).toBe("SEP");
+  });
+});
+
 describe("formatearFechaCorta", () => {
   it("muestra día/mes y hora de 24 h en la zona pedida", () => {
     expect(formatearFechaCorta("2026-11-13T01:05:00.000Z", { zonaHoraria: BUENOS_AIRES })).toBe(
