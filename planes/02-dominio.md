@@ -97,6 +97,7 @@ Métodos:
 | estado | EstadoCompra |
 | historial | CambioEstadoCompra[] |
 | mensajes | Mensaje[] |
+| lecturas | `{ [usuarioId]: mensajeId }` — marca "leído hasta" de cada participante (R11, spec 20) |
 | fechaCompra | Date |
 
 Métodos:
@@ -112,7 +113,8 @@ Métodos:
 - `participa(usuarioId)` → es el comprador o el organizador del evento (para chat).
 - `puedePagarse(ahora)`, `puedeMarcarseUtilizada()`.
 - `accionesPara(usuarioId, ahora)` → `{ puedePagar, puedeCancelar, puedeMarcarUtilizada, puedeReseniar }` según rol en la compra (alimenta `acciones` de `CompraResumen`).
-- `agregarMensaje(usuario, texto, ahora)`.
+- `agregarMensaje(usuario, texto, ahora)` — avanza la marca de lectura del autor.
+- `marcarLeido(usuarioId)`, `noLeidosPara(usuarioId)`, `ultimoMensaje()`, `contraparteDe(usuarioId)` (R11).
 
 ### Resenia
 `id, comprador, evento, compraId (Δ), puntuacion (int 1-5), detalle (string 1-500), fecha`. `Resenia.crear({ compra, ... }, ahora)` exige compra UTILIZADA; `Resenia.promedio(resenias)` implementa R6.
@@ -159,6 +161,8 @@ Reglas:
 - **R8** Crear evento: solo ORGANIZADOR; fecha futura; ≥1 tipo; nombres de tipo únicos; precio ≥ 0; cupo ≥ 1.
 - **R9** Ver compras de un evento: solo su organizador (403).
 - **R10** Búsqueda: por defecto solo eventos no ocurridos.
+- **R11** Lectura del chat: cada participante tiene una marca "leído hasta" por compra (0 si nunca leyó). Sus no leídos son los mensajes de la otra parte con `id` mayor a la marca. Enviar avanza la marca del autor; marcar como leído la lleva al último mensaje. Solo participantes (R7).
+- **R12** Conversaciones: compras con al menos un mensaje en las que participa el usuario (comprador: sus compras; organizador: las de sus eventos), por fecha del último mensaje desc y `compraId` desc.
 
 ## Casos borde a testear
 
