@@ -3,6 +3,7 @@ import { buscarEventos, crearEvento, listarComprasDelEvento, obtenerEvento } fro
 import { listarCategorias } from "./categoriasApi";
 import { listarMisEventos, obtenerReseniasDeOrganizador } from "./organizadoresApi";
 import { agregarFavorito, listarFavoritos, quitarFavorito } from "./favoritosApi";
+import { listarConversaciones, marcarLeidos } from "./conversacionesApi";
 import {
   cancelarCompra,
   crearCompra,
@@ -141,6 +142,20 @@ describe("crearEvento", () => {
     const evento = { nombre: "Stand-up" };
     expect(await crearEvento(evento)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/eventos", evento);
+  });
+});
+
+describe("conversaciones", () => {
+  it("listarConversaciones pide la bandeja con paginado", async () => {
+    expect(await listarConversaciones({ limit: 1 })).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/usuarios/yo/conversaciones", {
+      params: { limit: 1 },
+    });
+  });
+
+  it("marcarLeidos hace PUT /compras/:id/mensajes/leidos", async () => {
+    expect(await marcarLeidos(7)).toBeUndefined();
+    expect(cliente.put).toHaveBeenCalledWith("/compras/7/mensajes/leidos");
   });
 });
 

@@ -33,7 +33,28 @@ describe("MensajeController", () => {
   });
 });
 
+describe("MensajeController: bandeja", () => {
+  it("listarConversaciones valida la paginación, delega el usuario y responde 200", async () => {
+    const pagina = { conversaciones: [], total: 0, page: 1, totalPages: 0, totalNoLeidos: 0 };
+    const req = { query: { limit: "5" } };
+    const listar = await responderCon(MensajeController, "listarConversaciones", req, pagina);
+    expect(listar).toHaveBeenCalledWith(usuarioComprador, { page: 1, limit: 5 });
+  });
+
+  probarQueryInvalida(MensajeController, "listarConversaciones", { query: { limit: "0" } });
+
+  it("marcarLeidos parsea el id, delega y responde 204 sin cuerpo", async () => {
+    const servicio = { marcarLeidos: jest.fn().mockResolvedValue(undefined) };
+    const req = { params: { id: "7" } };
+    const { res } = await llamarController(MensajeController, "marcarLeidos", req, servicio);
+    expect(servicio.marcarLeidos).toHaveBeenCalledWith(7, usuarioComprador);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.send).toHaveBeenCalledWith();
+  });
+});
+
 probarIdYErrores(MensajeController, [
+  ["marcarLeidos", "id"],
   ["listar", "id"],
   ["enviar", "id"],
 ]);

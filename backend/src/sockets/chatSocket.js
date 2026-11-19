@@ -1,7 +1,7 @@
 import { AppError } from "../errors/AppError.js";
 import { MENSAJE_ERROR_CHAT, MENSAJE_NO_AUTENTICADO } from "../errors/mensajes.js";
 import { parsearId } from "../validations/parsearId.js";
-import { salaDeCompra } from "./notificador.js";
+import { salaDeCompra, salaDeUsuario } from "./notificador.js";
 
 function autenticarHandshake(authService) {
   return async (socket, next) => {
@@ -48,6 +48,7 @@ function salirDeLaCompra(socket) {
 export function registrarChat(io, { authService, mensajeService }) {
   io.use(autenticarHandshake(authService));
   io.on("connection", (socket) => {
+    socket.join(salaDeUsuario(socket.data.usuario.id));
     socket.on("compra:unirse", unirseALaCompra(socket, mensajeService));
     socket.on("compra:salir", salirDeLaCompra(socket));
   });

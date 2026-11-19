@@ -226,3 +226,25 @@ describe("compra:estado", () => {
     expect(recibidos).toEqual([]);
   });
 });
+
+describe("conversacion:actualizada", () => {
+  it("le llega a la otra parte en su sala de usuario, sin unirse a la compra", async () => {
+    const id = await idDeCompra(PRIMAVERA);
+    const fenix = await conectarComo(FENIX);
+    const ana = await conectarComo(ANA);
+    const llega = esperarEvento(fenix.cliente, "conversacion:actualizada");
+
+    const res = await escribir(ana.token, id, "¿Hay estacionamiento?");
+
+    expect(await llega).toEqual({ compraId: id, ultimoMensaje: res.body, noLeidos: 1 });
+  });
+
+  it("no le llega al autor", async () => {
+    const id = await idDeCompra(PRIMAVERA);
+    const ana = await conectarComo(ANA);
+    const recibidos = await recibidosDurante(ana.cliente, "conversacion:actualizada", () =>
+      escribir(ana.token, id),
+    );
+    expect(recibidos).toEqual([]);
+  });
+});

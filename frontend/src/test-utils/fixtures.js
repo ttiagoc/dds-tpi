@@ -162,6 +162,31 @@ export function mensaje(cambios = {}) {
   };
 }
 
+export function conversacionResumen(cambios = {}) {
+  return {
+    compraId: 7,
+    estado: "CONFIRMADA",
+    evento: { id: 1, nombre: "Los Piojos en River", imagen: "/imagenes/piojos.jpg" },
+    contraparte: { id: 2, nombre: "Fénix Producciones" },
+    ultimoMensaje: mensaje({
+      id: 2,
+      usuario: { id: 2, nombre: "Fénix Producciones", rol: "ORGANIZADOR" },
+      mensaje: "Abrimos a las 17 h. ¡Los esperamos!",
+    }),
+    noLeidos: 1,
+    ...cambios,
+  };
+}
+
+export const paginaDeConversaciones = (conversaciones, extra = {}) => ({
+  conversaciones,
+  total: conversaciones.length,
+  page: 1,
+  totalPages: conversaciones.length ? 1 : 0,
+  totalNoLeidos: conversaciones.reduce((suma, c) => suma + c.noLeidos, 0),
+  ...extra,
+});
+
 export const paginaDeMensajes = (mensajes, hayMas = false) => ({ mensajes, hayMas });
 
 export function conversacion() {

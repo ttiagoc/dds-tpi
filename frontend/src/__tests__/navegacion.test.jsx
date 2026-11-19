@@ -8,6 +8,8 @@ import LayoutComprador from "../app/(comprador)/_layout";
 import Explorar from "../app/(comprador)/explorar";
 import MisCompras from "../app/(comprador)/mis-compras";
 import Favoritos from "../app/(comprador)/favoritos";
+import MensajesComprador from "../app/(comprador)/mensajes";
+import MensajesOrganizador from "../app/(organizador)/bandeja";
 import PerfilComprador from "../app/(comprador)/perfil";
 import LayoutOrganizador from "../app/(organizador)/_layout";
 import MisEventos from "../app/(organizador)/mis-eventos";
@@ -24,6 +26,7 @@ import { buscarEventos, listarComprasDelEvento, obtenerEvento } from "../api/eve
 import { listarCategorias } from "../api/categoriasApi";
 import { listarMisEventos, obtenerReseniasDeOrganizador } from "../api/organizadoresApi";
 import { listarMensajes, listarMisCompras, obtenerCompra } from "../api/comprasApi";
+import { listarConversaciones } from "../api/conversacionesApi";
 import { ANA, FENIX } from "../test-utils/renderConProviders";
 import {
   compraDetalle,
@@ -34,6 +37,7 @@ import {
   eventoPropio,
   eventoResumen,
   paginaDeCompras,
+  paginaDeConversaciones,
   paginaDeEventos,
   reseniasDe,
 } from "../test-utils/fixtures";
@@ -44,6 +48,7 @@ jest.mock("../api/eventosApi");
 jest.mock("../api/categoriasApi");
 jest.mock("../api/organizadoresApi");
 jest.mock("../api/comprasApi");
+jest.mock("../api/conversacionesApi");
 
 const RUTAS = {
   _layout: RootLayout,
@@ -53,6 +58,8 @@ const RUTAS = {
   "(comprador)/explorar": Explorar,
   "(comprador)/mis-compras": MisCompras,
   "(comprador)/favoritos": Favoritos,
+  "(comprador)/mensajes": MensajesComprador,
+  "(organizador)/bandeja": MensajesOrganizador,
   "(comprador)/perfil": PerfilComprador,
   "(organizador)/_layout": LayoutOrganizador,
   "(organizador)/mis-eventos": MisEventos,
@@ -84,6 +91,7 @@ beforeEach(() => {
   listarMensajes.mockResolvedValue({ mensajes: [], hayMas: false });
   listarMisEventos.mockResolvedValue(paginaDeEventos([eventoPropio()]));
   listarComprasDelEvento.mockResolvedValue(comprasDelEvento([compraResumen()]));
+  listarConversaciones.mockResolvedValue(paginaDeConversaciones([], { totalNoLeidos: 3 }));
 });
 
 describe("navegación según la sesión", () => {
@@ -97,7 +105,7 @@ describe("navegación según la sesión", () => {
     conSesion(ANA);
     await abrirApp();
     await waitFor(() => expect(screen).toHavePathname("/explorar"));
-    for (const tab of ["explorar", "mis-compras", "favoritos", "perfil"]) {
+    for (const tab of ["explorar", "mis-compras", "mensajes", "favoritos", "perfil"]) {
       expect(screen.getByTestId(`tab-${tab}`)).toBeTruthy();
     }
     expect(screen.queryByTestId("tab-mis-eventos")).toBeNull();
@@ -110,9 +118,20 @@ describe("navegación según la sesión", () => {
     await abrirApp();
     await waitFor(() => expect(screen).toHavePathname("/mis-eventos"));
     expect(screen.getByTestId("tab-mis-eventos")).toBeTruthy();
+    expect(screen.getByTestId("tab-mensajes")).toBeTruthy();
     expect(screen.getByTestId("tab-perfil")).toBeTruthy();
     expect(screen.queryByTestId("tab-explorar")).toBeNull();
     expect(await screen.findByTestId("logo")).toBeTruthy();
+  });
+
+  it.each([
+    ["comprador", ANA, "/explorar"],
+    ["organizador", FENIX, "/mis-eventos"],
+  ])("el %s ve los no leídos en la pestaña Mensajes", async (_rol, usuario, inicio) => {
+    conSesion(usuario);
+    await abrirApp();
+    await waitFor(() => expect(screen).toHavePathname(inicio));
+    await waitFor(() => expect(screen.getByTestId("tab-mensajes")).toHaveTextContent(/3/));
   });
 
   it("con la sesión vencida vuelve al login", async () => {

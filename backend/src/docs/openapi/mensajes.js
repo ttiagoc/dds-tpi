@@ -1,4 +1,19 @@
-import { ref, ok, error, body, id, fecha, texto, conAuth, query } from "./comun.js";
+import {
+  ref,
+  ok,
+  error,
+  body,
+  id,
+  fecha,
+  texto,
+  conAuth,
+  query,
+  page,
+  limit,
+  paginado,
+  sinCuerpo,
+  ESTADOS,
+} from "./comun.js";
 import { LIMITE_POR_PAGINA } from "../../validations/paginacionValidation.js";
 import { MENSAJES_POR_PAGINA } from "../../validations/mensajesQueryValidation.js";
 
@@ -16,7 +31,10 @@ Se escribe por REST; las novedades en vivo llegan por Socket.io (OpenAPI no mode
 | cliente → server | \`compra:unirse\` | \`{ compraId }\`, con ack \`{ ok: true }\` o \`{ ok: false, error }\` (id inválido, compra inexistente o no participás) |
 | cliente → server | \`compra:salir\` | \`{ compraId }\` |
 | server → room \`compra:<id>\` | \`mensaje:nuevo\` | \`Mensaje\`, igual que el 201 del POST; llega a todo el room, incluido el autor |
-| server → room \`compra:<id>\` | \`compra:estado\` | \`{ compraId, estado }\` tras pagar, cancelar o marcar utilizada; un solo evento con el estado final |`;
+| server → room \`compra:<id>\` | \`compra:estado\` | \`{ compraId, estado }\` tras pagar, cancelar o marcar utilizada; un solo evento con el estado final |
+| server → room \`usuario:<id>\` | \`conversacion:actualizada\` | \`{ compraId, ultimoMensaje, noLeidos }\` a la otra parte tras un mensaje; cada socket entra solo a su sala de usuario al conectarse |
+
+**No leídos** (R11): cada participante tiene una marca "leído hasta"; sus no leídos son los mensajes de la otra parte posteriores a esa marca. Escribir avanza la marca del autor.`;
 
 export default {
   tags: [{ name: "Chat", description: DESCRIPCION }],
@@ -67,8 +85,59 @@ export default {
         PARTICIPANTE,
       ),
     },
+    "/compras/{id}/mensajes/leidos": {
+      parameters: [id("Id de la compra")],
+      put: conAuth(
+        {
+          tags: ["Chat"],
+          summary: "Marcar como leído el chat de una compra",
+          description: "Lleva tu marca de lectura al último mensaje. Idempotente.",
+          responses: { 204: sinCuerpo("Marcado como leído"), ...errores },
+        },
+        PARTICIPANTE,
+      ),
+    },
+    "/usuarios/yo/conversaciones": {
+      get: conAuth({
+        tags: ["Chat"],
+        summary: "Listar mis conversaciones",
+        description:
+          "Compras con al menos un mensaje en las que participás (comprador: tus compras; organizador: las de tus eventos), primero la del mensaje más reciente (R12). `totalNoLeidos` suma todas, no solo la página.",
+        parameters: [page, limit],
+        responses: {
+          200: ok(
+            "Mis conversaciones",
+            paginado("conversaciones", ref("Conversacion"), {
+              totalNoLeidos: { type: "integer", example: 3 },
+            }),
+          ),
+          400: error("BadRequest"),
+        },
+      }),
+    },
   },
   schemas: {
+    Conversacion: {
+      type: "object",
+      properties: {
+        compraId: { type: "integer", example: 7 },
+        estado: { type: "string", enum: ESTADOS },
+        evento: {
+          type: "object",
+          properties: {
+            id: { type: "integer", example: 1 },
+            nombre: texto("Los Piojos en River"),
+            imagen: texto("/imagenes/piojos.jpg", { nullable: true }),
+          },
+        },
+        contraparte: {
+          type: "object",
+          properties: { id: { type: "integer", example: 2 }, nombre: texto("Fénix Producciones") },
+        },
+        ultimoMensaje: ref("Mensaje"),
+        noLeidos: { type: "integer", example: 1 },
+      },
+    },
     MensajeInput: {
       type: "object",
       required: ["mensaje"],

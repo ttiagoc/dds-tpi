@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { enviarMensaje, listarMensajes } from "../../api/comprasApi";
+import { marcarLeidos } from "../../api/conversacionesApi";
+import { useNoLeidos } from "../../mensajes/NoLeidosContext";
 import { useCargar } from "../../hooks/useCargar";
 import { useEnvio } from "../../hooks/useEnvio";
 import { useSalaDeCompra } from "../../hooks/useSalaDeCompra";
@@ -68,8 +70,17 @@ function useConversacion(compraId) {
   return { carga, cargado: historial.pagina !== null, mensajes, agregar, conectado, anteriores };
 }
 
+function useMarcarLeido(compraId, cargado, ultimoId) {
+  const { refrescar } = useNoLeidos();
+  useEffect(() => {
+    if (!cargado) return;
+    Promise.resolve(marcarLeidos(compraId)).then(refrescar, () => {});
+  }, [compraId, cargado, ultimoId, refrescar]);
+}
+
 export function useChatCompra(compraId) {
   const { carga, cargado, mensajes, agregar, conectado, anteriores } = useConversacion(compraId);
+  useMarcarLeido(compraId, cargado, mensajes.at(-1)?.id);
   const [texto, setTexto] = useState("");
   const { enCurso, error, enviar } = useEnvio();
   const enviando = enCurso !== null;
