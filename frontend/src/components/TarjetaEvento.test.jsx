@@ -9,7 +9,7 @@ describe("TarjetaEvento", () => {
     await renderConProviders(<TarjetaEvento evento={eventoResumen()} onPress={jest.fn()} />);
     expect(screen.getByText("Los Piojos en River")).toBeTruthy();
     expect(screen.getByText(/Estadio River Plate/)).toBeTruthy();
-    expect(screen.getByText(/dic/)).toBeTruthy();
+    expect(screen.getByTestId("bloque-fecha")).toHaveTextContent(/DIC/);
     expect(screen.getByText(/^Desde \$\s45\.000$/)).toBeTruthy();
     expect(screen.getByText("Fénix Producciones")).toBeTruthy();
     expect(screen.getByLabelText("Puntaje 4,5 de 5")).toBeTruthy();

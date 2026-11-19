@@ -55,5 +55,37 @@ it("el modo oscuro está marcado como dark", () => {
 
 it("espaciado y radios siguen la escala del sistema de diseño", () => {
   expect(espaciado).toEqual({ xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 });
-  expect(radios).toEqual({ sm: 8, md: 12, lg: 16 });
+  expect(radios).toEqual({ sm: 8, md: 12, lg: 16, pill: 999 });
+});
+
+it.each([
+  ["claro", temaClaro, { background: "#FAFAF7", surface: "#FFFFFF", primary: "#BF4316" }],
+  ["oscuro", temaOscuro, { background: "#141311", surface: "#1E1C1A", primary: "#FF8A55" }],
+])("el tema %s usa la paleta Minimal cálido", (_nombre, tema, tokens) => {
+  expect(tema.colors).toMatchObject(tokens);
+});
+
+describe.each([
+  ["claro", temaClaro],
+  ["oscuro", temaOscuro],
+])("tipografía del tema %s", (_nombre, tema) => {
+  it("usa Manrope en todas las variantes", () => {
+    for (const [variante, fuente] of Object.entries(tema.fonts)) {
+      if (variante === "default") continue;
+      expect(fuente.fontFamily).toMatch(/^Manrope_/);
+    }
+  });
+
+  it("los títulos van en 800 y el texto en 500", () => {
+    expect(tema.fonts.headlineMedium.fontFamily).toBe("Manrope_800ExtraBold");
+    expect(tema.fonts.bodyMedium.fontFamily).toBe("Manrope_500Medium");
+    expect(tema.fonts.labelLarge.fontFamily).toBe("Manrope_700Bold");
+  });
+
+  it("el texto apagado y los bordes tienen contraste suficiente sobre el fondo", () => {
+    expect(contraste(tema.colors.onSurfaceVariant, tema.colors.background)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+    expect(contraste(tema.colors.onSurface, tema.colors.surface)).toBeGreaterThanOrEqual(7);
+  });
 });

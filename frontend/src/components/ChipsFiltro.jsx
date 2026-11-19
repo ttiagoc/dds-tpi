@@ -1,13 +1,21 @@
 import { ScrollView, StyleSheet } from "react-native";
-import { Chip } from "react-native-paper";
-import { espaciado } from "../tema/espaciado";
+import { Chip, useTheme } from "react-native-paper";
+import { espaciado, radios } from "../tema/espaciado";
 
 function ChipFiltro({ seleccionado, onPress, testID, children }) {
+  const { colors } = useTheme();
+  const fondo = seleccionado ? colors.onSurface : colors.surface;
+  const texto = seleccionado ? colors.surface : colors.onSurface;
   return (
     <Chip
-      mode={seleccionado ? "flat" : "outlined"}
+      mode="outlined"
       selected={seleccionado}
-      showSelectedOverlay
+      showSelectedCheck={false}
+      style={[
+        estilos.chip,
+        { backgroundColor: fondo, borderColor: seleccionado ? fondo : colors.outlineVariant },
+      ]}
+      textStyle={{ color: texto }}
       onPress={onPress}
       testID={testID}
       accessibilityState={{ selected: seleccionado }}
@@ -45,4 +53,7 @@ export function ChipsFiltro({ opciones, seleccionada, onElegir, prefijoTestID })
   );
 }
 
-const estilos = StyleSheet.create({ fila: { gap: espaciado.sm } });
+const estilos = StyleSheet.create({
+  fila: { gap: espaciado.sm },
+  chip: { borderRadius: radios.pill },
+});

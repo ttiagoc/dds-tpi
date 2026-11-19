@@ -55,6 +55,22 @@ export function formatearDia(fecha, { zonaHoraria } = {}) {
     .replaceAll(" de ", " ");
 }
 
+const sinPunto = (texto) => texto?.replace(".", "").toLocaleUpperCase(LOCALE);
+
+export function partesDelBloqueFecha(fecha, { zonaHoraria } = {}) {
+  const valor = partesDeFecha(
+    fecha,
+    { weekday: "short", day: "numeric", month: "short" },
+    zonaHoraria,
+  );
+  return {
+    diaSemana: sinPunto(valor("weekday")),
+    dia: valor("day"),
+    mes: sinPunto(valor("month"))?.slice(0, 3),
+    hora: `${valor("hour")}:${valor("minute")}`,
+  };
+}
+
 export function formatearFechaCorta(fecha, { zonaHoraria } = {}) {
   const valor = partesDeFecha(fecha, { day: "numeric", month: "numeric" }, zonaHoraria);
   const parte = (tipo) => valor(tipo)?.padStart(2, "0");

@@ -1,6 +1,6 @@
 # Spec 19 — Identidad visual "Minimal cálido"
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/identidad-visual`
 - **Casos de uso:** transversal (todas las pantallas)
 - **Iteración:** It5b (rediseño)

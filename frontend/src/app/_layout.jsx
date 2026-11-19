@@ -1,4 +1,13 @@
+import {
+  Manrope_500Medium,
+  Manrope_600SemiBold,
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+  useFonts,
+} from "@expo-google-fonts/manrope";
 import { Stack, ThemeProvider } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
@@ -46,8 +55,26 @@ function Navegacion() {
   );
 }
 
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+function useFuentes() {
+  const [cargadas, error] = useFonts({
+    Manrope_500Medium,
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Manrope_800ExtraBold,
+  });
+  const listas = cargadas || !!error;
+  useEffect(() => {
+    if (listas) SplashScreen.hideAsync().catch(() => {});
+  }, [listas]);
+  return listas;
+}
+
 export default function RootLayout() {
   const oscuro = useColorScheme() === "dark";
+  const fuentesListas = useFuentes();
+  if (!fuentesListas) return null;
   return (
     <PaperProvider theme={oscuro ? temaOscuro : temaClaro}>
       <ThemeProvider value={oscuro ? navegacionOscura : navegacionClara}>

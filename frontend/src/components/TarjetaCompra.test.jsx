@@ -25,6 +25,11 @@ describe("TarjetaCompra", () => {
     expect(screen.getByLabelText(/^Ana Pérez, Confirmada/)).toBeTruthy();
   });
 
+  it("tiene forma de entrada: troquel entre los datos y el estado", async () => {
+    await renderConProviders(<TarjetaCompra compra={compraResumen()} onPress={jest.fn()} />);
+    expect(screen.getByTestId("troquel-7")).toBeTruthy();
+  });
+
   it("sin días restantes no muestra el contador", async () => {
     const compra = compraResumen({ estado: "REEMBOLSADA", diasRestantes: null });
     await renderConProviders(<TarjetaCompra compra={compra} onPress={jest.fn()} />);

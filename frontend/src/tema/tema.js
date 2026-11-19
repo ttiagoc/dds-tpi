@@ -1,5 +1,10 @@
 import { DarkTheme, DefaultTheme } from "expo-router";
-import { MD3LightTheme, MD3DarkTheme, adaptNavigationTheme } from "react-native-paper";
+import {
+  MD3LightTheme,
+  MD3DarkTheme,
+  adaptNavigationTheme,
+  configureFonts,
+} from "react-native-paper";
 
 export const ESTADOS_COMPRA = ["PENDIENTE", "CONFIRMADA", "UTILIZADA", "CANCELADA", "REEMBOLSADA"];
 
@@ -12,19 +17,19 @@ const ESTADOS_BASE = {
 };
 
 const COLORES_ESTADO_CLARO = {
-  PENDIENTE: { fondo: "#FFE08A", texto: "#3D2E00" },
-  CONFIRMADA: { fondo: "#C3EFC5", texto: "#0B3D14" },
-  UTILIZADA: { fondo: "#D3E3FD", texto: "#0B2A55" },
-  CANCELADA: { fondo: "#FFDAD6", texto: "#5C0B0B" },
-  REEMBOLSADA: { fondo: "#EADDFF", texto: "#2A0E5C" },
+  PENDIENTE: { fondo: "#FBF0D9", texto: "#6B4500" },
+  CONFIRMADA: { fondo: "#E4F2EA", texto: "#1F5E3B" },
+  UTILIZADA: { fondo: "#E5ECF6", texto: "#2B4A78" },
+  CANCELADA: { fondo: "#F8E3E1", texto: "#8E2A22" },
+  REEMBOLSADA: { fondo: "#EDE6F5", texto: "#4F3578" },
 };
 
 const COLORES_ESTADO_OSCURO = {
-  PENDIENTE: { fondo: "#5A4300", texto: "#FFE08A" },
-  CONFIRMADA: { fondo: "#1E5128", texto: "#C3EFC5" },
-  UTILIZADA: { fondo: "#24406E", texto: "#D3E3FD" },
-  CANCELADA: { fondo: "#7A1C1C", texto: "#FFDAD6" },
-  REEMBOLSADA: { fondo: "#4A2C86", texto: "#EADDFF" },
+  PENDIENTE: { fondo: "#3D2F12", texto: "#F5D58A" },
+  CONFIRMADA: { fondo: "#183526", texto: "#A8DDBE" },
+  UTILIZADA: { fondo: "#1C2A40", texto: "#B7CBEA" },
+  CANCELADA: { fondo: "#401B18", texto: "#F2B8B1" },
+  REEMBOLSADA: { fondo: "#2E2340", texto: "#D3C3EE" },
 };
 
 const conColores = (colores) =>
@@ -32,18 +37,76 @@ const conColores = (colores) =>
     ESTADOS_COMPRA.map((estado) => [estado, { ...ESTADOS_BASE[estado], ...colores[estado] }]),
   );
 
+export const FUENTES = Object.freeze({
+  texto: "Manrope_500Medium",
+  etiqueta: "Manrope_600SemiBold",
+  fuerte: "Manrope_700Bold",
+  titulo: "Manrope_800ExtraBold",
+});
+
+const fuente = (fontFamily, letterSpacing) => ({
+  fontFamily,
+  fontWeight: "normal",
+  ...(letterSpacing != null && { letterSpacing }),
+});
+
+const titulo = fuente(FUENTES.titulo, -0.4);
+
+const fuentes = configureFonts({
+  config: {
+    displayLarge: titulo,
+    displayMedium: titulo,
+    displaySmall: titulo,
+    headlineLarge: titulo,
+    headlineMedium: titulo,
+    headlineSmall: titulo,
+    titleLarge: fuente(FUENTES.titulo, -0.2),
+    titleMedium: fuente(FUENTES.fuerte, -0.1),
+    titleSmall: fuente(FUENTES.fuerte),
+    labelLarge: fuente(FUENTES.fuerte),
+    labelMedium: fuente(FUENTES.etiqueta),
+    labelSmall: fuente(FUENTES.etiqueta),
+    bodyLarge: fuente(FUENTES.texto),
+    bodyMedium: fuente(FUENTES.texto),
+    bodySmall: fuente(FUENTES.texto),
+    default: fuente(FUENTES.texto),
+  },
+});
+
+const planos = (base, nivel1, nivel2) => ({
+  level0: "transparent",
+  level1: base,
+  level2: nivel1,
+  level3: nivel1,
+  level4: nivel2,
+  level5: nivel2,
+});
+
 export const temaClaro = {
   ...MD3LightTheme,
+  fonts: fuentes,
   colors: {
     ...MD3LightTheme.colors,
-    primary: "#8E2DA8",
+    primary: "#BF4316",
     onPrimary: "#FFFFFF",
-    primaryContainer: "#FAD8FF",
-    onPrimaryContainer: "#350040",
-    secondary: "#9C4234",
+    primaryContainer: "#FBE6DC",
+    onPrimaryContainer: "#8A2E0C",
+    secondary: "#4A4843",
     onSecondary: "#FFFFFF",
-    secondaryContainer: "#FFDAD3",
-    onSecondaryContainer: "#3E0400",
+    secondaryContainer: "#EFEBE4",
+    onSecondaryContainer: "#1C1B19",
+    background: "#FAFAF7",
+    onBackground: "#1C1B19",
+    surface: "#FFFFFF",
+    onSurface: "#1C1B19",
+    surfaceVariant: "#F2F0EB",
+    onSurfaceVariant: "#6B6862",
+    outline: "#CFCAC1",
+    outlineVariant: "#E7E4DE",
+    inverseSurface: "#1C1B19",
+    inverseOnSurface: "#FAFAF7",
+    inversePrimary: "#FF8A55",
+    elevation: planos("#FFFFFF", "#F7F5F1", "#F2F0EB"),
     estrella: "#9A5B00",
   },
   estados: conColores(COLORES_ESTADO_CLARO),
@@ -51,16 +114,29 @@ export const temaClaro = {
 
 export const temaOscuro = {
   ...MD3DarkTheme,
+  fonts: fuentes,
   colors: {
     ...MD3DarkTheme.colors,
-    primary: "#F0B0FF",
-    onPrimary: "#560066",
-    primaryContainer: "#731A8E",
-    onPrimaryContainer: "#FAD8FF",
-    secondary: "#FFB4A5",
-    onSecondary: "#5F150A",
-    secondaryContainer: "#7D2B1F",
-    onSecondaryContainer: "#FFDAD3",
+    primary: "#FF8A55",
+    onPrimary: "#141311",
+    primaryContainer: "#5A230C",
+    onPrimaryContainer: "#FFDCCB",
+    secondary: "#CFCAC1",
+    onSecondary: "#141311",
+    secondaryContainer: "#2E2B28",
+    onSecondaryContainer: "#F2EFEA",
+    background: "#141311",
+    onBackground: "#F2EFEA",
+    surface: "#1E1C1A",
+    onSurface: "#F2EFEA",
+    surfaceVariant: "#2A2724",
+    onSurfaceVariant: "#A39F97",
+    outline: "#4A4641",
+    outlineVariant: "#2E2B28",
+    inverseSurface: "#F2EFEA",
+    inverseOnSurface: "#141311",
+    inversePrimary: "#BF4316",
+    elevation: planos("#1E1C1A", "#24221F", "#2A2724"),
     estrella: "#FFC94D",
   },
   estados: conColores(COLORES_ESTADO_OSCURO),
