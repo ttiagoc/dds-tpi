@@ -36,6 +36,19 @@ beforeEach(() => {
 
 afterEach(() => jest.useRealTimers());
 
+describe("MisEventos: resumen", () => {
+  it("muestra recaudado y vendidas de todos los eventos que manda el back", async () => {
+    listarMisEventos.mockResolvedValue({
+      ...paginaDeEventos([PASADO, FUTURO]),
+      resumen: { recaudado: 1845000, vendidas: 142 },
+    });
+    await renderConProviders(<MisEventos />, { usuario: FENIX });
+    expect(await screen.findByTestId("resumen-recaudado")).toHaveTextContent(/\$\s1\.845\.000/);
+    expect(screen.getByTestId("resumen-vendidas")).toHaveTextContent(/142/);
+    expect(screen.getByText("Hola, Fénix Producciones")).toBeTruthy();
+  });
+});
+
 describe("MisEventos: lista", () => {
   it("muestra cada evento con vendidas sobre cupo y lo recaudado", async () => {
     await abrir();

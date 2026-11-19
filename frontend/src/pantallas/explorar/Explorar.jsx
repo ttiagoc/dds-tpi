@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Keyboard, StyleSheet, View } from "react-native";
-import { Searchbar, Text, useTheme } from "react-native-paper";
+import { Searchbar, Text } from "react-native-paper";
 import { router } from "expo-router";
 import { buscarEventos } from "../../api/eventosApi";
 import { useAuth } from "../../auth/AuthContext";
+import { EncabezadoPestania } from "../../components/EncabezadoPestania";
 import { Pantalla } from "../../components/Pantalla";
 import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaPaginada } from "../../components/ListaPaginada";
@@ -50,14 +51,12 @@ function useFiltros() {
 
 function Saludo() {
   const { usuario } = useAuth();
-  const { colors } = useTheme();
   return (
-    <View>
-      <Text variant="headlineSmall">{`Hola, ${usuario?.nombre ?? ""}`}</Text>
-      <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
-        Encontrá tu próximo evento
-      </Text>
-    </View>
+    <EncabezadoPestania
+      conLogo
+      saludo={`Hola, ${usuario?.nombre ?? ""}`}
+      titulo="Encontrá tu próximo evento"
+    />
   );
 }
 
@@ -108,7 +107,7 @@ export default function Explorar() {
   const filtros = useFiltros();
   const lista = useListaPaginada(pedirEventos, filtros.criterio);
   return (
-    <Pantalla>
+    <Pantalla bordes={["top"]}>
       <ListaPaginada
         testID="lista-eventos"
         lista={lista}

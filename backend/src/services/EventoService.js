@@ -107,13 +107,17 @@ export class EventoService {
     const recaudado = recaudadoPorEvento(await this.compraRepository.findByOrganizador(usuario.id));
     const puntajePromedio = await this.puntajeDe(usuario.id);
     const { items, ...pagina } = paginar([...eventos].sort(Evento.compararPorFecha), paginacion);
+    const resumen = {
+      recaudado: [...recaudado.values()].reduce((suma, monto) => suma + monto, 0),
+      vendidas: eventos.reduce((suma, evento) => suma + evento.totalVendidas(), 0),
+    };
     const resumenes = items.map((evento) => ({
       ...this.toResumen(evento, { puntajePromedio, esFavorito: false }),
       vendidas: evento.totalVendidas(),
       cupo: evento.cupoTotal(),
       recaudado: recaudado.get(evento.id) ?? 0,
     }));
-    return { eventos: resumenes, ...pagina };
+    return { eventos: resumenes, ...pagina, resumen };
   }
 
   async puntajeDe(organizadorId) {

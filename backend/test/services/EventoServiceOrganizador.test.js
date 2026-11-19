@@ -149,4 +149,18 @@ describe("EventoService.listarDelOrganizador", () => {
     expect(resultado).toMatchObject({ total: 3, page: 2, totalPages: 2 });
     expect(ids(resultado)).toEqual([3]);
   });
+
+  it("el resumen suma vendidas y recaudado de todos los eventos, no solo la página", async () => {
+    const primero = evento(1, 1);
+    const ultimo = evento(3, 3);
+    eventos = [primero, evento(2, 2), ultimo];
+    compras = [
+      crearCompra({ id: 1, estado: CONFIRMADA, evento: primero, cantidad: 1 }),
+      crearCompra({ id: 2, estado: UTILIZADA, evento: ultimo, cantidad: 2 }),
+      crearCompra({ id: 3, estado: PENDIENTE, evento: ultimo, cantidad: 1 }),
+    ];
+    const resultado = await service.listarDelOrganizador(usuarioFenix, { page: 1, limit: 1 });
+    expect(ids(resultado)).toEqual([1]);
+    expect(resultado.resumen).toEqual({ recaudado: 135000, vendidas: 4 });
+  });
 });

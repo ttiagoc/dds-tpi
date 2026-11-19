@@ -67,7 +67,7 @@ Specs: `18-paginacion-favoritos-chat`, `19-identidad-visual`, `20-bandeja-mensaj
 - [x] `feature/identidad-visual` (spec 19): tokens, Manrope, componentes compartidos.
 - [x] `feature/bandeja-mensajes` (spec 20): no leídos (R11, R12), pestaña Mensajes con badge en vivo.
 - [x] `feature/subir-imagen-evento` (spec 21, ADR-013): `POST /imagenes` y portada desde la galería.
-- [ ] `feature/rediseno-pantallas` (spec 22): cada pantalla según las maquetas.
+- [x] `feature/rediseno-pantallas` (spec 22): cada pantalla según las maquetas.
 
 **Aceptación:** suites y e2e verdes; recorrido completo en Expo Go en claro y oscuro.
 

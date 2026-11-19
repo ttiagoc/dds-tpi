@@ -49,6 +49,19 @@ describe("Chat: conversación", () => {
     expect(ajena).toHaveStyle({ alignSelf: "flex-start" });
   });
 
+  it("el encabezado muestra al comprador, el evento y la compra para el organizador", async () => {
+    await abrir(FENIX);
+    const encabezado = screen.getByTestId("chat-encabezado");
+    expect(encabezado).toHaveTextContent(/Ana Pérez/);
+    expect(encabezado).toHaveTextContent(/Los Piojos en River · #7/);
+    expect(within(encabezado).getByLabelText("Estado: Confirmada")).toBeTruthy();
+  });
+
+  it("separa los mensajes por día", async () => {
+    await abrir();
+    expect(screen.getAllByTestId(/^chat-dia-/).length).toBeGreaterThanOrEqual(1);
+  });
+
   it("para el organizador sus mensajes son los propios", async () => {
     await abrir(FENIX);
     expect(screen.getByTestId("mensaje-2")).toHaveStyle({ alignSelf: "flex-end" });

@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { router } from "expo-router";
 import { listarConversaciones } from "../../api/conversacionesApi";
 import { useAuth } from "../../auth/AuthContext";
+import { EncabezadoPestania } from "../../components/EncabezadoPestania";
 import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaPaginada } from "../../components/ListaPaginada";
 import { Pantalla } from "../../components/Pantalla";
@@ -34,10 +35,11 @@ export default function Mensajes() {
   useRecargarAlVolver(lista.recargar);
   useRecargarConNovedades(lista.recargar);
   return (
-    <Pantalla>
+    <Pantalla bordes={["top"]}>
       <ListaPaginada
         testID="lista-conversaciones"
         lista={lista}
+        encabezado={<EncabezadoPestania titulo="Mensajes" />}
         renderItem={(conversacion) => (
           <FilaConversacion
             conversacion={conversacion}

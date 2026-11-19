@@ -1,19 +1,23 @@
 import { StyleSheet, View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
 import { espaciado, radios } from "../../tema/espaciado";
-import { formatearFechaCorta } from "../../utils/formato";
+import { partesDelBloqueFecha } from "../../utils/formato";
 
 export function Burbuja({ mensaje, propia }) {
   const { colors } = useTheme();
-  const fondo = propia ? colors.primary : colors.surfaceVariant;
-  const color = propia ? colors.onPrimary : colors.onSurfaceVariant;
+  const fondo = propia ? colors.onSurface : colors.surface;
+  const color = propia ? colors.surface : colors.onSurface;
   return (
     <View
-      style={[estilos.burbuja, propia ? estilos.propia : estilos.ajena, { backgroundColor: fondo }]}
+      style={[
+        estilos.burbuja,
+        propia ? estilos.propia : [estilos.ajena, { borderColor: colors.outlineVariant }],
+        { backgroundColor: fondo },
+      ]}
       testID={`mensaje-${mensaje.id}`}
     >
       {!propia && (
-        <Text variant="labelMedium" style={{ color: colors.primary }}>
+        <Text variant="labelMedium" style={{ color: colors.onSurfaceVariant }}>
           {mensaje.usuario.nombre}
         </Text>
       )}
@@ -21,7 +25,7 @@ export function Burbuja({ mensaje, propia }) {
         {mensaje.mensaje}
       </Text>
       <Text variant="labelSmall" style={[estilos.hora, { color }]}>
-        {formatearFechaCorta(mensaje.enviado)}
+        {partesDelBloqueFecha(mensaje.enviado).hora}
       </Text>
     </View>
   );
@@ -36,6 +40,6 @@ const estilos = StyleSheet.create({
     gap: espaciado.xs,
   },
   propia: { alignSelf: "flex-end", borderBottomRightRadius: radios.sm },
-  ajena: { alignSelf: "flex-start", borderBottomLeftRadius: radios.sm },
+  ajena: { alignSelf: "flex-start", borderBottomLeftRadius: radios.sm, borderWidth: 1 },
   hora: { alignSelf: "flex-end", opacity: 0.8 },
 });

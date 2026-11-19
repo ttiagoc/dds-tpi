@@ -82,6 +82,15 @@ const diasEntre = (desde, hasta, zonaHoraria) =>
 
 const conMayuscula = (texto) => texto.charAt(0).toLocaleUpperCase(LOCALE) + texto.slice(1);
 
+export const claveDeDia = (fecha, { zonaHoraria } = {}) => diaCalendario(fecha, zonaHoraria);
+
+export function etiquetaDeDia(fecha, { ahora = new Date(), zonaHoraria } = {}) {
+  const dias = diasEntre(fecha, ahora, zonaHoraria);
+  if (dias <= 0) return "Hoy";
+  if (dias === 1) return "Ayer";
+  return formatearDia(fecha, { zonaHoraria });
+}
+
 export function formatearMomento(fecha, { ahora = new Date(), zonaHoraria } = {}) {
   const dias = diasEntre(fecha, ahora, zonaHoraria);
   const valor = partesDeFecha(

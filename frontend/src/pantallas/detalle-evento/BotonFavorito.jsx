@@ -27,7 +27,9 @@ export function BotonFavorito({ eventoId, inicial, onError }) {
     <IconButton
       icon={favorito ? "heart" : "heart-outline"}
       iconColor={colors.primary}
-      size={28}
+      mode="contained"
+      containerColor={colors.surface}
+      size={24}
       onPress={() => {
         alternar();
       }}

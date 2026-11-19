@@ -1,6 +1,6 @@
 # Spec 22 — Rediseño de pantallas
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/rediseno-pantallas`
 - **Casos de uso:** todos los de la app (ver `planes/00-indice.md`)
 - **Iteración:** It5b (rediseño)

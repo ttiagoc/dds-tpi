@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
-import { Chip, Surface, Text, useTheme } from "react-native-paper";
-import { espaciado, radios } from "../../tema/espaciado";
+import { TarjetaPlana } from "../../components/TarjetaPlana";
+import { Chip, Text, useTheme } from "react-native-paper";
+import { espaciado } from "../../tema/espaciado";
 import { formatearPrecio, textoDisponibilidad } from "../../utils/formato";
 
 function Disponibilidad({ disponibles }) {
@@ -22,7 +23,7 @@ function Disponibilidad({ disponibles }) {
 function TipoEntrada({ tipo }) {
   const { colors } = useTheme();
   return (
-    <Surface style={estilos.tipo} elevation={1} testID={`tipo-entrada-${tipo.id}`}>
+    <TarjetaPlana style={estilos.tipo} testID={`tipo-entrada-${tipo.id}`}>
       <View style={estilos.datos}>
         <Text variant="titleSmall">{tipo.nombre}</Text>
         {!!tipo.descripcion && (
@@ -35,7 +36,7 @@ function TipoEntrada({ tipo }) {
         <Text variant="titleSmall">{formatearPrecio(tipo.precio)}</Text>
         <Disponibilidad disponibles={tipo.disponibles} />
       </View>
-    </Surface>
+    </TarjetaPlana>
   );
 }
 
@@ -56,8 +57,7 @@ const estilos = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: espaciado.md,
-    padding: espaciado.md,
-    borderRadius: radios.md,
+    padding: espaciado.md + 2,
   },
   datos: { flex: 1, gap: espaciado.xs },
   precio: { alignItems: "flex-end", gap: espaciado.xs },

@@ -1,5 +1,6 @@
 import { StyleSheet, View } from "react-native";
-import { Card, Divider, Snackbar, Text, useTheme } from "react-native-paper";
+import { TarjetaPlana } from "../../components/TarjetaPlana";
+import { Divider, Snackbar, Text, TouchableRipple, useTheme } from "react-native-paper";
 import { router } from "expo-router";
 import { useAuth } from "../../auth/AuthContext";
 import { ChipEstado } from "../../components/ChipEstado";
@@ -9,6 +10,7 @@ import { FechaYLugar } from "../../components/FechaYLugar";
 import { ImagenEvento } from "../../components/ImagenEvento";
 import { LineaDeTiempo } from "../../components/LineaDeTiempo";
 import { Pantalla } from "../../components/Pantalla";
+import { Troquel } from "../../components/Troquel";
 import { useAvisoDeRuta } from "../../hooks/useAvisoDeRuta";
 import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { useSalaDeCompra } from "../../hooks/useSalaDeCompra";
@@ -24,7 +26,11 @@ function Estado({ compra }) {
     <View style={estilos.estado} testID="compra-estado">
       <ChipEstado estado={compra.estado} />
       {dias && (
-        <Text variant="titleMedium" style={{ color: colors.primary }} testID="dias-restantes">
+        <Text
+          variant="labelLarge"
+          style={{ color: colors.onSurfaceVariant }}
+          testID="dias-restantes"
+        >
           {dias}
         </Text>
       )}
@@ -34,18 +40,20 @@ function Estado({ compra }) {
 
 function Evento({ evento }) {
   return (
-    <Card
-      mode="outlined"
+    <TouchableRipple
       onPress={() => router.push(`/eventos/${evento.id}`)}
       testID="compra-evento"
+      accessibilityRole="button"
       accessibilityLabel={`Ver el evento ${evento.nombre}`}
     >
-      <ImagenEvento uri={evento.imagen} nombre={evento.nombre} />
-      <Card.Content style={estilos.evento}>
-        <Text variant="titleMedium">{evento.nombre}</Text>
-        <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />
-      </Card.Content>
-    </Card>
+      <View style={estilos.evento}>
+        <ImagenEvento uri={evento.imagen} nombre={evento.nombre} />
+        <View style={estilos.datos}>
+          <Text variant="titleLarge">{evento.nombre}</Text>
+          <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />
+        </View>
+      </View>
+    </TouchableRipple>
   );
 }
 
@@ -53,7 +61,7 @@ function Resumen({ compra }) {
   const { colors } = useTheme();
   const { tipoEntrada, cantidad, total, fechaCompra } = compra;
   return (
-    <View style={estilos.resumen}>
+    <View style={[estilos.datos, estilos.resumen]}>
       <Text variant="bodyLarge">
         {`${tipoEntrada.nombre} × ${cantidad} · ${formatearPrecio(tipoEntrada.precio)} c/u`}
       </Text>
@@ -64,6 +72,18 @@ function Resumen({ compra }) {
         {`Comprada el ${formatearFecha(fechaCompra)}`}
       </Text>
     </View>
+  );
+}
+
+function Entrada({ compra }) {
+  const { colors } = useTheme();
+  return (
+    <TarjetaPlana style={estilos.entrada}>
+      <Evento evento={compra.evento} />
+      <Resumen compra={compra} />
+      <Troquel testID="compra-troquel" />
+      <Estado compra={compra} />
+    </TarjetaPlana>
   );
 }
 
@@ -107,9 +127,7 @@ function Contenido({ compra, carga }) {
   return (
     <>
       <Pantalla scroll>
-        <Estado compra={compra} />
-        <Evento evento={compra.evento} />
-        <Resumen compra={compra} />
+        <Entrada compra={compra} />
         <AccionesCompra compra={compra} acciones={acciones} />
         <SeccionResenia resenia={compra.resenia} />
         <Divider />
@@ -128,8 +146,15 @@ export default function DetalleCompra() {
 }
 
 const estilos = StyleSheet.create({
-  estado: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  evento: { paddingTop: espaciado.md, gap: espaciado.xs },
-  resumen: { gap: espaciado.xs },
+  entrada: { borderWidth: 1, overflow: "hidden" },
+  estado: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: espaciado.lg,
+  },
+  evento: { gap: espaciado.md },
+  datos: { gap: espaciado.xs, paddingHorizontal: espaciado.lg },
+  resumen: { paddingTop: espaciado.sm, paddingBottom: espaciado.lg },
   resenia: { gap: espaciado.xs },
 });

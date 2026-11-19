@@ -14,7 +14,11 @@ function Resenia({ resenia }) {
   const { colors } = useTheme();
   const secundario = { color: colors.onSurfaceVariant };
   return (
-    <Surface style={estilos.resenia} elevation={0} testID={`resenia-${resenia.id}`}>
+    <Surface
+      style={[estilos.resenia, { borderColor: colors.outlineVariant }]}
+      elevation={0}
+      testID={`resenia-${resenia.id}`}
+    >
       <Estrellas valor={resenia.puntuacion} />
       <Text variant="bodyMedium">{resenia.detalle}</Text>
       <Text variant="bodySmall" style={secundario}>
@@ -68,5 +72,5 @@ export function ReseniasOrganizador({ organizadorId }) {
 const estilos = StyleSheet.create({
   seccion: { gap: espaciado.sm },
   resumen: { flexDirection: "row", alignItems: "center", gap: espaciado.sm },
-  resenia: { gap: espaciado.xs, padding: espaciado.md, borderRadius: radios.md },
+  resenia: { gap: espaciado.xs, padding: espaciado.md, borderWidth: 1, borderRadius: radios.lg },
 });

@@ -102,6 +102,26 @@ describe("formatearMomento", () => {
   });
 });
 
+describe("etiquetaDeDia y claveDeDia", () => {
+  const { etiquetaDeDia, claveDeDia } = require("./formato");
+  const ahora = new Date("2026-11-19T15:00:00.000Z");
+  const etiqueta = (fecha) => etiquetaDeDia(fecha, { ahora, zonaHoraria: BUENOS_AIRES });
+
+  it.each([
+    ["2026-11-19T13:32:00.000Z", "Hoy"],
+    ["2026-11-18T23:00:00.000Z", "Ayer"],
+    ["2026-11-10T15:00:00.000Z", "10 nov 2026"],
+  ])("%s es %s", (fecha, esperado) => {
+    expect(etiqueta(fecha)).toBe(esperado);
+  });
+
+  it("la clave es el día calendario en la zona horaria", () => {
+    expect(claveDeDia("2026-11-19T02:00:00.000Z", { zonaHoraria: BUENOS_AIRES })).toBe(
+      "2026-11-18",
+    );
+  });
+});
+
 describe("formatearFechaCorta", () => {
   it("muestra día/mes y hora de 24 h en la zona pedida", () => {
     expect(formatearFechaCorta("2026-11-13T01:05:00.000Z", { zonaHoraria: BUENOS_AIRES })).toBe(

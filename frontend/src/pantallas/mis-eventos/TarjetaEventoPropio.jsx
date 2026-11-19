@@ -1,8 +1,8 @@
 import { StyleSheet, View } from "react-native";
-import { Card, Chip, Text, useTheme } from "react-native-paper";
+import { Card, Chip, Text } from "react-native-paper";
 import { BarraDeVentas } from "../../components/BarraDeVentas";
 import { FechaYLugar } from "../../components/FechaYLugar";
-import { espaciado } from "../../tema/espaciado";
+import { espaciado, radios } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio } from "../../utils/formato";
 
 const etiquetaDe = ({ nombre, fecha, lugar, vendidas, cupo, recaudado, finalizado }) =>
@@ -16,11 +16,11 @@ const etiquetaDe = ({ nombre, fecha, lugar, vendidas, cupo, recaudado, finalizad
   ].join(", ");
 
 export function TarjetaEventoPropio({ evento, onPress }) {
-  const { colors } = useTheme();
   const { id, nombre, fecha, lugar, vendidas, cupo, recaudado, finalizado } = evento;
   return (
     <Card
-      mode="elevated"
+      mode="outlined"
+      style={estilos.tarjeta}
       onPress={onPress}
       testID={`evento-propio-${id}`}
       accessibilityLabel={etiquetaDe(evento)}
@@ -38,15 +38,14 @@ export function TarjetaEventoPropio({ evento, onPress }) {
         </View>
         <FechaYLugar fecha={fecha} lugar={lugar} />
         <BarraDeVentas vendidas={vendidas} cupo={cupo} />
-        <Text variant="titleSmall" style={{ color: colors.primary }}>
-          {`Recaudado ${formatearPrecio(recaudado)}`}
-        </Text>
+        <Text variant="titleSmall">{`Recaudado ${formatearPrecio(recaudado)}`}</Text>
       </Card.Content>
     </Card>
   );
 }
 
 const estilos = StyleSheet.create({
+  tarjeta: { borderRadius: radios.lg },
   contenido: { gap: espaciado.xs },
   titulo: { flexDirection: "row", alignItems: "center", gap: espaciado.sm },
   nombre: { flex: 1 },

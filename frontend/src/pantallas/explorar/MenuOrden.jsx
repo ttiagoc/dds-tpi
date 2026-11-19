@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Menu } from "react-native-paper";
+import { Button, Menu, useTheme } from "react-native-paper";
 
 export const OPCIONES_ORDEN = [
   { ordenarPor: "fecha", orden: "asc", etiqueta: "Fecha: más próximos" },
@@ -11,6 +11,7 @@ export const OPCIONES_ORDEN = [
 ];
 
 export function MenuOrden({ seleccionada, onElegir }) {
+  const { colors } = useTheme();
   const [abierto, setAbierto] = useState(false);
   const elegir = (opcion) => {
     setAbierto(false);
@@ -22,8 +23,10 @@ export function MenuOrden({ seleccionada, onElegir }) {
       onDismiss={() => setAbierto(false)}
       anchor={
         <Button
-          mode="outlined"
+          mode="text"
+          compact
           icon="sort"
+          textColor={colors.onSurfaceVariant}
           onPress={() => setAbierto(true)}
           testID="orden-menu"
           accessibilityLabel={`Ordenar: ${seleccionada.etiqueta}`}
