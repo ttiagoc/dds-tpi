@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
-import { Button, IconButton, Surface, Text, TextInput } from "react-native-paper";
-import { espaciado, radios } from "../../tema/espaciado";
+import { TarjetaPlana } from "../../components/TarjetaPlana";
+import { Button, IconButton, Text, TextInput, useTheme } from "react-native-paper";
+import { espaciado } from "../../tema/espaciado";
 
 const CAMPOS = [
   { campo: "nombre", etiqueta: "Nombre" },
@@ -10,8 +11,9 @@ const CAMPOS = [
 ];
 
 function Tipo({ tipo, indice, puedeQuitar, deshabilitado, onCambiar, onQuitar }) {
+  const { colors } = useTheme();
   return (
-    <Surface style={estilos.tipo} elevation={1} testID={`tipo-${indice}`}>
+    <TarjetaPlana style={estilos.tipo} testID={`tipo-${indice}`}>
       <View style={estilos.encabezado}>
         <Text variant="titleSmall">{`Tipo ${indice + 1}`}</Text>
         {puedeQuitar && (
@@ -36,7 +38,7 @@ function Tipo({ tipo, indice, puedeQuitar, deshabilitado, onCambiar, onQuitar })
           testID={`tipo-${indice}-${campo}`}
         />
       ))}
-    </Surface>
+    </TarjetaPlana>
   );
 }
 
@@ -71,6 +73,6 @@ export function TiposDeEntrada({ formulario, deshabilitado }) {
 
 const estilos = StyleSheet.create({
   lista: { gap: espaciado.sm },
-  tipo: { gap: espaciado.sm, padding: espaciado.md, borderRadius: radios.md },
+  tipo: { gap: espaciado.sm, padding: espaciado.md },
   encabezado: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
 });

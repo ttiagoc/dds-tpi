@@ -1,15 +1,19 @@
 import { StyleSheet, View } from "react-native";
-import { HelperText, IconButton, TextInput } from "react-native-paper";
+import { HelperText, IconButton, TextInput, useTheme } from "react-native-paper";
 import { Contador } from "../../components/Contador";
-import { espaciado } from "../../tema/espaciado";
+import { espaciado, radios } from "../../tema/espaciado";
 
 const MAXIMO = 500;
 
 function BotonEnviar({ chat }) {
+  const { colors } = useTheme();
   return (
     <IconButton
       icon="send"
       mode="contained"
+      containerColor={colors.primary}
+      iconColor={colors.onPrimary}
+      size={24}
       disabled={!chat.puedeEnviar}
       loading={chat.enviando}
       onPress={() => {
@@ -39,6 +43,7 @@ export function Redactor({ chat }) {
           maxLength={MAXIMO}
           editable={!chat.enviando}
           style={estilos.input}
+          outlineStyle={estilos.contorno}
           testID="chat-input"
         />
         <BotonEnviar chat={chat} />
@@ -52,4 +57,5 @@ const estilos = StyleSheet.create({
   redactor: { gap: espaciado.xs },
   fila: { flexDirection: "row", alignItems: "center", gap: espaciado.sm },
   input: { flex: 1, maxHeight: 120 },
+  contorno: { borderRadius: radios.lg },
 });

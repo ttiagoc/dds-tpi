@@ -42,7 +42,7 @@ describe("DetalleEvento: datos", () => {
     await abrir();
     expect(obtenerEvento).toHaveBeenCalledWith("1");
     expect(screen.getByText("Los Piojos en River")).toBeTruthy();
-    expect(screen.getByText("Recitales")).toBeTruthy();
+    expect(screen.getByText("RECITALES")).toBeTruthy();
     expect(screen.getByText(/Estadio River Plate/)).toBeTruthy();
     expect(screen.getByTestId("tipo-entrada-10")).toHaveTextContent(/Campo/);
     expect(screen.getByTestId("tipo-entrada-10")).toHaveTextContent(/Quedan 40/);
@@ -129,6 +129,16 @@ describe("DetalleEvento: favorito", () => {
 });
 
 describe("DetalleEvento: comprar y permisos", () => {
+  it("el comprador ve la barra inferior con el precio desde", async () => {
+    await abrir();
+    expect(screen.getByTestId("evento-barra-comprar")).toHaveTextContent(/Desde\s*\$\s45\.000/);
+  });
+
+  it("el organizador no ve la barra de compra", async () => {
+    await abrir({ usuario: FENIX });
+    expect(screen.queryByTestId("evento-barra-comprar")).toBeNull();
+  });
+
   it("Comprar lleva a la pantalla de compra", async () => {
     await abrir();
     await fireEvent.press(screen.getByTestId("evento-comprar"));

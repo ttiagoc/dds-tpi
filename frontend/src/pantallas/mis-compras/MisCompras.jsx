@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { listarMisCompras } from "../../api/comprasApi";
+import { EncabezadoPestania } from "../../components/EncabezadoPestania";
 import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaDeCompras } from "../../components/ListaDeCompras";
 import { Pantalla } from "../../components/Pantalla";
@@ -7,6 +8,13 @@ import { paginaDe } from "../../hooks/useListaPaginada";
 
 const pedirCompras = paginaDe(listarMisCompras, "compras");
 const SIN_CRITERIO = {};
+
+const encabezado = ({ filtro }) => (
+  <>
+    <EncabezadoPestania titulo="Mis entradas" />
+    {filtro}
+  </>
+);
 
 const VACIO = {
   testID: "sin-compras",
@@ -27,12 +35,13 @@ const VACIO = {
 
 export default function MisCompras() {
   return (
-    <Pantalla>
+    <Pantalla bordes={["top"]}>
       <ListaDeCompras
         testID="lista-compras"
         pedir={pedirCompras}
         criterio={SIN_CRITERIO}
         vacio={VACIO}
+        encabezado={encabezado}
       />
     </Pantalla>
   );

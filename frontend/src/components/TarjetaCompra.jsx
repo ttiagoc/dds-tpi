@@ -2,25 +2,10 @@ import { StyleSheet, View } from "react-native";
 import { Text, TouchableRipple, useTheme } from "react-native-paper";
 import { ChipEstado } from "./ChipEstado";
 import { FechaYLugar } from "./FechaYLugar";
+import { Troquel } from "./Troquel";
 import { espaciado, radios } from "../tema/espaciado";
 import { useEstadoCompra } from "../tema/useEstadoCompra";
 import { formatearPrecio, textoDiasRestantes } from "../utils/formato";
-
-const TROQUEL = 20;
-
-function Troquel({ id }) {
-  const { colors } = useTheme();
-  const muesca = { backgroundColor: colors.background, borderColor: colors.outlineVariant };
-  return (
-    <View
-      style={[estilos.troquel, { borderColor: colors.outlineVariant }]}
-      testID={`troquel-${id}`}
-    >
-      <View style={[estilos.muesca, estilos.muescaIzquierda, muesca]} />
-      <View style={[estilos.muesca, estilos.muescaDerecha, muesca]} />
-    </View>
-  );
-}
 
 export function TarjetaCompra({ compra, onPress, conComprador = false }) {
   const { colors } = useTheme();
@@ -49,7 +34,7 @@ export function TarjetaCompra({ compra, onPress, conComprador = false }) {
             {`${tipoEntrada.nombre} × ${cantidad} · ${formatearPrecio(total)}`}
           </Text>
         </View>
-        <Troquel id={id} />
+        <Troquel testID={`troquel-${id}`} />
         <View style={estilos.pie}>
           <ChipEstado estado={estado} />
           {dias && (
@@ -66,16 +51,6 @@ export function TarjetaCompra({ compra, onPress, conComprador = false }) {
 const estilos = StyleSheet.create({
   tarjeta: { borderWidth: 1, borderRadius: radios.lg },
   datos: { gap: espaciado.xs, padding: espaciado.lg },
-  troquel: { height: 0, borderTopWidth: 1.5, borderStyle: "dashed", marginHorizontal: 14 },
-  muesca: {
-    position: "absolute",
-    top: -TROQUEL / 2,
-    width: TROQUEL,
-    height: TROQUEL,
-    borderRadius: radios.pill,
-  },
-  muescaIzquierda: { left: -14 - TROQUEL / 2 - 1, borderRightWidth: 1 },
-  muescaDerecha: { right: -14 - TROQUEL / 2 - 1, borderLeftWidth: 1 },
   pie: {
     flexDirection: "row",
     alignItems: "center",

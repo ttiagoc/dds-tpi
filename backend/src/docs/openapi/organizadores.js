@@ -14,7 +14,19 @@ export default {
             "Incluye los eventos pasados, por fecha asc. `vendidas` es el cupo ocupado; `recaudado`, la suma de las compras CONFIRMADA y UTILIZADA.",
           parameters: [page, limit],
           responses: {
-            200: ok("Página de mis eventos", paginado("eventos", ref("EventoDelOrganizador"))),
+            200: ok(
+              "Página de mis eventos",
+              paginado("eventos", ref("EventoDelOrganizador"), {
+                resumen: {
+                  type: "object",
+                  description: "Totales de todos tus eventos, no solo de la página",
+                  properties: {
+                    recaudado: { type: "integer", example: 3060000 },
+                    vendidas: { type: "integer", example: 28 },
+                  },
+                },
+              }),
+            ),
             400: error("BadRequest"),
           },
         },

@@ -4,11 +4,12 @@ import { Button, HelperText, Icon, Text, useTheme } from "react-native-paper";
 import { useAuth } from "../../auth/AuthContext";
 import { Cargando } from "../../components/Cargando";
 import { ConCompra } from "../../components/ConCompra";
-import { EncabezadoEvento } from "../../components/EncabezadoEvento";
 import { ErrorCarga } from "../../components/ErrorCarga";
 import { Pantalla } from "../../components/Pantalla";
 import { espaciado, radios } from "../../tema/espaciado";
 import { Burbuja } from "./Burbuja";
+import { conSeparadores } from "./conSeparadores";
+import { EncabezadoChat } from "./EncabezadoChat";
 import { Redactor } from "./Redactor";
 import { useChatCompra } from "./useChatCompra";
 
@@ -79,6 +80,19 @@ function SinMensajesCargados({ chat, encabezado }) {
   );
 }
 
+function SeparadorDia({ dia }) {
+  const { colors } = useTheme();
+  return (
+    <Text
+      variant="labelMedium"
+      style={[estilos.dia, { color: colors.onSurfaceVariant }]}
+      testID={`chat-dia-${dia.clave}`}
+    >
+      {dia.etiqueta}
+    </Text>
+  );
+}
+
 function Mensajes({ chat, encabezado }) {
   const { usuario } = useAuth();
   const lista = useRef(null);
@@ -89,9 +103,15 @@ function Mensajes({ chat, encabezado }) {
       ListHeaderComponent={<CabeceraDeMensajes encabezado={encabezado} chat={chat} />}
       contentInsetAdjustmentBehavior="automatic"
       keyboardDismissMode="interactive"
-      data={chat.mensajes}
-      keyExtractor={(m) => String(m.id)}
-      renderItem={({ item }) => <Burbuja mensaje={item} propia={item.usuario.id === usuario?.id} />}
+      data={conSeparadores(chat.mensajes)}
+      keyExtractor={(item) => item.clave}
+      renderItem={({ item }) =>
+        item.dia ? (
+          <SeparadorDia dia={item.dia} />
+        ) : (
+          <Burbuja mensaje={item.mensaje} propia={item.mensaje.usuario.id === usuario?.id} />
+        )
+      }
       contentContainerStyle={estilos.mensajes}
       onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
       ListEmptyComponent={
@@ -117,7 +137,7 @@ function Conversacion({ compra }) {
             chat={chat}
             encabezado={
               <View style={estilos.encabezado}>
-                <EncabezadoEvento evento={compra.evento} />
+                <EncabezadoChat compra={compra} />
                 {!chat.conectado && <SinConexion onActualizar={chat.recargar} />}
               </View>
             }
@@ -138,6 +158,7 @@ const estilos = StyleSheet.create({
   encabezado: { gap: espaciado.md, paddingBottom: espaciado.sm },
   mensajes: { gap: espaciado.sm, paddingVertical: espaciado.sm },
   vacio: { textAlign: "center", paddingVertical: espaciado.xl },
+  dia: { alignSelf: "center", paddingVertical: espaciado.xs },
   anteriores: { alignItems: "center" },
   sinConexion: {
     flexDirection: "row",

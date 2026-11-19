@@ -1,6 +1,5 @@
 import { Tabs } from "expo-router";
 import { Icon, useTheme } from "react-native-paper";
-import { Logo } from "../components/Logo";
 
 function opcionesDe({ colors, fonts }) {
   return {
@@ -19,6 +18,7 @@ function opcionesDe({ colors, fonts }) {
       color: colors.onPrimary,
       ...fonts.labelSmall,
     },
+    headerShown: false,
     headerStyle: { backgroundColor: colors.background },
     headerShadowVisible: false,
     headerTintColor: colors.onSurface,
@@ -30,7 +30,7 @@ export function Pestanias({ pestanias, badge }) {
   const tema = useTheme();
   return (
     <Tabs screenOptions={opcionesDe(tema)}>
-      {pestanias.map(({ ruta, titulo, icono, conLogo, conBadge, testID = `tab-${ruta}` }) => (
+      {pestanias.map(({ ruta, titulo, icono, conBadge, testID = `tab-${ruta}` }) => (
         <Tabs.Screen
           key={ruta}
           name={ruta}
@@ -40,7 +40,6 @@ export function Pestanias({ pestanias, badge }) {
             tabBarButtonTestID: testID,
             tabBarAccessibilityLabel: titulo,
             tabBarBadge: conBadge ? badge : undefined,
-            ...(conLogo && { headerTitle: () => <Logo />, headerTitleAlign: "left" }),
           }}
         />
       ))}

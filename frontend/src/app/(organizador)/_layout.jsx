@@ -2,7 +2,7 @@ import { textoBadge, useNoLeidos } from "../../mensajes/NoLeidosContext";
 import { Pestanias } from "../../navegacion/Pestanias";
 
 const PESTANIAS = [
-  { ruta: "mis-eventos", titulo: "Mis eventos", icono: "calendar-star", conLogo: true },
+  { ruta: "mis-eventos", titulo: "Mis eventos", icono: "calendar-star" },
   {
     ruta: "bandeja",
     titulo: "Mensajes",

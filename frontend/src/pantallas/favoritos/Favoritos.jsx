@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { listarFavoritos } from "../../api/favoritosApi";
+import { EncabezadoPestania } from "../../components/EncabezadoPestania";
 import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaPaginada } from "../../components/ListaPaginada";
 import { Pantalla } from "../../components/Pantalla";
@@ -15,10 +16,11 @@ export default function Favoritos() {
   const lista = useListaPaginada(pedirFavoritos, SIN_CRITERIO);
   useRecargarAlVolver(lista.recargar);
   return (
-    <Pantalla>
+    <Pantalla bordes={["top"]}>
       <ListaPaginada
         testID="lista-favoritos"
         lista={lista}
+        encabezado={<EncabezadoPestania titulo="Favoritos" />}
         renderItem={(evento) => (
           <TarjetaEvento evento={evento} onPress={() => router.push(`/eventos/${evento.id}`)} />
         )}
