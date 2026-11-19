@@ -87,6 +87,21 @@ describe("partesDelBloqueFecha", () => {
   });
 });
 
+describe("formatearMomento", () => {
+  const { formatearMomento } = require("./formato");
+  const ahora = new Date("2026-11-19T15:00:00.000Z");
+  const momento = (fecha) => formatearMomento(fecha, { ahora, zonaHoraria: BUENOS_AIRES });
+
+  it.each([
+    ["2026-11-19T13:32:00.000Z", "10:32"],
+    ["2026-11-18T23:00:00.000Z", "Ayer"],
+    ["2026-11-16T15:00:00.000Z", "Lun"],
+    ["2026-11-10T15:00:00.000Z", "10 nov"],
+  ])("%s se muestra como %s", (fecha, esperado) => {
+    expect(momento(fecha)).toBe(esperado);
+  });
+});
+
 describe("formatearFechaCorta", () => {
   it("muestra día/mes y hora de 24 h en la zona pedida", () => {
     expect(formatearFechaCorta("2026-11-13T01:05:00.000Z", { zonaHoraria: BUENOS_AIRES })).toBe(

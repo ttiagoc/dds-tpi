@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
 import { ultimoSocket } from "socket.io-client";
 import { enviarMensaje, listarMensajes } from "../../api/comprasApi";
+import { marcarLeidos } from "../../api/conversacionesApi";
 import {
   conversacion,
   errorHttp,
@@ -11,6 +12,7 @@ import {
 import { unirMensajes, useChatCompra } from "./useChatCompra";
 
 jest.mock("../../api/comprasApi");
+jest.mock("../../api/conversacionesApi");
 
 const { pregunta: PREGUNTA, respuesta: RESPUESTA, nuevo: NUEVO } = conversacion();
 
@@ -108,6 +110,25 @@ describe("useChatCompra: mensajes anteriores", () => {
     expect(result.current.errorAnteriores).toBe("Se rompió");
     expect(ids(result)).toEqual([1, 2]);
     expect(result.current.hayAnteriores).toBe(true);
+  });
+});
+
+describe("useChatCompra: lectura", () => {
+  it("al cargar marca leída la compra", async () => {
+    await montar();
+    expect(marcarLeidos).toHaveBeenCalledWith(7);
+  });
+
+  it("al llegar un mensaje nuevo vuelve a marcar leído", async () => {
+    const { socket } = await montar();
+    await act(async () => socket.simular("mensaje:nuevo", NUEVO));
+    expect(marcarLeidos).toHaveBeenCalledTimes(2);
+  });
+
+  it("si marcar leído falla no muestra error", async () => {
+    marcarLeidos.mockRejectedValueOnce(new Error("sin red"));
+    const { result } = await montar();
+    expect(result.current.error).toBeNull();
   });
 });
 

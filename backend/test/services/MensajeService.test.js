@@ -3,9 +3,10 @@ import { MensajeService } from "../../src/services/MensajeService.js";
 import { MENSAJE_COMPRA_INEXISTENTE, MENSAJE_SIN_PERMISO } from "../../src/errors/mensajes.js";
 import { ForbiddenError, NotFoundError } from "../../src/errors/AppError.js";
 import { EstadoCompra } from "../../src/domain/EstadoCompra.js";
-import { AHORA, crearComprador, crearCompra } from "../helpers/domainFactories.js";
+import { AHORA, crearComprador, crearCompra, crearEvento } from "../helpers/domainFactories.js";
 import {
   ana,
+  bruno,
   fenix,
   usuarioAna,
   usuarioBruno,
@@ -30,12 +31,14 @@ beforeEach(() => {
   repos = {
     compraRepository: {
       findById: jest.fn(async (id) => compras.find((c) => c.id === id) ?? null),
+      findByComprador: jest.fn(async (id) => compras.filter((c) => c.esDe(id))),
+      findByOrganizador: jest.fn(async (id) => compras.filter((c) => c.evento.esDe(id))),
       save: jest.fn(async (compra) => compra),
     },
     usuarioRepository: usuarioRepositoryFake(),
   };
   reloj = { ahora: jest.fn(() => DESPUES) };
-  notificador = { mensajeNuevo: jest.fn() };
+  notificador = { mensajeNuevo: jest.fn(), conversacionActualizada: jest.fn() };
   service = new MensajeService({ ...repos, reloj, notificador });
 });
 
@@ -205,6 +208,107 @@ describe("MensajeService.enviar", () => {
     await expect(sinNotificador.enviar(7, { mensaje: "Hola" }, usuarioAna)).resolves.toMatchObject({
       id: 1,
     });
+  });
+});
+
+describe("MensajeService.enviar notifica la bandeja", () => {
+  it("avisa a la otra parte con el último mensaje y sus no leídos", async () => {
+    const compra = compraDeAna();
+    compra.agregarMensaje(ana, "Hola", AHORA);
+    compras = [compra];
+    const mensaje = await service.enviar(7, { mensaje: "¿Hay guardarropas?" }, usuarioAna);
+    expect(notificador.conversacionActualizada).toHaveBeenCalledWith(fenix.id, {
+      compraId: 7,
+      ultimoMensaje: mensaje,
+      noLeidos: 2,
+    });
+  });
+
+  it("si escribe el organizador avisa al comprador", async () => {
+    compras = [compraDeAna()];
+    await service.enviar(7, { mensaje: "Hola" }, usuarioFenix);
+    expect(notificador.conversacionActualizada.mock.calls[0][0]).toBe(ana.id);
+  });
+});
+
+describe("MensajeService.listarConversaciones", () => {
+  const TODO = { page: 1, limit: 20 };
+  let piojos;
+  const compraCon = (id, mensajes, comprador = ana) => {
+    const evento = piojos;
+    const compra = crearCompra({ id, comprador, evento });
+    for (const [autor, minuto] of mensajes) {
+      compra.agregarMensaje(autor, `m${minuto}`, new Date(AHORA.getTime() + minuto * 60_000));
+    }
+    return compra;
+  };
+
+  beforeEach(() => {
+    piojos = crearEvento({ id: 1, multimedia: ["/imagenes/piojos.jpg"] });
+    compras = [
+      compraCon(1, [[ana, 1]]),
+      compraCon(2, []),
+      compraCon(3, [
+        [ana, 2],
+        [fenix, 5],
+      ]),
+      compraCon(4, [[bruno, 9]], bruno),
+    ];
+  });
+
+  it("al comprador le lista sus compras con mensajes, primero la del mensaje más reciente", async () => {
+    const pagina = await service.listarConversaciones(usuarioAna, TODO);
+    expect(pagina.conversaciones.map((c) => c.compraId)).toEqual([3, 1]);
+    expect(pagina).toMatchObject({ total: 2, page: 1, totalPages: 1, totalNoLeidos: 1 });
+    expect(pagina.conversaciones[0]).toEqual({
+      compraId: 3,
+      estado: "PENDIENTE",
+      evento: { id: 1, nombre: "Los Piojos en River", imagen: "/imagenes/piojos.jpg" },
+      contraparte: { id: fenix.id, nombre: "Fénix Producciones" },
+      ultimoMensaje: expect.objectContaining({ id: 2, mensaje: "m5" }),
+      noLeidos: 1,
+    });
+  });
+
+  it("al organizador le lista las compras de sus eventos con la contraparte compradora", async () => {
+    const pagina = await service.listarConversaciones(usuarioFenix, TODO);
+    expect(pagina.conversaciones.map((c) => c.compraId)).toEqual([4, 3, 1]);
+    expect(pagina.conversaciones[0].contraparte).toEqual({ id: bruno.id, nombre: "Bruno Gómez" });
+    expect(pagina.totalNoLeidos).toBe(2);
+  });
+
+  it("pagina y totalNoLeidos suma todas las conversaciones, no solo la página", async () => {
+    const pagina = await service.listarConversaciones(usuarioFenix, { page: 1, limit: 1 });
+    expect(pagina.conversaciones.map((c) => c.compraId)).toEqual([4]);
+    expect(pagina).toMatchObject({ total: 3, totalPages: 3, totalNoLeidos: 2 });
+  });
+
+  it("sin conversaciones devuelve una página vacía", async () => {
+    compras = [];
+    expect(await service.listarConversaciones(usuarioAna, TODO)).toEqual({
+      conversaciones: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      totalNoLeidos: 0,
+    });
+  });
+});
+
+describe("MensajeService.marcarLeidos", () => {
+  it("deja en cero los no leídos del usuario y guarda la compra", async () => {
+    const compra = compraDeAna();
+    compra.agregarMensaje(fenix, "Hola", AHORA);
+    compras = [compra];
+    await service.marcarLeidos(7, usuarioAna);
+    expect(compra.noLeidosPara(ana.id)).toBe(0);
+    expect(repos.compraRepository.save).toHaveBeenCalledWith(compra);
+  });
+
+  it("rechaza con 403 a quien no participa y con 404 una compra inexistente", async () => {
+    compras = [compraDeAna()];
+    await expect(service.marcarLeidos(7, usuarioBruno)).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(service.marcarLeidos(999, usuarioAna)).rejects.toBeInstanceOf(NotFoundError);
   });
 });
 

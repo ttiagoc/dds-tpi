@@ -13,6 +13,7 @@ import { useColorScheme } from "react-native";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider, useAuth } from "../auth/AuthContext";
 import { Cargando } from "../components/Cargando";
+import { NoLeidosProvider } from "../mensajes/NoLeidosContext";
 import { temaClaro, temaOscuro, navegacionClara, navegacionOscura } from "../tema/tema";
 
 function Navegacion() {
@@ -79,8 +80,10 @@ export default function RootLayout() {
     <PaperProvider theme={oscuro ? temaOscuro : temaClaro}>
       <ThemeProvider value={oscuro ? navegacionOscura : navegacionClara}>
         <AuthProvider>
-          <StatusBar style="auto" />
-          <Navegacion />
+          <NoLeidosProvider>
+            <StatusBar style="auto" />
+            <Navegacion />
+          </NoLeidosProvider>
         </AuthProvider>
       </ThemeProvider>
     </PaperProvider>

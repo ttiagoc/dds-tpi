@@ -71,6 +71,30 @@ export function partesDelBloqueFecha(fecha, { zonaHoraria } = {}) {
   };
 }
 
+const diaCalendario = (fecha, zonaHoraria) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: zonaHoraria }).format(new Date(fecha));
+
+const diasEntre = (desde, hasta, zonaHoraria) =>
+  Math.round(
+    (new Date(diaCalendario(hasta, zonaHoraria)) - new Date(diaCalendario(desde, zonaHoraria))) /
+      (24 * 60 * 60 * 1000),
+  );
+
+const conMayuscula = (texto) => texto.charAt(0).toLocaleUpperCase(LOCALE) + texto.slice(1);
+
+export function formatearMomento(fecha, { ahora = new Date(), zonaHoraria } = {}) {
+  const dias = diasEntre(fecha, ahora, zonaHoraria);
+  const valor = partesDeFecha(
+    fecha,
+    { weekday: "short", day: "numeric", month: "short" },
+    zonaHoraria,
+  );
+  if (dias <= 0) return `${valor("hour")}:${valor("minute")}`;
+  if (dias === 1) return "Ayer";
+  if (dias < 7) return conMayuscula(valor("weekday").replace(".", ""));
+  return `${valor("day")} ${valor("month").replace(".", "")}`;
+}
+
 export function formatearFechaCorta(fecha, { zonaHoraria } = {}) {
   const valor = partesDeFecha(fecha, { day: "numeric", month: "numeric" }, zonaHoraria);
   const parte = (tipo) => valor(tipo)?.padStart(2, "0");

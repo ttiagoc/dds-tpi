@@ -26,11 +26,11 @@ function opcionesDe({ colors, fonts }) {
   };
 }
 
-export function Pestanias({ pestanias }) {
+export function Pestanias({ pestanias, badge }) {
   const tema = useTheme();
   return (
     <Tabs screenOptions={opcionesDe(tema)}>
-      {pestanias.map(({ ruta, titulo, icono, conLogo, badge, testID = `tab-${ruta}` }) => (
+      {pestanias.map(({ ruta, titulo, icono, conLogo, conBadge, testID = `tab-${ruta}` }) => (
         <Tabs.Screen
           key={ruta}
           name={ruta}
@@ -39,7 +39,7 @@ export function Pestanias({ pestanias }) {
             tabBarIcon: ({ color, size }) => <Icon source={icono} color={color} size={size} />,
             tabBarButtonTestID: testID,
             tabBarAccessibilityLabel: titulo,
-            tabBarBadge: badge,
+            tabBarBadge: conBadge ? badge : undefined,
             ...(conLogo && { headerTitle: () => <Logo />, headerTitleAlign: "left" }),
           }}
         />

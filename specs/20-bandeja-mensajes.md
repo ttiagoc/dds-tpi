@@ -1,6 +1,6 @@
 # Spec 20 — Bandeja de mensajes con no leídos
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/bandeja-mensajes`
 - **Casos de uso:** CU5, CU6 (ver `planes/00-indice.md`)
 - **Iteración:** It5b (rediseño)
@@ -34,7 +34,7 @@ Socket:
 ## Pantallas
 - **Pestaña Mensajes** en `(comprador)` y `(organizador)` (`tab-mensajes`), entre la segunda pestaña y Perfil, con `tabBarBadge` = `totalNoLeidos` (sin badge en 0, "99+" desde 100).
 - **Contexto `NoLeidos`** (`src/mensajes/NoLeidosContext.jsx`) dentro de la sesión: pide `totalNoLeidos` al iniciar sesión y cuando la app vuelve a primer plano, mantiene un socket propio que escucha `conversacion:actualizada` y vuelve a pedir el total, y expone `refrescar()`.
-- **Pantalla Mensajes** (`pantallas/mensajes/Mensajes.jsx`, rutas `(comprador)/mensajes` y `(organizador)/mensajes`): `ListaPaginada` de conversaciones (`lista-conversaciones`, `conversacion-<compraId>`). Cada fila: foto del evento con las iniciales de la contraparte, nombre de la contraparte, evento y número de compra, vista previa del último mensaje (con "Vos: " si es propio), hora relativa (hora si es hoy, "Ayer", día de la semana o fecha corta) y badge con `noLeidos`. Las filas con no leídos van en negrita. Toca → `compras/[id]/chat`. Recarga al volver y al llegar `conversacion:actualizada`. Vacío: "Todavía no tenés mensajes" (`sin-conversaciones`).
+- **Pantalla Mensajes** (`pantallas/mensajes/Mensajes.jsx`, rutas `(comprador)/mensajes` y `(organizador)/bandeja`, porque dos rutas con el mismo nombre en grupos distintos chocan, como pasó con Perfil; el testID de la pestaña es `tab-mensajes` en los dos): `ListaPaginada` de conversaciones (`lista-conversaciones`, `conversacion-<compraId>`). Cada fila: foto del evento con las iniciales de la contraparte, nombre de la contraparte, evento y número de compra, vista previa del último mensaje (con "Vos: " si es propio), hora relativa (hora si es hoy, "Ayer", día de la semana o fecha corta) y badge con `noLeidos`. Las filas con no leídos van en negrita. Toca → `compras/[id]/chat`. Recarga al volver y al llegar `conversacion:actualizada`. Vacío: "Todavía no tenés mensajes" (`sin-conversaciones`).
 - **Chat**: al abrir y al llegar un `mensaje:nuevo` de la otra parte, llama a `PUT .../leidos` y después a `refrescar()` del contexto. Si el PUT falla, no muestra error (el badge se corrige en la próxima carga).
 
 ## Criterios de aceptación

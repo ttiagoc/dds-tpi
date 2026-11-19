@@ -152,3 +152,78 @@ describe("mensaje inválido", () => {
     expect((await escribir(999, { mensaje: "" })).status).toBe(400);
   });
 });
+
+const conversaciones = (email, query = "") =>
+  pedirComo(app, request(app).get(`/usuarios/yo/conversaciones${query}`), email);
+const marcarLeidos = (id, email) =>
+  pedirComo(app, request(app).put(`/compras/${id}/mensajes/leidos`), email);
+
+describe("GET /usuarios/yo/conversaciones", () => {
+  it("Ana ve la conversación del seed con la respuesta de Fénix sin leer", async () => {
+    const res = await conversaciones(ANA);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ total: 1, page: 1, totalPages: 1, totalNoLeidos: 1 });
+    expect(res.body.conversaciones[0]).toMatchObject({
+      compraId: await idDeCompra(PRIMAVERA),
+      evento: { nombre: PRIMAVERA },
+      contraparte: { nombre: "Fénix Producciones" },
+      ultimoMensaje: { mensaje: "Abrimos a las 17 h. ¡Los esperamos!" },
+      noLeidos: 1,
+    });
+  });
+
+  it("Fénix ve la misma conversación con la compradora como contraparte y 0 sin leer", async () => {
+    const res = await conversaciones(FENIX);
+    expect(res.body.totalNoLeidos).toBe(0);
+    expect(res.body.conversaciones[0].contraparte.nombre).toBe("Ana Pérez");
+  });
+
+  it("cuando Ana escribe, Konex (organizador del stand-up) la ve sin leer", async () => {
+    const id = await idDeCompra("Noche de Stand-up");
+    await escribir(id, { mensaje: "¿Hay mesas?" }, ANA);
+    const res = await conversaciones(KONEX);
+    expect(res.body.conversaciones[0]).toMatchObject({ compraId: id, noLeidos: 1 });
+  });
+
+  it("un usuario sin mensajes recibe una página vacía", async () => {
+    const res = await conversaciones(BRUNO);
+    expect(res.body).toEqual({
+      conversaciones: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      totalNoLeidos: 0,
+    });
+  });
+
+  it.each(["?limit=0", "?orden=asc"])("responde 400 con la query %s", async (q) => {
+    expect((await conversaciones(ANA, q)).status).toBe(400);
+  });
+
+  it("sin token responde 401", async () => {
+    expect((await conversaciones(null)).status).toBe(401);
+  });
+});
+
+describe("PUT /compras/:id/mensajes/leidos", () => {
+  it("marca leído, responde 204 y es idempotente", async () => {
+    const id = await idDeCompra(PRIMAVERA);
+    const res = await marcarLeidos(id, ANA);
+    expect(res.status).toBe(204);
+    expect((await marcarLeidos(id, ANA)).status).toBe(204);
+    expect((await conversaciones(ANA)).body.totalNoLeidos).toBe(0);
+  });
+
+  it("rechaza con 403 a quien no participa", async () => {
+    const res = await marcarLeidos(await idDeCompra(PRIMAVERA), BRUNO);
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe(MENSAJE_SIN_PERMISO);
+  });
+
+  it("responde 404 si la compra no existe y 400 con un id inválido", async () => {
+    const res = await marcarLeidos(999, ANA);
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe(MENSAJE_COMPRA_INEXISTENTE);
+    expect((await marcarLeidos("abc", ANA)).status).toBe(400);
+  });
+});

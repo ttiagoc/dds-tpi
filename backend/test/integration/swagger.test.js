@@ -23,6 +23,8 @@ const OPERACIONES_DE_PLANES_03 = [
   "POST /compras/{id}/resenia",
   "GET /compras/{id}/mensajes",
   "POST /compras/{id}/mensajes",
+  "PUT /compras/{id}/mensajes/leidos",
+  "GET /usuarios/yo/conversaciones",
   "GET /usuarios/yo/favoritos",
   "PUT /usuarios/yo/favoritos/{eventoId}",
   "DELETE /usuarios/yo/favoritos/{eventoId}",

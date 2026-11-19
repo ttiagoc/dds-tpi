@@ -19,6 +19,7 @@ export class Compra {
     estado = PENDIENTE,
     historial = [],
     mensajes = [],
+    lecturas = {},
     fechaCompra,
   }) {
     exigir(comprador, "La compra necesita un comprador");
@@ -36,6 +37,7 @@ export class Compra {
     this.#estado = estado;
     this.historial = historial.map((cambio) => new CambioEstadoCompra(cambio));
     this.mensajes = mensajes.map((mensaje) => new Mensaje(mensaje));
+    this.lecturas = { ...lecturas };
     this.fechaCompra = fechaValida(fechaCompra, "La fecha de compra no es válida");
   }
 
@@ -150,6 +152,24 @@ export class Compra {
       enviado: ahora,
     });
     this.mensajes.push(mensaje);
+    this.lecturas[usuario.id] = mensaje.id;
     return mensaje;
+  }
+
+  ultimoMensaje() {
+    return this.mensajes.reduce((ultimo, m) => (ultimo && ultimo.id > m.id ? ultimo : m), null);
+  }
+
+  marcarLeido(usuarioId) {
+    this.lecturas[usuarioId] = this.ultimoMensaje()?.id ?? 0;
+  }
+
+  noLeidosPara(usuarioId) {
+    const leidoHasta = this.lecturas[usuarioId] ?? 0;
+    return this.mensajes.filter((m) => m.usuario.id !== usuarioId && m.id > leidoHasta).length;
+  }
+
+  contraparteDe(usuarioId) {
+    return this.esDe(usuarioId) ? this.evento.organizador : this.comprador;
   }
 }

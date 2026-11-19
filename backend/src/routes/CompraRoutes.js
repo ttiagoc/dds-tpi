@@ -32,6 +32,7 @@ export function crearCompraRoutes(
     reseniaController.crear,
   );
   router.get("/:id/mensajes", autenticar, mensajeController.listar);
+  router.put("/:id/mensajes/leidos", autenticar, mensajeController.marcarLeidos);
   router.post(
     "/:id/mensajes",
     autenticar,

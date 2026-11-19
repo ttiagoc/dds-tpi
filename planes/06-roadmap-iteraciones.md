@@ -65,7 +65,7 @@ Specs: `09-front-base` (incluye login), `10-explorar-eventos`, `10b-comprar`, `1
 Specs: `18-paginacion-favoritos-chat`, `19-identidad-visual`, `20-bandeja-mensajes`, `21-subir-imagen-evento`, `22-rediseno-pantallas`. Maquetas aprobadas antes de codear (ADR-012).
 - [x] `feature/paginacion-favoritos-chat` (spec 18): favoritos con `page/limit`, chat con cursor `antesDe`.
 - [x] `feature/identidad-visual` (spec 19): tokens, Manrope, componentes compartidos.
-- [ ] `feature/bandeja-mensajes` (spec 20): no leídos (R11, R12), pestaña Mensajes con badge en vivo.
+- [x] `feature/bandeja-mensajes` (spec 20): no leídos (R11, R12), pestaña Mensajes con badge en vivo.
 - [ ] `feature/subir-imagen-evento` (spec 21, ADR-013): `POST /imagenes` y portada desde la galería.
 - [ ] `feature/rediseno-pantallas` (spec 22): cada pantalla según las maquetas.
 

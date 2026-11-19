@@ -408,3 +408,61 @@ describe("Compra", () => {
     });
   });
 });
+
+describe("Compra: lectura del chat (R11)", () => {
+  const ana = crearComprador();
+  const fenix = crearOrganizador();
+  const DESPUES = new Date(AHORA.getTime() + 60_000);
+
+  const conChat = () => {
+    const compra = crearCompra({ comprador: ana, evento: crearEvento({ organizador: fenix }) });
+    compra.agregarMensaje(ana, "¿A qué hora abren?", AHORA);
+    compra.agregarMensaje(fenix, "A las 17", DESPUES);
+    compra.agregarMensaje(fenix, "Traé el DNI", DESPUES);
+    return compra;
+  };
+
+  it("sin leer, los no leídos son los mensajes de la otra parte", () => {
+    const compra = conChat();
+    expect(compra.noLeidosPara(COMPRADOR_ID)).toBe(2);
+    expect(compra.noLeidosPara(ORGANIZADOR_ID)).toBe(0);
+  });
+
+  it("enviar avanza la marca del autor", () => {
+    const compra = conChat();
+    compra.agregarMensaje(ana, "Gracias", DESPUES);
+    expect(compra.noLeidosPara(COMPRADOR_ID)).toBe(0);
+    expect(compra.noLeidosPara(ORGANIZADOR_ID)).toBe(1);
+  });
+
+  it("marcarLeido lleva la marca al último mensaje y es idempotente", () => {
+    const compra = conChat();
+    compra.marcarLeido(COMPRADOR_ID);
+    compra.marcarLeido(COMPRADOR_ID);
+    expect(compra.noLeidosPara(COMPRADOR_ID)).toBe(0);
+    expect(compra.lecturas).toEqual({ [COMPRADOR_ID]: 3, [ORGANIZADOR_ID]: 3 });
+  });
+
+  it("en una compra sin mensajes no hay no leídos ni último mensaje", () => {
+    const compra = crearCompra();
+    compra.marcarLeido(COMPRADOR_ID);
+    expect(compra.noLeidosPara(COMPRADOR_ID)).toBe(0);
+    expect(compra.ultimoMensaje()).toBeNull();
+  });
+
+  it("ultimoMensaje es el de id más alto", () => {
+    expect(conChat().ultimoMensaje().mensaje).toBe("Traé el DNI");
+  });
+
+  it("contraparteDe devuelve al organizador para el comprador y al revés", () => {
+    const compra = conChat();
+    expect(compra.contraparteDe(COMPRADOR_ID)).toBe(fenix);
+    expect(compra.contraparteDe(ORGANIZADOR_ID)).toBe(ana);
+  });
+
+  it("conserva las lecturas al reconstruirse", () => {
+    const compra = crearCompra();
+    const copia = new Compra({ ...compra, estado: compra.estado, lecturas: { 3: 2 } });
+    expect(copia.lecturas).toEqual({ 3: 2 });
+  });
+});
