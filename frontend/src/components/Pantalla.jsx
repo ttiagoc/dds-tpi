@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "react-native-paper";
 import { espaciado, ANCHO_MAXIMO } from "../tema/espaciado";
@@ -13,15 +13,22 @@ function Contenido({ children, scroll, testID, refScroll }) {
     );
   }
   return (
-    <ScrollView
-      ref={refScroll}
+    <KeyboardAvoidingView
       style={estilos.pantalla}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardShouldPersistTaps="handled"
-      testID={testID}
+      behavior={Platform.OS === "android" ? "height" : undefined}
     >
-      {contenido}
-    </ScrollView>
+      <ScrollView
+        ref={refScroll}
+        style={estilos.pantalla}
+        contentInsetAdjustmentBehavior="automatic"
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled"
+        testID={testID}
+      >
+        {contenido}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

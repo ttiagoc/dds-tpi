@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { CampoNumero } from "../../components/CampoNumero";
 import { TarjetaPlana } from "../../components/TarjetaPlana";
 import { Button, IconButton, Text, TextInput } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
@@ -7,24 +8,25 @@ import { ErrorCampo } from "./ErrorCampo";
 
 const CAMPOS = [
   { campo: "nombre", etiqueta: "Nombre" },
-  { campo: "precio", etiqueta: "Precio", teclado: "decimal-pad" },
-  { campo: "cupo", etiqueta: "Cupo", teclado: "number-pad" },
+  { campo: "precio", etiqueta: "Precio", numero: { decimal: true } },
+  { campo: "cupo", etiqueta: "Cupo", numero: { decimal: false } },
   { campo: "descripcion", etiqueta: "Descripción (opcional)" },
 ];
 
 function CampoTipo({ definicion, tipo, indice, formulario, deshabilitado, foco }) {
-  const { campo, etiqueta, teclado } = definicion;
+  const { campo, etiqueta, numero } = definicion;
   const clave = claveDeTipo(indice, campo);
   const error = formulario.errores[clave];
   const testID = `tipo-${indice}-${campo}`;
+  const Entrada = numero ? CampoNumero : TextInput;
   return (
     <View>
-      <TextInput
+      <Entrada
+        {...numero}
         ref={foco.registrarEntrada(clave)}
         mode="outlined"
         label={etiqueta}
         value={tipo[campo]}
-        keyboardType={teclado ?? "default"}
         disabled={deshabilitado}
         error={!!error}
         accessibilityHint={error}

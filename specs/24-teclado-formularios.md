@@ -1,6 +1,6 @@
 ﻿# Spec 24 — El teclado no tapa los campos y el numérico se puede cerrar
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `fix/teclado-formularios`
 - **Casos de uso:** CU4, CU5, CU6, CU9 (ver `planes/00-indice.md`)
 - **Iteración:** It5c
@@ -20,7 +20,7 @@ Ninguna.
 Sin cambios.
 
 ## Pantallas
-- **`Pantalla` con `scroll`**: el contenido se adapta al teclado. Usa `KeyboardAvoidingView` (`padding` en iOS), `automaticallyAdjustKeyboardInsets` y `keyboardDismissMode="interactive"`. Así el campo enfocado sube y el teclado se puede bajar deslizando. Aplica a todas las pantallas con scroll: Login, Nuevo evento, Reseñar.
+- **`Pantalla` con `scroll`**: el contenido se adapta al teclado. En iOS usa `automaticallyAdjustKeyboardInsets` del `ScrollView` (sin `KeyboardAvoidingView`, para no calcular el alto del encabezado); en Android, con edge-to-edge, un `KeyboardAvoidingView` con `behavior="height"`. En los dos, `keyboardDismissMode="interactive"`. Así el campo enfocado sube y el teclado se puede bajar deslizando. Aplica a todas las pantallas con scroll: Login, Nuevo evento, Reseñar.
 - **`CampoNumero`** (`src/components/`): `TextInput` de Paper con `keyboardType` `number-pad` (enteros) o `decimal-pad` (precio), `returnKeyType="done"`, y en iOS un `InputAccessoryView` con un botón "Listo" (`<testID>-listo`) que cierra el teclado. Lo usan precio y cupo en `TiposDeEntrada`.
 - **Chat**: se verifica que el redactor quede arriba del teclado (ya usa `KeyboardAvoidingView`).
 - Comprar no tiene inputs de texto (usa `SelectorCantidad`).
