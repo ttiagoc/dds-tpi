@@ -1,5 +1,12 @@
 import { z } from "./zod.js";
 
+const RUTA_IMAGEN_DEL_BACK = /^\/imagenes\/(?!.*\.\.)[\w\-./]+$/;
+
+const imagen = z.union([
+  z.url({ protocol: /^https?$/ }),
+  z.string().regex(RUTA_IMAGEN_DEL_BACK, "Tiene que ser una URL http(s) o una ruta /imagenes/..."),
+]);
+
 const tipoEntrada = z
   .object({
     nombre: z.string(),
@@ -16,10 +23,7 @@ export const crearEventoValidation = z
     categoriaId: z.number().int().positive(),
     fecha: z.iso.datetime({ offset: true }),
     lugar: z.string(),
-    multimedia: z
-      .array(z.url({ protocol: /^https?$/ }))
-      .max(5)
-      .default([]),
+    multimedia: z.array(imagen).max(5).default([]),
     tiposEntrada: z.array(tipoEntrada).min(1).max(10),
   })
   .strict();

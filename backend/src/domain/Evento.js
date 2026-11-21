@@ -1,7 +1,14 @@
 import { NotFoundError } from "../errors/AppError.js";
 import { Rol } from "./Rol.js";
 import { TipoEntrada } from "./TipoEntrada.js";
-import { exigir, esTextoNoVacio, textoEntre, textoRequerido, fechaValida } from "./validaciones.js";
+import {
+  exigir,
+  exigirCampo,
+  esTextoNoVacio,
+  textoEntre,
+  textoRequerido,
+  fechaValida,
+} from "./validaciones.js";
 
 const normalizar = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -73,7 +80,7 @@ export class Evento {
 
   static crear(datos, ahora) {
     const evento = new Evento(datos);
-    exigir(!evento.yaOcurrio(ahora), "La fecha del evento tiene que ser futura");
+    exigirCampo(!evento.yaOcurrio(ahora), "fecha", "La fecha del evento tiene que ser futura");
     exigir(evento.totalVendidas() === 0, "Un evento nuevo no puede tener entradas vendidas");
     return evento;
   }

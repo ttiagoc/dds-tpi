@@ -3,7 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "react-native-paper";
 import { espaciado, ANCHO_MAXIMO } from "../tema/espaciado";
 
-function Contenido({ children, scroll, testID }) {
+function Contenido({ children, scroll, testID, refScroll }) {
   const contenido = <View style={estilos.contenido}>{children}</View>;
   if (!scroll) {
     return (
@@ -14,6 +14,7 @@ function Contenido({ children, scroll, testID }) {
   }
   return (
     <ScrollView
+      ref={refScroll}
       style={estilos.pantalla}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, useTheme } from "react-native-paper";
 import {
   DatePickerModal,
   TimePickerModal,
@@ -9,24 +9,35 @@ import {
 } from "react-native-paper-dates";
 import { espaciado } from "../../tema/espaciado";
 import { formatearDia } from "../../utils/formato";
+import { ErrorCampo } from "./ErrorCampo";
 
 registerTranslation("es", es);
 
 const dosDigitos = (numero) => String(numero).padStart(2, "0");
 const textoHora = ({ hours, minutes }) => `${dosDigitos(hours)}:${dosDigitos(minutes)}`;
 
-function BotonElegir({ icono, texto, onPress, deshabilitado, testID }) {
+const inicioDeHoy = () => {
+  const hoy = new Date();
+  return new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+};
+
+function BotonElegir({ icono, texto, etiqueta, error, onPress, deshabilitado, testID, nodo }) {
+  const { colors } = useTheme();
   return (
-    <Button
-      mode="outlined"
-      icon={icono}
-      disabled={deshabilitado}
-      onPress={onPress}
-      style={estilos.boton}
-      testID={testID}
-    >
-      {texto}
-    </Button>
+    <View ref={nodo} style={estilos.columna}>
+      <Button
+        mode="outlined"
+        icon={icono}
+        disabled={deshabilitado}
+        onPress={onPress}
+        style={error ? { borderColor: colors.error } : undefined}
+        accessibilityLabel={error ? `${etiqueta}: ${texto}. ${error}` : `${etiqueta}: ${texto}`}
+        testID={testID}
+      >
+        {texto}
+      </Button>
+      <ErrorCampo mensaje={error} testID={`${testID}-error`} />
+    </View>
   );
 }
 
@@ -38,6 +49,7 @@ function Modales({ abierto, dia, hora, onDia, onHora, cerrar }) {
         mode="single"
         visible={abierto === "dia"}
         date={dia ?? undefined}
+        validRange={{ startDate: inicioDeHoy() }}
         onDismiss={cerrar}
         onConfirm={({ date }) => {
           cerrar();
@@ -60,23 +72,40 @@ function Modales({ abierto, dia, hora, onDia, onHora, cerrar }) {
   );
 }
 
-export function SelectorFechaHora({ dia, hora, onDia, onHora, deshabilitado }) {
+function useFocoDeLaFila(foco) {
+  const fecha = foco.registrar("fecha");
+  const hora = foco.registrar("hora");
+  const onLayout = (evento) => {
+    fecha.onLayout(evento);
+    hora.onLayout(evento);
+  };
+  return { fecha, hora, onLayout };
+}
+
+export function SelectorFechaHora({ dia, hora, onDia, onHora, deshabilitado, errores, foco }) {
   const [abierto, setAbierto] = useState(null);
+  const fila = useFocoDeLaFila(foco);
   return (
-    <View style={estilos.fila}>
+    <View style={estilos.fila} onLayout={fila.onLayout}>
       <BotonElegir
         icono="calendar"
+        etiqueta="Fecha"
         texto={dia ? formatearDia(dia) : "Fecha"}
+        error={errores.fecha}
         onPress={() => setAbierto("dia")}
         deshabilitado={deshabilitado}
         testID="evento-fecha"
+        nodo={fila.fecha.ref}
       />
       <BotonElegir
         icono="clock-outline"
+        etiqueta="Hora"
         texto={hora ? textoHora(hora) : "Hora"}
+        error={errores.hora}
         onPress={() => setAbierto("hora")}
         deshabilitado={deshabilitado}
         testID="evento-hora"
+        nodo={fila.hora.ref}
       />
       <Modales
         abierto={abierto}
@@ -92,5 +121,5 @@ export function SelectorFechaHora({ dia, hora, onDia, onHora, deshabilitado }) {
 
 const estilos = StyleSheet.create({
   fila: { flexDirection: "row", gap: espaciado.sm },
-  boton: { flex: 1 },
+  columna: { flex: 1 },
 });

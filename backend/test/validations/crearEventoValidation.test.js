@@ -40,6 +40,20 @@ describe("crearEventoValidation", () => {
     ]);
   });
 
+  it.each([["/imagenes/subidas/3f2a.jpg"], ["/imagenes/rock.jpg"], ["https://img/1.jpg"]])(
+    "acepta la imagen %p",
+    (imagen) => {
+      expect(parsear(body({ multimedia: [imagen] })).success).toBe(true);
+    },
+  );
+
+  it.each([["imagenes/x.jpg"], ["/otra/x.jpg"], ["/imagenes/../secreto"], ["/imagenes/"]])(
+    "rechaza la ruta %p",
+    (imagen) => {
+      expect(camposConError(parsear(body({ multimedia: [imagen] })))).toEqual(["multimedia.0"]);
+    },
+  );
+
   it("acepta hasta 5 URLs y rechaza 6", () => {
     const urls = (n) => Array.from({ length: n }, (_v, i) => `http://img/${i}.jpg`);
     expect(parsear(body({ multimedia: urls(5) })).success).toBe(true);

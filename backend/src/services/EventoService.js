@@ -1,5 +1,6 @@
-import { NotFoundError, UnprocessableEntityError } from "../errors/AppError.js";
+import { NotFoundError } from "../errors/AppError.js";
 import { Evento } from "../domain/Evento.js";
+import { errorDeCampo } from "../domain/validaciones.js";
 import { Resenia } from "../domain/Resenia.js";
 import { Rol } from "../domain/Rol.js";
 import { relojSistema } from "../config/reloj.js";
@@ -92,7 +93,7 @@ export class EventoService {
 
   async crear({ categoriaId, ...datos }, usuario) {
     const categoria = await this.categoriaRepository.findById(categoriaId);
-    if (!categoria) throw new UnprocessableEntityError(MENSAJE_CATEGORIA_INEXISTENTE);
+    if (!categoria) throw errorDeCampo("categoriaId", MENSAJE_CATEGORIA_INEXISTENTE);
     const organizador = await this.usuarioRepository.findById(usuario.id);
     const evento = Evento.crear({ ...datos, categoria, organizador }, this.reloj.ahora());
     await this.eventoRepository.save(evento);

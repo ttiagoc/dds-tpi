@@ -6,7 +6,7 @@ export function useEnvio({ recargar } = {}) {
   const [error, setError] = useState(null);
   const ocupado = useRef(false);
 
-  const enviar = async (nombre, pedir, alResolver) => {
+  const enviar = async (nombre, pedir, alResolver, alFallar) => {
     if (ocupado.current) return;
     ocupado.current = true;
     setEnCurso(nombre);
@@ -17,6 +17,7 @@ export function useEnvio({ recargar } = {}) {
     } catch (e) {
       setError(mensajeDeError(e));
       if (codigoDeError(e) === 422) recargar?.();
+      alFallar?.(e);
       return;
     } finally {
       ocupado.current = false;

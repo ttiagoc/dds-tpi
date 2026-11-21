@@ -52,6 +52,7 @@ const REGLAS_DEL_ALTA = [
   "La fecha tiene que ser futura y los nombres de tipo de entrada, únicos (sin distinguir mayúsculas ni acentos) (R8).",
   "El nombre va de 3 a 100 caracteres; descripción, lugar y nombre de cada tipo no pueden estar vacíos; el precio no puede ser negativo y el cupo es un entero mayor a 0.",
   'Esas reglas las valida el dominio y responden 422, igual que una categoría inexistente ("La categoría no existe"). Un campo con tipo incorrecto, de más o faltante responde 400.',
+  "Los 422 de fecha y categoría traen `details: [{ campo, mensaje }]` (campo `fecha` o `categoriaId`), igual que los 400.",
 ].join(" ");
 
 export default {
@@ -166,7 +167,10 @@ export default {
         multimedia: {
           type: "array",
           maxItems: 5,
-          items: { type: "string", format: "uri", description: "URL http o https" },
+          items: {
+            type: "string",
+            description: "URL http o https, o la ruta /imagenes/... que devuelve POST /imagenes",
+          },
         },
         tiposEntrada: { type: "array", minItems: 1, maxItems: 10, items: ref("TipoEntradaInput") },
       },
