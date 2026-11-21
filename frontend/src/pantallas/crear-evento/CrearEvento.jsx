@@ -15,10 +15,16 @@ const TEXTOS = [
   { campo: "nombre", etiqueta: "Nombre", testID: "evento-nombre" },
   { campo: "descripcion", etiqueta: "Descripción", testID: "evento-descripcion", multilinea: true },
   { campo: "lugar", etiqueta: "Lugar", testID: "evento-lugar" },
+  {
+    campo: "direccion",
+    etiqueta: "Dirección",
+    testID: "evento-direccion",
+    ayuda: "Calle y número, localidad, provincia",
+  },
 ];
 
 function CampoTexto({ definicion, formulario, foco }) {
-  const { campo, etiqueta, testID, multilinea } = definicion;
+  const { campo, etiqueta, testID, multilinea, ayuda } = definicion;
   const error = formulario.errores[campo];
   return (
     <View {...foco.registrar(campo)} style={estilos.campo}>
@@ -36,6 +42,7 @@ function CampoTexto({ definicion, formulario, foco }) {
         testID={testID}
       />
       <ErrorCampo mensaje={error} testID={`${testID}-error`} />
+      {ayuda && !error && <HelperText type="info">{ayuda}</HelperText>}
     </View>
   );
 }

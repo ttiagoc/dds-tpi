@@ -140,6 +140,16 @@ export default {
     },
     EventoDetalle: extiende("EventoResumen", {
       descripcion: { type: "string" },
+      direccion: texto("Sarmiento 3131, CABA, Buenos Aires"),
+      ubicacion: {
+        type: "object",
+        nullable: true,
+        description: "Coordenadas según Georef; null si no respondió al crear (R15)",
+        properties: {
+          latitud: { type: "number", example: -34.6034 },
+          longitud: { type: "number", example: -58.4115 },
+        },
+      },
       multimedia: { type: "array", items: { type: "string" } },
       tiposEntrada: { type: "array", items: ref("TipoEntrada") },
     }),
@@ -156,7 +166,15 @@ export default {
     },
     EventoInput: {
       type: "object",
-      required: ["nombre", "descripcion", "categoriaId", "fecha", "lugar", "tiposEntrada"],
+      required: [
+        "nombre",
+        "descripcion",
+        "categoriaId",
+        "fecha",
+        "lugar",
+        "direccion",
+        "tiposEntrada",
+      ],
       additionalProperties: false,
       properties: {
         nombre: texto("Stand-up en el Konex", { minLength: 3, maxLength: 100 }),
@@ -164,6 +182,12 @@ export default {
         categoriaId: { type: "integer", minimum: 1, example: 6 },
         fecha: fechaFutura,
         lugar: texto("Ciudad Cultural Konex", { minLength: 1 }),
+        direccion: texto("Sarmiento 3131, CABA, Buenos Aires", {
+          minLength: 5,
+          maxLength: 200,
+          description:
+            "'Calle y número, localidad, provincia'. Se geocodifica con Georef: si no la encuentra responde 422 'No encontramos esa dirección' (R13-R15)",
+        }),
         multimedia: {
           type: "array",
           maxItems: 5,

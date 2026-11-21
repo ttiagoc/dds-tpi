@@ -13,7 +13,9 @@ import {
   crearCompra,
   bodyEvento,
   tipoEntradaBody,
+  UBICACION_DE_PRUEBA,
 } from "../helpers/domainFactories.js";
+import { GeocodificadorNoDisponible } from "../../src/services/geocodificacion/GeorefGeocodificador.js";
 
 const { PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA } = EstadoCompra;
 
@@ -27,6 +29,7 @@ let eventos;
 let compras;
 let repos;
 let service;
+let geocodificador;
 
 const evento = (id, dias) => crearEvento({ id, nombre: `Evento ${id}`, fecha: enDias(dias) });
 
@@ -48,7 +51,8 @@ beforeEach(() => {
     },
     compraRepository: { findByOrganizador: jest.fn(async () => [...compras]) },
   };
-  service = new EventoService({ ...repos, reloj: { ahora: () => AHORA } });
+  geocodificador = { ubicar: jest.fn(async () => UBICACION_DE_PRUEBA) };
+  service = new EventoService({ ...repos, geocodificador, reloj: { ahora: () => AHORA } });
 });
 
 describe("EventoService.crear", () => {
@@ -80,6 +84,48 @@ describe("EventoService.crear", () => {
     expect(repos.usuarioRepository.findById).toHaveBeenCalledWith(2);
   });
 
+  it("geocodifica la dirección y guarda la ubicación", async () => {
+    const detalle = await service.crear(datos(), usuarioFenix);
+    expect(geocodificador.ubicar).toHaveBeenCalledWith("Sarmiento 3131, CABA, Buenos Aires");
+    expect(detalle).toMatchObject({
+      direccion: "Sarmiento 3131, CABA, Buenos Aires",
+      ubicacion: UBICACION_DE_PRUEBA,
+    });
+  });
+
+  it("si Georef no encuentra la dirección responde 422 en el campo sin guardar", async () => {
+    geocodificador.ubicar.mockResolvedValue(null);
+    const promesa = service.crear(datos(), usuarioFenix);
+    await expect(promesa).rejects.toMatchObject({
+      statusCode: 422,
+      message: "No encontramos esa dirección",
+      details: [{ campo: "direccion", mensaje: "No encontramos esa dirección" }],
+    });
+    expect(repos.eventoRepository.save).not.toHaveBeenCalled();
+  });
+
+  it("si Georef no responde crea el evento sin ubicación", async () => {
+    const aviso = jest.spyOn(console, "warn").mockImplementation(() => {});
+    geocodificador.ubicar.mockRejectedValue(new GeocodificadorNoDisponible("timeout"));
+    const detalle = await service.crear(datos(), usuarioFenix);
+    expect(detalle.ubicacion).toBeNull();
+    expect(repos.eventoRepository.save).toHaveBeenCalled();
+    expect(aviso).toHaveBeenCalled();
+    aviso.mockRestore();
+  });
+
+  it("no consulta Georef si la dirección no tiene el formato", async () => {
+    await expect(service.crear(datos({ direccion: "Corrientes" }), usuarioFenix)).rejects.toThrow(
+      "La dirección tiene que ser 'Calle y número, localidad, provincia'",
+    );
+    expect(geocodificador.ubicar).not.toHaveBeenCalled();
+  });
+
+  it("propaga un error inesperado del geocodificador", async () => {
+    geocodificador.ubicar.mockRejectedValue(new Error("bug"));
+    await expect(service.crear(datos(), usuarioFenix)).rejects.toThrow("bug");
+  });
+
   it("rechaza una categoría inexistente con 422 sin guardar", async () => {
     const promesa = service.crear(datos({ categoriaId: 999 }), usuarioFenix);
     await expect(promesa).rejects.toBeInstanceOf(UnprocessableEntityError);
@@ -98,7 +144,7 @@ describe("EventoService.crear", () => {
   });
 
   it("usa el reloj para exigir una fecha futura", async () => {
-    service = new EventoService({ ...repos, reloj: { ahora: () => enDias(30) } });
+    service = new EventoService({ ...repos, geocodificador, reloj: { ahora: () => enDias(30) } });
     await expect(service.crear(datos(), usuarioFenix)).rejects.toThrow(
       "La fecha del evento tiene que ser futura",
     );

@@ -34,6 +34,7 @@ async function completar({ sinHora = false } = {}) {
   await escribir("evento-nombre", "  Stand-up en el Konex ");
   await escribir("evento-descripcion", "Noche de humor");
   await escribir("evento-lugar", "Ciudad Cultural Konex");
+  await escribir("evento-direccion", "Sarmiento 3131, CABA, Buenos Aires");
   await fireEvent(screen.getByTestId("evento-categoria"), "focus");
   await fireEvent.press(await screen.findByTestId("categoria-6"));
   await fireEvent.press(screen.getByTestId("evento-fecha"));
@@ -100,8 +101,8 @@ describe("CrearEvento: validación al publicar", () => {
     expect(screen.getByTestId("evento-categoria-error")).toHaveTextContent("Elegí una categoría");
     expect(screen.getByTestId("evento-hora-error")).toHaveTextContent("Elegí la hora");
     expect(screen.getByTestId("tipo-0-cupo-error")).toBeTruthy();
-    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá los 9 campos marcados");
-    expect(anunciar).toHaveBeenCalledWith("Revisá los 9 campos marcados");
+    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá los 10 campos marcados");
+    expect(anunciar).toHaveBeenCalledWith("Revisá los 10 campos marcados");
     expect(screen.getByTestId("evento-nombre")).toHaveProp("accessibilityHint", expect.any(String));
   });
 
@@ -145,6 +146,20 @@ describe("CrearEvento: validación al publicar", () => {
     expect(screen.getByTestId("evento-aviso-error")).toHaveTextContent(mensaje);
   });
 
+  it("si el back no encuentra la dirección la marca en el campo", async () => {
+    const mensaje = "No encontramos esa dirección";
+    crearEvento.mockRejectedValueOnce(errorHttp(422, mensaje, [{ campo: "direccion", mensaje }]));
+    await abrir();
+    await completar();
+    await fireEvent.press(publicar());
+    expect(await screen.findByTestId("evento-direccion-error")).toHaveTextContent(mensaje);
+  });
+
+  it("la dirección muestra cómo escribirla", async () => {
+    await abrir();
+    expect(screen.getByText("Calle y número, localidad, provincia")).toBeTruthy();
+  });
+
   it("un 400 con details de un tipo marca ese campo", async () => {
     crearEvento.mockRejectedValueOnce(
       errorHttp(400, "Datos inválidos", [{ campo: "tiposEntrada.0.precio", mensaje: "Muy caro" }]),
@@ -167,6 +182,7 @@ describe("CrearEvento: envío", () => {
       categoriaId: 6,
       fecha: new Date(2026, 11, 5, 22, 0).toISOString(),
       lugar: "Ciudad Cultural Konex",
+      direccion: "Sarmiento 3131, CABA, Buenos Aires",
       multimedia: [],
       tiposEntrada: [{ nombre: "General", precio: 15000, cupo: 200 }],
     });

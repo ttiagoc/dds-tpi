@@ -11,6 +11,7 @@ const COMPLETO = {
   nombre: "  Stand-up en el Konex ",
   descripcion: " Noche de humor ",
   lugar: " Ciudad Cultural Konex ",
+  direccion: " Sarmiento 3131, CABA, Buenos Aires ",
   imagen: "",
   categoria: { id: 6, nombre: "Stand-up" },
   dia: new Date(2026, 11, 5),
@@ -26,6 +27,7 @@ describe("armarEvento", () => {
       categoriaId: 6,
       fecha: new Date(2026, 11, 5, 22, 0).toISOString(),
       lugar: "Ciudad Cultural Konex",
+      direccion: "Sarmiento 3131, CABA, Buenos Aires",
       multimedia: [],
       tiposEntrada: [{ nombre: "General", precio: 15000, cupo: 200 }],
     });
@@ -67,6 +69,7 @@ describe("validarEvento", () => {
       ["nombre", MENSAJES.nombre],
       ["descripcion", MENSAJES.descripcion],
       ["lugar", MENSAJES.lugar],
+      ["direccion", MENSAJES.direccion],
       ["categoria", MENSAJES.categoria],
       ["fecha", MENSAJES.fecha],
       ["hora", MENSAJES.hora],
@@ -81,6 +84,8 @@ describe("validarEvento", () => {
     ["nombre largo", { nombre: "a".repeat(101) }, "nombre"],
     ["sin hora", { hora: null }, "hora"],
     ["sin categoría", { categoria: null }, "categoria"],
+    ["dirección sin localidad", { direccion: "Sarmiento 3131" }, "direccion"],
+    ["dirección sin número", { direccion: "Sarmiento, CABA" }, "direccion"],
   ])("con %s marca solo ese campo", (_, cambio, campo) => {
     expect(Object.keys(validarEvento({ ...COMPLETO, ...cambio }, AHORA))).toEqual([campo]);
   });

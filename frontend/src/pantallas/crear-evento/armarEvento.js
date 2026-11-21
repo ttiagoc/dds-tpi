@@ -6,6 +6,7 @@ export const formularioVacio = () => ({
   nombre: "",
   descripcion: "",
   lugar: "",
+  direccion: "",
   imagen: "",
   categoria: null,
   dia: null,
@@ -17,6 +18,7 @@ export const MENSAJES = {
   nombre: "El nombre tiene que tener entre 3 y 100 caracteres",
   descripcion: "Escribí una descripción",
   lugar: "Indicá el lugar",
+  direccion: "La dirección tiene que ser 'Calle y número, localidad, provincia'",
   categoria: "Elegí una categoría",
   fecha: "Elegí la fecha",
   hora: "Elegí la hora",
@@ -30,6 +32,14 @@ const conTexto = (valor) => valor.trim().length > 0;
 const aNumero = (valor) => (conTexto(valor) ? Number(valor.trim().replace(",", ".")) : NaN);
 const precioValido = (valor) => Number.isFinite(aNumero(valor)) && aNumero(valor) >= 0;
 const cupoValido = (valor) => Number.isInteger(aNumero(valor)) && aNumero(valor) >= 1;
+
+function direccionConFormato(direccion) {
+  const partes = direccion
+    .split(",")
+    .map((parte) => parte.trim())
+    .filter(Boolean);
+  return partes.length >= 2 && /\d/.test(partes[0]);
+}
 
 export const claveDeTipo = (indice, campo) => `tiposEntrada.${indice}.${campo}`;
 
@@ -52,12 +62,13 @@ function errorDeFecha({ dia, hora }, ahora) {
 }
 
 export function validarEvento(formulario, ahora) {
-  const { nombre, descripcion, lugar, categoria, hora, tipos } = formulario;
+  const { nombre, descripcion, lugar, direccion, categoria, hora, tipos } = formulario;
   const largo = nombre.trim().length;
   const errores = [
     ["nombre", (largo < 3 || largo > 100) && MENSAJES.nombre],
     ["descripcion", !conTexto(descripcion) && MENSAJES.descripcion],
     ["lugar", !conTexto(lugar) && MENSAJES.lugar],
+    ["direccion", !direccionConFormato(direccion) && MENSAJES.direccion],
     ["categoria", !categoria && MENSAJES.categoria],
     ["fecha", errorDeFecha(formulario, ahora)],
     ["hora", !hora && MENSAJES.hora],
@@ -80,13 +91,14 @@ function armarTipo({ nombre, precio, cupo, descripcion }) {
 }
 
 export function armarEvento(formulario) {
-  const { nombre, descripcion, lugar, imagen, categoria, dia, hora, tipos } = formulario;
+  const { nombre, descripcion, lugar, direccion, imagen, categoria, dia, hora, tipos } = formulario;
   return {
     nombre: nombre.trim(),
     descripcion: descripcion.trim(),
     categoriaId: categoria.id,
     fecha: fechaLocal(dia, hora).toISOString(),
     lugar: lugar.trim(),
+    direccion: direccion.trim(),
     multimedia: conTexto(imagen) ? [imagen.trim()] : [],
     tiposEntrada: tipos.map(armarTipo),
   };

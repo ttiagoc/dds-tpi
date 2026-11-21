@@ -2,6 +2,7 @@ import { NotFoundError } from "../errors/AppError.js";
 import { Rol } from "./Rol.js";
 import { TipoEntrada } from "./TipoEntrada.js";
 import { normalizar } from "./texto.js";
+import { direccionValida, ubicacionValida } from "./direccion.js";
 import {
   exigir,
   exigirCampo,
@@ -52,6 +53,8 @@ export class Evento {
     categoria,
     fecha,
     lugar,
+    direccion,
+    ubicacion = null,
     tiposEntrada,
     multimedia = [],
     organizador,
@@ -68,6 +71,8 @@ export class Evento {
     this.categoria = categoria;
     this.fecha = fechaValida(fecha, "La fecha del evento no es válida");
     this.lugar = textoRequerido(lugar, "El evento necesita un lugar");
+    this.direccion = direccionValida(direccion);
+    this.ubicacion = ubicacionValida(ubicacion);
     this.tiposEntrada = armarTipos(tiposEntrada);
     this.multimedia = armarMultimedia(multimedia);
     exigir(
@@ -82,6 +87,10 @@ export class Evento {
     exigirCampo(!evento.yaOcurrio(ahora), "fecha", "La fecha del evento tiene que ser futura");
     exigir(evento.totalVendidas() === 0, "Un evento nuevo no puede tener entradas vendidas");
     return evento;
+  }
+
+  ubicarEn(ubicacion) {
+    this.ubicacion = ubicacionValida(ubicacion);
   }
 
   tipoEntrada(id) {

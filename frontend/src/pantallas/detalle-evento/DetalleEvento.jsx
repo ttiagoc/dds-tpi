@@ -11,6 +11,7 @@ import { useRecargarAlVolver } from "../../hooks/useRecargarAlVolver";
 import { espaciado, radios } from "../../tema/espaciado";
 import { BarraComprar } from "./BarraComprar";
 import { BotonFavorito } from "./BotonFavorito";
+import { ComoLlegar } from "./ComoLlegar";
 import { ReseniasOrganizador } from "./ReseniasOrganizador";
 import { TiposEntrada } from "./TiposEntrada";
 
@@ -53,6 +54,7 @@ function Encabezado({ evento }) {
       <Categoria nombre={evento.categoria.nombre} />
       <Text variant="headlineMedium">{evento.nombre}</Text>
       <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} variant="bodyLarge" />
+      {evento.direccion && <ComoLlegar evento={evento} />}
       <View style={[estilos.organizador, { borderColor: colors.outlineVariant }]}>
         <PuntajeOrganizador organizador={evento.organizador} />
       </View>

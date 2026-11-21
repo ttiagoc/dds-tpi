@@ -21,6 +21,7 @@ describe("leerEntorno", () => {
       port: 3000,
       jwtSecret: "s",
       jwtExpiresIn: "8h",
+      georefUrl: "https://apis.datos.gob.ar/georef/api",
       nodeEnv: "development",
     });
   });
@@ -31,11 +32,13 @@ describe("leerEntorno", () => {
       PORT: "4000",
       JWT_SECRET: "otro",
       JWT_EXPIRES_IN: "1h",
+      GEOREF_URL: "https://georef.test/api",
     });
     expect(entorno).toEqual({
       port: 4000,
       jwtSecret: "otro",
       jwtExpiresIn: "1h",
+      georefUrl: "https://georef.test/api",
       nodeEnv: "production",
     });
   });
