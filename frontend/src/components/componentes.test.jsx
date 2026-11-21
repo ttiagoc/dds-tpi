@@ -1,8 +1,9 @@
 import { Text } from "react-native-paper";
-import { StyleSheet } from "react-native";
+import { Keyboard, StyleSheet } from "react-native";
 import { screen, fireEvent, within } from "@testing-library/react-native";
 import { renderConProviders } from "../test-utils/renderConProviders";
 import { BarraDeVentas } from "./BarraDeVentas";
+import { CampoNumero } from "./CampoNumero";
 import { ChipEstado } from "./ChipEstado";
 import { ConCarga } from "./ConCarga";
 import { ChipsFiltro } from "./ChipsFiltro";
@@ -109,6 +110,37 @@ describe("Cargando y Pantalla", () => {
       </Pantalla>,
     );
     expect(screen.getByTestId("pantalla").props.contentInsetAdjustmentBehavior).toBe("automatic");
+  });
+
+  it("con scroll sube el contenido con el teclado y deja bajarlo deslizando", async () => {
+    await renderConProviders(
+      <Pantalla scroll testID="pantalla">
+        <Text>Formulario largo</Text>
+      </Pantalla>,
+    );
+    const { props } = screen.getByTestId("pantalla");
+    expect(props.automaticallyAdjustKeyboardInsets).toBe(true);
+    expect(props.keyboardDismissMode).toBe("interactive");
+  });
+});
+
+describe("CampoNumero", () => {
+  it("usa el teclado decimal o entero y Listo cierra el teclado", async () => {
+    const cerrar = jest.spyOn(Keyboard, "dismiss");
+    const onChangeText = jest.fn();
+    await renderConProviders(
+      <>
+        <CampoNumero label="Precio" decimal value="" onChangeText={onChangeText} testID="precio" />
+        <CampoNumero label="Cupo" value="" onChangeText={() => {}} testID="cupo" />
+      </>,
+    );
+    expect(screen.getByTestId("precio")).toHaveProp("keyboardType", "decimal-pad");
+    expect(screen.getByTestId("cupo")).toHaveProp("keyboardType", "number-pad");
+    expect(screen.getByTestId("precio")).toHaveProp("returnKeyType", "done");
+    await fireEvent.changeText(screen.getByTestId("precio"), "1500");
+    expect(onChangeText).toHaveBeenCalledWith("1500");
+    await fireEvent.press(screen.getByTestId("precio-listo"));
+    expect(cerrar).toHaveBeenCalled();
   });
 });
 
