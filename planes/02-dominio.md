@@ -34,7 +34,7 @@ Resenia ──▶ Usuario (comprador), Evento, Compra (Δ, por compraId)
 Métodos: `agregarFavorito(eventoId)` (idempotente), `quitarFavorito(eventoId)`, `esFavorito(eventoId)`, `esOrganizador()`, `nombreCompleto()` (nombre + apellido si hay; es el `nombre` de los resúmenes embebidos).
 
 ### Categoria
-`id, nombre, descripcion`. Sembradas (Recitales, Teatro, Festivales, Conferencias, Deportes, Stand-up). No hay ABM.
+`id, nombre, descripcion`. Sembradas (15: Recitales, Teatro, Festivales, Conferencias, Deportes, Stand-up y otras, spec 25). No hay ABM: en Nuevo evento se buscan y se eligen, no se crean.
 
 ### TipoEntrada
 | Campo | Tipo | Regla |
@@ -62,9 +62,11 @@ Métodos:
 | descripcion | string | requerido |
 | categoria | Categoria | requerida |
 | fecha | Date | futura al crear (`Evento.crear`, no el constructor) |
-| lugar | string | (Δ) requerido; útil para chat/consultas de acceso |
+| lugar | string | (Δ) requerido; nombre del sitio |
+| direccion | string | (Δ) requerida, "Calle y número, localidad, provincia" (R13, spec 28) |
+| ubicacion | `{ latitud, longitud }` \| null | (Δ) coordenadas de la dirección según Georef; null si no se pudo geocodificar (R14, R15) |
 | tiposEntrada | TipoEntrada[] | al menos 1 |
-| multimedia | string[] | URLs de imágenes, opcional |
+| multimedia | string[] | URLs `http(s)` o rutas `/imagenes/...` del back, opcional |
 | organizador | Usuario | rol ORGANIZADOR |
 
 Métodos:
@@ -162,6 +164,9 @@ Reglas:
 - **R9** Ver compras de un evento: solo su organizador (403).
 - **R10** Búsqueda: por defecto solo eventos no ocurridos.
 - **R11** Lectura del chat: cada participante tiene una marca "leído hasta" por compra (0 si nunca leyó). Sus no leídos son los mensajes de la otra parte con `id` mayor a la marca. Enviar avanza la marca del autor; marcar como leído la lleva al último mensaje. Solo participantes (R7).
+- **R13** Dirección del evento: requerida, al menos dos partes separadas por coma y la primera con número ("La dirección tiene que ser 'Calle y número, localidad, provincia'"). Spec 28.
+- **R14** Ubicación del evento: `null` o `{ latitud ∈ [-90, 90], longitud ∈ [-180, 180] }` ("La ubicación del evento no es válida").
+- **R15** Al crear, el back geocodifica la dirección con Georef (ADR-014): no encontrada → 422 "No encontramos esa dirección"; Georef sin respuesta → se crea con `ubicacion: null`.
 - **R12** Conversaciones: compras con al menos un mensaje en las que participa el usuario (comprador: sus compras; organizador: las de sus eventos), por fecha del último mensaje desc y `compraId` desc.
 
 ## Casos borde a testear

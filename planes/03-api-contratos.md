@@ -30,7 +30,7 @@ Leyenda: 🔓 público · 🔐 logueado · 🅒 solo COMPRADOR · 🅞 solo ORGA
 `esFavorito` solo si hay sesión de comprador; si no, `false`. `imagen` (y cada elemento de `multimedia`) es una URL absoluta o una ruta relativa al back (`/imagenes/rock.jpg`, servida por `GET /imagenes/<archivo>`); el front resuelve las relativas contra `EXPO_PUBLIC_API_URL` (spec 17). `finalizado` = el evento ya ocurrió (`Evento.yaOcurrio(ahora)`, `fecha <= ahora`); lo usa el front para no ofrecer comprar (spec 16).
 
 ### EventoDetalle
-EventoResumen + `descripcion`, `multimedia: string[]`, `tiposEntrada: [{ id, nombre, descripcion, precio, cupo, disponibles }]`.
+EventoResumen + `descripcion`, `direccion`, `ubicacion: { latitud, longitud } | null` (spec 28), `multimedia: string[]`, `tiposEntrada: [{ id, nombre, descripcion, precio, cupo, disponibles }]`.
 
 ### CompraResumen
 ```json
@@ -65,15 +65,16 @@ CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `r
 | GET | `/auth/yo` | 🔐 | — | 200 usuario | 401 |
 
 ### Categorías
-| GET | `/categorias` | 🔓 | — | 200 `[{ id, nombre, descripcion }]` | |
+| Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
+| GET | `/categorias` | 🔓 | `q?` (≤ 50, sin mayúsculas ni acentos), `page` (1), `limit` (20, máx 50) | 200 `{ categorias: [{ id, nombre, descripcion }], total, page, totalPages }`, por nombre asc e id asc. Detalle en `specs/25-selector-categoria.md` | 400 |
 
 ### Eventos
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
 | GET | `/eventos` | 🔓 | query abajo | 200 lista paginada de EventoResumen | 400 query inválida |
 | GET | `/eventos/:id` | 🔓 | — | 200 EventoDetalle | 400, 404 |
-| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 401, 403, 422 (incluye categoría inexistente: "La categoría no existe") |
+| POST | `/eventos` | 🅞 | body abajo | 201 EventoDetalle | 400, 401, 403, 422 (incluye categoría inexistente: "La categoría no existe", fecha pasada y "No encontramos esa dirección"); los 422 de un campo traen `details: [{ campo, mensaje }]` como los 400 (spec 23) |
 | GET | `/organizadores/yo/eventos` | 🅞 | `page, limit` | 200 `{ eventos: [EventoResumen + vendidas, cupo, recaudado], total, page, totalPages }` — todos sus eventos (incluye pasados), por fecha asc; `vendidas` = cupo ocupado, `cupo` = suma de cupos, `recaudado` = suma de `total` de las compras CONFIRMADA y UTILIZADA; `resumen: { recaudado, vendidas }` suma todos sus eventos, no solo la página (spec 22). Detalle en `specs/05b-eventos-organizador.md` | 400, 401, 403 |
 | GET | `/eventos/:id/compras` | 🅞 dueño | `estado?, page, limit` | 200 `{ evento: {id,nombre}, disponibilidad: [{ tipoEntradaId, nombre, cupo, vendidas, disponibles }], compras: [CompraResumen], total, page, totalPages }` — compras por `fechaCompra` desc, id desc; `disponibilidad` no se filtra por estado. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404 |
 | GET | `/organizadores/:id/resenias` | 🔓 | `page, limit` | 200 `{ organizador: {id,nombre,puntajePromedio,cantidadResenias}, resenias: [Resenia], total, page, totalPages }` — reseñas por `fecha` desc, id desc; promedio y cantidad sobre todas; sin reseñas → `[]` y `puntajePromedio: null`. Detalle en `specs/07-resenias-favoritos.md` | 400, 404 "No existe el organizador" (inexistente o no ORGANIZADOR) |
@@ -96,10 +97,12 @@ Body `POST /eventos`:
 {
   "nombre": "Stand-up en el Konex", "descripcion": "...", "categoriaId": 6,
   "fecha": "2026-12-05T22:00:00.000Z", "lugar": "Ciudad Cultural Konex",
+  "direccion": "Sarmiento 3131, CABA, Buenos Aires",
   "multimedia": ["/imagenes/subidas/3f2a.jpg"],
   "tiposEntrada": [ { "nombre": "General", "descripcion": "De pie", "precio": 15000, "cupo": 200 } ]
 }
 ```
+`multimedia`: URLs `http(s)` o rutas `/imagenes/...` (las que devuelve `POST /imagenes`). `direccion`: 5-200, se geocodifica con Georef (R13-R15, spec 28).
 
 ### Imágenes
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
@@ -158,4 +161,4 @@ Detalle en `specs/07-resenias-favoritos.md`.
 | fenix@aiticket.com | ORGANIZADOR |
 | konex@aiticket.com | ORGANIZADOR |
 
-Seed: 6 categorías, ~12 eventos (algunos pasados con reseñas para que el puntaje exista), compras en todos los estados para Ana.
+Seed: 15 categorías, ~12 eventos (algunos pasados con reseñas para que el puntaje exista), compras en todos los estados para Ana.

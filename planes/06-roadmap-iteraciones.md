@@ -71,6 +71,15 @@ Specs: `18-paginacion-favoritos-chat`, `19-identidad-visual`, `20-bandeja-mensaj
 
 **Aceptación:** suites y e2e verdes; recorrido completo en Expo Go en claro y oscuro.
 
+## It5c — Ajustes tras la prueba en Expo Go (21/11-)
+Specs 23-28, ADR-014. Hallazgos de la prueba en el celular.
+- [ ] `fix/publicar-evento` (spec 23): `multimedia` con rutas relativas, validación en el front con foco en el primer error, `details` en los 422.
+- [ ] `fix/teclado-formularios` (spec 24): `Pantalla` sube con el teclado, `CampoNumero` con "Listo".
+- [ ] `feature/selector-categoria` (spec 25): `GET /categorias` paginado con `q`, buscador en Nuevo evento.
+- [ ] `feature/chips-y-listas` (spec 26): chevron en los chips, espacio en Mis entradas, Explorar de a 6.
+- [ ] `fix/chat-encabezado-fijo` (spec 27): encabezado fijo, lista invertida, anteriores al subir.
+- [ ] `feature/como-llegar` (spec 28, ADR-014): dirección geocodificada con Georef y botón "Cómo llegar".
+
 ## It6 — Entrega (29/11-1/12)
 - [ ] Guion final (`planes/08`), ensayo, grabación 5-10 min.
 - [ ] Conclusión armada desde `docs/ia/bitacora.md`.
