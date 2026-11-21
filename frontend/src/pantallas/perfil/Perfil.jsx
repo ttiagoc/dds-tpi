@@ -1,11 +1,28 @@
 import { StyleSheet, View } from "react-native";
-import { Avatar, Button, Text, useTheme } from "react-native-paper";
+import { Avatar, Button, SegmentedButtons, Text, useTheme } from "react-native-paper";
 import { useAuth } from "../../auth/AuthContext";
 import { EncabezadoPestania } from "../../components/EncabezadoPestania";
 import { Pantalla } from "../../components/Pantalla";
 import { espaciado } from "../../tema/espaciado";
+import { usePreferenciaTema } from "../../tema/PreferenciaTemaContext";
 
 const ROLES = { COMPRADOR: "Comprador", ORGANIZADOR: "Organizador" };
+
+const OPCIONES_TEMA = [
+  { value: "claro", label: "Claro", icon: "white-balance-sunny" },
+  { value: "oscuro", label: "Oscuro", icon: "weather-night" },
+  { value: "automatico", label: "Automático", icon: "theme-light-dark" },
+].map((opcion) => ({ ...opcion, testID: `tema-${opcion.value}` }));
+
+function Apariencia() {
+  const { preferencia, elegir } = usePreferenciaTema();
+  return (
+    <View style={estilos.apariencia}>
+      <Text variant="titleMedium">Apariencia</Text>
+      <SegmentedButtons value={preferencia} onValueChange={elegir} buttons={OPCIONES_TEMA} />
+    </View>
+  );
+}
 
 export default function Perfil() {
   const { usuario, cerrarSesion } = useAuth();
@@ -37,6 +54,7 @@ export default function Perfil() {
           {ROLES[usuario.rol]}
         </Text>
       </View>
+      <Apariencia />
       <Button mode="outlined" icon="logout" onPress={cerrarSesion} testID="cerrar-sesion">
         Cerrar sesión
       </Button>
@@ -46,4 +64,5 @@ export default function Perfil() {
 
 const estilos = StyleSheet.create({
   datos: { alignItems: "center", gap: espaciado.sm, marginVertical: espaciado.xl },
+  apariencia: { gap: espaciado.sm, marginBottom: espaciado.lg },
 });

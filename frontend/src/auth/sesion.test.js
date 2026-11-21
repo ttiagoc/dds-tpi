@@ -2,12 +2,6 @@ import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { leerSesion, guardarSesion, borrarSesion } from "./sesion";
 
-jest.mock("expo-secure-store", () => ({
-  getItemAsync: jest.fn(),
-  setItemAsync: jest.fn(),
-  deleteItemAsync: jest.fn(),
-}));
-
 const SESION = { token: "abc", usuario: { id: 3, rol: "COMPRADOR" } };
 const sistemaOriginal = Platform.OS;
 
