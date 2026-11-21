@@ -213,6 +213,8 @@ describe("EventoService.toResumen y toDetalle", () => {
     });
     expect(detalle).toMatchObject({
       descripcion: "Vuelven los Piojos",
+      direccion: "Av. Figueroa Alcorta 7597, CABA, Buenos Aires",
+      ubicacion: { latitud: -34.5453, longitud: -58.4498 },
       multimedia: ["https://img/1"],
     });
     expect(detalle.tiposEntrada).toHaveLength(2);

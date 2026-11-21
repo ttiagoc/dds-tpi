@@ -78,7 +78,7 @@ Specs 23-28, ADR-014. Hallazgos de la prueba en el celular.
 - [x] `feature/selector-categoria` (spec 25): `GET /categorias` paginado con `q`, buscador en Nuevo evento.
 - [x] `feature/chips-y-listas` (spec 26): chevron en los chips, espacio en Mis entradas, Explorar de a 6.
 - [x] `fix/chat-encabezado-fijo` (spec 27): encabezado fijo, lista invertida, anteriores al subir.
-- [ ] `feature/como-llegar` (spec 28, ADR-014): dirección geocodificada con Georef y botón "Cómo llegar".
+- [x] `feature/como-llegar` (spec 28, ADR-014): dirección geocodificada con Georef y botón "Cómo llegar".
 
 ## It6 — Entrega (29/11-1/12)
 - [ ] Guion final (`planes/08`), ensayo, grabación 5-10 min.

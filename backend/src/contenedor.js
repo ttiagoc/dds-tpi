@@ -12,6 +12,7 @@ import { CompraService } from "./services/CompraService.js";
 import { ReseniaService } from "./services/ReseniaService.js";
 import { FavoritoService } from "./services/FavoritoService.js";
 import { MensajeService } from "./services/MensajeService.js";
+import { GeorefGeocodificador } from "./services/geocodificacion/GeorefGeocodificador.js";
 import { sembrar } from "./seeds/sembrar.js";
 import { notificadorNulo } from "./sockets/notificador.js";
 
@@ -51,7 +52,7 @@ function crearServiciosDeCompras(repos, { reloj, notificador }) {
   };
 }
 
-function crearServicios(repos, { reloj, entorno, notificador }) {
+function crearServicios(repos, { reloj, entorno, notificador, geocodificador }) {
   const servicios = {
     authService: new AuthService({
       usuarioRepository: repos.usuarioRepository,
@@ -64,6 +65,7 @@ function crearServicios(repos, { reloj, entorno, notificador }) {
       usuarioRepository: repos.usuarioRepository,
       categoriaRepository: repos.categoriaRepository,
       compraRepository: repos.compraRepository,
+      geocodificador: geocodificador ?? new GeorefGeocodificador({ url: entorno.georefUrl }),
       reloj,
     }),
     categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),
@@ -81,9 +83,10 @@ export function crearContenedor({
   reloj = relojSistema,
   entorno = leerEntorno(),
   notificador = notificadorNulo,
+  geocodificador,
 } = {}) {
   const repos = crearRepos();
-  const servicios = crearServicios(repos, { reloj, entorno, notificador });
+  const servicios = crearServicios(repos, { reloj, entorno, notificador, geocodificador });
 
   async function resetear() {
     await Promise.all(Object.values(repos).map((repo) => repo.clear()));

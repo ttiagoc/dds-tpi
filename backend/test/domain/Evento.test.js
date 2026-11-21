@@ -10,7 +10,38 @@ import {
   datosEvento,
 } from "../helpers/domainFactories.js";
 
+const MENSAJE_DIRECCION = "La dirección tiene que ser 'Calle y número, localidad, provincia'";
+
 describe("Evento", () => {
+  describe("dirección y ubicación", () => {
+    it("guarda la dirección sin espacios de más y la ubicación", () => {
+      const evento = crearEvento({ direccion: "  Corrientes 1234, CABA  " });
+      expect(evento.direccion).toBe("Corrientes 1234, CABA");
+      expect(evento.ubicacion).toEqual({ latitud: -34.5453, longitud: -58.4498 });
+    });
+
+    it("la ubicación es opcional", () => {
+      expect(crearEvento({ ubicacion: undefined }).ubicacion).toBeNull();
+    });
+
+    it("el error de dirección indica el campo", () => {
+      expect(() => crearEvento({ direccion: "Corrientes" })).toThrow(
+        expect.objectContaining({ details: [{ campo: "direccion", mensaje: MENSAJE_DIRECCION }] }),
+      );
+    });
+
+    it("ubicarEn valida y guarda las coordenadas", () => {
+      const evento = crearEvento({ ubicacion: null });
+      evento.ubicarEn({ latitud: -34.6, longitud: -58.4 });
+      expect(evento.ubicacion).toEqual({ latitud: -34.6, longitud: -58.4 });
+      evento.ubicarEn(null);
+      expect(evento.ubicacion).toBeNull();
+      expect(() => evento.ubicarEn({ latitud: 100, longitud: 0 })).toThrow(
+        "La ubicación del evento no es válida",
+      );
+    });
+  });
+
   describe("constructor", () => {
     it("convierte los tipos de entrada a instancias de TipoEntrada", () => {
       const evento = crearEvento();
@@ -49,6 +80,13 @@ describe("Evento", () => {
       [{ fecha: "no es fecha" }, "La fecha del evento no es válida"],
       [{ fecha: undefined }, "La fecha del evento no es válida"],
       [{ lugar: " " }, "El evento necesita un lugar"],
+      [{ direccion: undefined }, MENSAJE_DIRECCION],
+      [{ direccion: "Corrientes" }, MENSAJE_DIRECCION],
+      [{ direccion: "Corrientes, CABA" }, MENSAJE_DIRECCION],
+      [{ direccion: "Corrientes 1234, " }, MENSAJE_DIRECCION],
+      [{ ubicacion: { latitud: -91, longitud: 0 } }, "La ubicación del evento no es válida"],
+      [{ ubicacion: { latitud: 0, longitud: 181 } }, "La ubicación del evento no es válida"],
+      [{ ubicacion: { latitud: "a", longitud: 0 } }, "La ubicación del evento no es válida"],
       [{ tiposEntrada: [] }, "El evento necesita al menos un tipo de entrada"],
       [{ tiposEntrada: undefined }, "El evento necesita al menos un tipo de entrada"],
       [

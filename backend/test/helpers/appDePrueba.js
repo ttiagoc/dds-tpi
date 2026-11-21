@@ -3,12 +3,18 @@ import { crearContenedor } from "../../src/contenedor.js";
 import { crearApp } from "../../src/app.js";
 import { leerEntorno } from "../../src/config/entorno.js";
 import { CONTRASENIA_DEMO } from "../../src/seeds/sembrar.js";
-import { AHORA } from "./domainFactories.js";
+import { AHORA, geocodificadorFijo } from "./domainFactories.js";
 
-export async function crearAppDePrueba({ ahora = AHORA, nodeEnv = "test", carpetaImagenes } = {}) {
+export async function crearAppDePrueba({
+  ahora = AHORA,
+  nodeEnv = "test",
+  carpetaImagenes,
+  geocodificador = geocodificadorFijo(),
+} = {}) {
   const contenedor = crearContenedor({
     reloj: { ahora: () => ahora },
     entorno: leerEntorno({ NODE_ENV: "test" }),
+    geocodificador,
   });
   await contenedor.resetear();
   return { app: crearApp(contenedor, { nodeEnv, carpetaImagenes }), contenedor };

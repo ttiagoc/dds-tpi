@@ -20,6 +20,8 @@ export function eventoDetalle(cambios = {}) {
   return {
     ...eventoResumen(),
     descripcion: "La vuelta de Los Piojos al Monumental.",
+    direccion: "Av. Figueroa Alcorta 7597, CABA, Buenos Aires",
+    ubicacion: { latitud: -34.5453, longitud: -58.4498 },
     multimedia: ["https://imagenes.test/piojos.jpg"],
     tiposEntrada: [
       { id: 10, nombre: "Campo", descripcion: "De pie", precio: 45000, cupo: 100, disponibles: 40 },

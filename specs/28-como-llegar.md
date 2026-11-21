@@ -1,6 +1,6 @@
 ﻿# Spec 28 — Dirección geocodificada y "Cómo llegar"
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/como-llegar`
 - **Casos de uso:** CU4, CU10 (ver `planes/00-indice.md`)
 - **Iteración:** It5c

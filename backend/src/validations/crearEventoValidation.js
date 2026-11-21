@@ -23,6 +23,7 @@ export const crearEventoValidation = z
     categoriaId: z.number().int().positive(),
     fecha: z.iso.datetime({ offset: true }),
     lugar: z.string(),
+    direccion: z.string().min(5).max(200),
     multimedia: z.array(imagen).max(5).default([]),
     tiposEntrada: z.array(tipoEntrada).min(1).max(10),
   })

@@ -1,3 +1,4 @@
+import { Linking } from "react-native";
 import { screen, fireEvent, waitFor, act } from "@testing-library/react-native";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import DetalleEvento from "./DetalleEvento";
@@ -47,6 +48,28 @@ describe("DetalleEvento: datos", () => {
     expect(screen.getByTestId("tipo-entrada-10")).toHaveTextContent(/Campo/);
     expect(screen.getByTestId("tipo-entrada-10")).toHaveTextContent(/Quedan 40/);
     expect(screen.getByTestId("tipo-entrada-11")).toHaveTextContent(/Agotado/);
+  });
+
+  it("Cómo llegar abre la ruta en Google Maps con las coordenadas", async () => {
+    const abrirUrl = jest.spyOn(Linking, "openURL").mockResolvedValue();
+    await abrir();
+    expect(screen.getByTestId("evento-direccion")).toHaveTextContent(
+      "Av. Figueroa Alcorta 7597, CABA, Buenos Aires",
+    );
+    await fireEvent.press(screen.getByTestId("evento-como-llegar"));
+    expect(abrirUrl).toHaveBeenCalledWith(
+      "https://www.google.com/maps/dir/?api=1&destination=-34.5453,-58.4498",
+    );
+  });
+
+  it("sin coordenadas Cómo llegar busca la dirección", async () => {
+    const abrirUrl = jest.spyOn(Linking, "openURL").mockResolvedValue();
+    obtenerEvento.mockResolvedValue(eventoDetalle({ ubicacion: null }));
+    await abrir();
+    await fireEvent.press(screen.getByTestId("evento-como-llegar"));
+    expect(abrirUrl).toHaveBeenCalledWith(
+      "https://www.google.com/maps/search/?api=1&query=Av.%20Figueroa%20Alcorta%207597%2C%20CABA%2C%20Buenos%20Aires",
+    );
   });
 
   it("muestra el promedio del organizador y sus últimas 3 reseñas", async () => {

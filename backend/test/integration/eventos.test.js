@@ -42,6 +42,7 @@ async function agregarOrganizadorSinResenias() {
       categoria: await categoriaRepository.findById(1),
       fecha: enDias(1),
       lugar: "Lugar",
+      direccion: "Corrientes 1234, CABA, Buenos Aires",
       tiposEntrada: [{ nombre: "General", precio: 1000, cupo: 10 }],
       organizador,
     }),

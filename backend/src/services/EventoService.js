@@ -1,11 +1,19 @@
 import { NotFoundError } from "../errors/AppError.js";
 import { Evento } from "../domain/Evento.js";
 import { errorDeCampo } from "../domain/validaciones.js";
+import {
+  GeocodificadorNoDisponible,
+  GeorefGeocodificador,
+} from "./geocodificacion/GeorefGeocodificador.js";
 import { Resenia } from "../domain/Resenia.js";
 import { Rol } from "../domain/Rol.js";
 import { relojSistema } from "../config/reloj.js";
 import { paginar } from "./paginacion.js";
-import { MENSAJE_CATEGORIA_INEXISTENTE, MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
+import {
+  MENSAJE_CATEGORIA_INEXISTENTE,
+  MENSAJE_DIRECCION_INEXISTENTE,
+  MENSAJE_EVENTO_INEXISTENTE,
+} from "../errors/mensajes.js";
 
 const CRITERIOS = {
   fecha: (evento) => evento.fecha.getTime(),
@@ -53,6 +61,7 @@ export class EventoService {
     usuarioRepository,
     categoriaRepository,
     compraRepository,
+    geocodificador = new GeorefGeocodificador(),
     reloj = relojSistema,
   }) {
     this.eventoRepository = eventoRepository;
@@ -60,6 +69,7 @@ export class EventoService {
     this.usuarioRepository = usuarioRepository;
     this.categoriaRepository = categoriaRepository;
     this.compraRepository = compraRepository;
+    this.geocodificador = geocodificador;
     this.reloj = reloj;
   }
 
@@ -96,11 +106,25 @@ export class EventoService {
     if (!categoria) throw errorDeCampo("categoriaId", MENSAJE_CATEGORIA_INEXISTENTE);
     const organizador = await this.usuarioRepository.findById(usuario.id);
     const evento = Evento.crear({ ...datos, categoria, organizador }, this.reloj.ahora());
+    evento.ubicarEn(await this.geocodificar(evento.direccion));
     await this.eventoRepository.save(evento);
     return this.toDetalle(evento, {
       puntajePromedio: await this.puntajeDe(organizador.id),
       esFavorito: false,
     });
+  }
+
+  async geocodificar(direccion) {
+    let ubicacion;
+    try {
+      ubicacion = await this.geocodificador.ubicar(direccion);
+    } catch (error) {
+      if (!(error instanceof GeocodificadorNoDisponible)) throw error;
+      console.warn(`Evento sin ubicación: ${error.message}`);
+      return null;
+    }
+    if (!ubicacion) throw errorDeCampo("direccion", MENSAJE_DIRECCION_INEXISTENTE);
+    return ubicacion;
   }
 
   async listarDelOrganizador(usuario, paginacion) {
@@ -156,6 +180,8 @@ export class EventoService {
     return {
       ...this.toResumen(evento, extras),
       descripcion: evento.descripcion,
+      direccion: evento.direccion,
+      ubicacion: evento.ubicacion,
       multimedia: [...evento.multimedia],
       tiposEntrada: evento.tiposEntrada.map((tipo) => ({
         id: tipo.id,

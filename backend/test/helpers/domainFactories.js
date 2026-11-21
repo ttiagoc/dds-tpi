@@ -50,6 +50,8 @@ export function datosEvento(overrides = {}) {
     categoria: crearCategoria(),
     fecha: enDias(12),
     lugar: "Estadio River Plate",
+    direccion: "Av. Figueroa Alcorta 7597, CABA, Buenos Aires",
+    ubicacion: { latitud: -34.5453, longitud: -58.4498 },
     tiposEntrada: [
       { id: 1, nombre: "Campo", precio: 45000, cupo: 10 },
       { id: 2, nombre: "Platea", precio: 80000, cupo: 5 },
@@ -77,6 +79,7 @@ export function bodyEvento(overrides = {}) {
     categoriaId: 6,
     fecha: enDias(20).toISOString(),
     lugar: "Ciudad Cultural Konex",
+    direccion: "Sarmiento 3131, CABA, Buenos Aires",
     multimedia: ["https://img/standup.jpg"],
     tiposEntrada: [
       tipoEntradaBody({ descripcion: "De pie" }),
@@ -128,3 +131,9 @@ export function crearResenia({
     fecha,
   });
 }
+
+export const UBICACION_DE_PRUEBA = { latitud: -34.6034, longitud: -58.4115 };
+
+export const geocodificadorFijo = (ubicacion = UBICACION_DE_PRUEBA) => ({
+  ubicar: async () => ubicacion,
+});

@@ -1,6 +1,7 @@
 export const MENSAJE_SIN_PERMISO = "No tenés permiso para realizar esta acción";
 export const MENSAJE_EVENTO_INEXISTENTE = "No existe el evento";
 export const MENSAJE_CATEGORIA_INEXISTENTE = "La categoría no existe";
+export const MENSAJE_DIRECCION_INEXISTENTE = "No encontramos esa dirección";
 export const MENSAJE_COMPRA_INEXISTENTE = "No existe la compra";
 export const MENSAJE_ORGANIZADOR_INEXISTENTE = "No existe el organizador";
 export const MENSAJE_COMPRA_RESENIADA = "Ya reseñaste esta compra";

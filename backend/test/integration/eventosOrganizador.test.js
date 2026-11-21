@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach } from "@jest/globals";
 import request from "supertest";
 import { crearAppDePrueba, loginComo, conToken } from "../helpers/appDePrueba.js";
-import { enDias, bodyEvento, tipoEntradaBody } from "../helpers/domainFactories.js";
+import {
+  enDias,
+  bodyEvento,
+  tipoEntradaBody,
+  UBICACION_DE_PRUEBA,
+  geocodificadorFijo,
+} from "../helpers/domainFactories.js";
 
 const FENIX = "fenix@aiticket.com";
 const ANA = "ana@aiticket.com";
@@ -66,6 +72,30 @@ describe("POST /eventos", () => {
     const res = await crear(sinMultimedia, await loginComo(app, FENIX));
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ multimedia: [], imagen: null });
+  });
+
+  it("guarda la dirección y la ubicación que devuelve el geocodificador", async () => {
+    const res = await crear(body(), await loginComo(app, FENIX));
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({
+      direccion: "Sarmiento 3131, CABA, Buenos Aires",
+      ubicacion: UBICACION_DE_PRUEBA,
+    });
+  });
+
+  it("si el geocodificador no encuentra la dirección responde 422 con details", async () => {
+    ({ app } = await crearAppDePrueba({ geocodificador: geocodificadorFijo(null) }));
+    const res = await crear(body(), await loginComo(app, FENIX));
+    expect(res.status).toBe(422);
+    expect(res.body.details).toEqual([
+      { campo: "direccion", mensaje: "No encontramos esa dirección" },
+    ]);
+  });
+
+  it("sin dirección responde 400", async () => {
+    const res = await crear(body({ direccion: undefined }), await loginComo(app, FENIX));
+    expect(res.status).toBe(400);
+    expect(res.body.details.map((d) => d.campo)).toEqual(["direccion"]);
   });
 
   it("crea el evento con la ruta que devuelve POST /imagenes", async () => {
