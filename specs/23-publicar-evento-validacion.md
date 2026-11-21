@@ -1,6 +1,6 @@
 ﻿# Spec 23 — Publicar evento: validación en el front y en el back
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `fix/publicar-evento`
 - **Casos de uso:** CU4 (ver `planes/00-indice.md`)
 - **Iteración:** It5c (ajustes tras la prueba en Expo Go)

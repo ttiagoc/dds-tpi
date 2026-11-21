@@ -1,17 +1,42 @@
 import { StyleSheet, View } from "react-native";
 import { TarjetaPlana } from "../../components/TarjetaPlana";
-import { Button, IconButton, Text, TextInput, useTheme } from "react-native-paper";
+import { Button, IconButton, Text, TextInput } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
+import { claveDeTipo } from "./armarEvento";
+import { ErrorCampo } from "./ErrorCampo";
 
 const CAMPOS = [
   { campo: "nombre", etiqueta: "Nombre" },
-  { campo: "precio", etiqueta: "Precio", teclado: "numeric" },
-  { campo: "cupo", etiqueta: "Cupo", teclado: "numeric" },
+  { campo: "precio", etiqueta: "Precio", teclado: "decimal-pad" },
+  { campo: "cupo", etiqueta: "Cupo", teclado: "number-pad" },
   { campo: "descripcion", etiqueta: "Descripción (opcional)" },
 ];
 
-function Tipo({ tipo, indice, puedeQuitar, deshabilitado, onCambiar, onQuitar }) {
-  const { colors } = useTheme();
+function CampoTipo({ definicion, tipo, indice, formulario, deshabilitado, foco }) {
+  const { campo, etiqueta, teclado } = definicion;
+  const clave = claveDeTipo(indice, campo);
+  const error = formulario.errores[clave];
+  const testID = `tipo-${indice}-${campo}`;
+  return (
+    <View>
+      <TextInput
+        ref={foco.registrarEntrada(clave)}
+        mode="outlined"
+        label={etiqueta}
+        value={tipo[campo]}
+        keyboardType={teclado ?? "default"}
+        disabled={deshabilitado}
+        error={!!error}
+        accessibilityHint={error}
+        onChangeText={(valor) => formulario.cambiarTipo(indice, campo, valor)}
+        testID={testID}
+      />
+      <ErrorCampo mensaje={error} testID={`${testID}-error`} />
+    </View>
+  );
+}
+
+function Tipo({ tipo, indice, puedeQuitar, deshabilitado, formulario, foco }) {
   return (
     <TarjetaPlana style={estilos.tipo} testID={`tipo-${indice}`}>
       <View style={estilos.encabezado}>
@@ -20,29 +45,28 @@ function Tipo({ tipo, indice, puedeQuitar, deshabilitado, onCambiar, onQuitar })
           <IconButton
             icon="close"
             disabled={deshabilitado}
-            onPress={() => onQuitar(indice)}
+            onPress={() => formulario.quitarTipo(indice)}
             testID={`tipo-${indice}-quitar`}
             accessibilityLabel={`Quitar tipo ${indice + 1}`}
           />
         )}
       </View>
-      {CAMPOS.map(({ campo, etiqueta, teclado }) => (
-        <TextInput
-          key={campo}
-          mode="outlined"
-          label={etiqueta}
-          value={tipo[campo]}
-          keyboardType={teclado ?? "default"}
-          disabled={deshabilitado}
-          onChangeText={(valor) => onCambiar(indice, campo, valor)}
-          testID={`tipo-${indice}-${campo}`}
+      {CAMPOS.map((definicion) => (
+        <CampoTipo
+          key={definicion.campo}
+          definicion={definicion}
+          tipo={tipo}
+          indice={indice}
+          formulario={formulario}
+          deshabilitado={deshabilitado}
+          foco={foco}
         />
       ))}
     </TarjetaPlana>
   );
 }
 
-export function TiposDeEntrada({ formulario, deshabilitado }) {
+export function TiposDeEntrada({ formulario, deshabilitado, foco }) {
   const { tipos } = formulario.valores;
   return (
     <View style={estilos.lista}>
@@ -54,8 +78,8 @@ export function TiposDeEntrada({ formulario, deshabilitado }) {
           indice={indice}
           puedeQuitar={tipos.length > 1}
           deshabilitado={deshabilitado}
-          onCambiar={formulario.cambiarTipo}
-          onQuitar={formulario.quitarTipo}
+          formulario={formulario}
+          foco={foco}
         />
       ))}
       <Button

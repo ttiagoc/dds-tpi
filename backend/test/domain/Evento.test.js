@@ -117,6 +117,13 @@ describe("Evento", () => {
       );
     });
 
+    it("el error de fecha pasada indica el campo fecha", () => {
+      const mensaje = "La fecha del evento tiene que ser futura";
+      expect(() => Evento.crear(datosEvento({ fecha: enDias(-1) }), AHORA)).toThrow(
+        expect.objectContaining({ statusCode: 422, details: [{ campo: "fecha", mensaje }] }),
+      );
+    });
+
     it("rechaza un evento nuevo con entradas vendidas", () => {
       const tiposEntrada = [{ nombre: "Campo", precio: 1, cupo: 5, vendidas: 1 }];
       expect(() => Evento.crear(datosEvento({ tiposEntrada }), AHORA)).toThrow(

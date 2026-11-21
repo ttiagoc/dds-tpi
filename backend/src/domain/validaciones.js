@@ -4,6 +4,13 @@ export function exigir(condicion, mensaje) {
   if (!condicion) throw new UnprocessableEntityError(mensaje);
 }
 
+export const errorDeCampo = (campo, mensaje) =>
+  new UnprocessableEntityError(mensaje, [{ campo, mensaje }]);
+
+export function exigirCampo(condicion, campo, mensaje) {
+  if (!condicion) throw errorDeCampo(campo, mensaje);
+}
+
 export const esTextoNoVacio = (valor) => typeof valor === "string" && valor.trim().length > 0;
 
 export const esEnteroPositivo = (valor) => Number.isInteger(valor) && valor >= 1;

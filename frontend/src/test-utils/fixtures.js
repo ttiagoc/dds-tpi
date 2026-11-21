@@ -62,8 +62,8 @@ export function reseniasDe(resenias, organizador = {}) {
   };
 }
 
-export function errorHttp(status, message) {
-  return new AxiosError("x", "ERR", {}, null, { status, data: { message } });
+export function errorHttp(status, message, details) {
+  return new AxiosError("x", "ERR", {}, null, { status, data: { message, details } });
 }
 
 export function promesaManual() {

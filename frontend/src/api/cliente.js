@@ -36,6 +36,8 @@ cliente.interceptors.response.use(
 
 export const codigoDeError = (error) => error?.response?.status ?? null;
 
+export const detallesDeError = (error) => error?.response?.data?.details ?? [];
+
 export function mensajeDeError(error) {
   return error?.response?.data?.message ?? MENSAJE_SIN_CONEXION;
 }

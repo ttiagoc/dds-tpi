@@ -68,6 +68,22 @@ describe("POST /eventos", () => {
     expect(res.body).toMatchObject({ multimedia: [], imagen: null });
   });
 
+  it("crea el evento con la ruta que devuelve POST /imagenes", async () => {
+    const imagen = "/imagenes/subidas/3f2a.jpg";
+    const res = await crear(body({ multimedia: [imagen] }), await loginComo(app, FENIX));
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ multimedia: [imagen], imagen });
+  });
+
+  it.each([
+    ["fecha", { fecha: enDias(-1).toISOString() }, "La fecha del evento tiene que ser futura"],
+    ["categoriaId", { categoriaId: 999 }, "La categoría no existe"],
+  ])("el 422 de %s trae details con el campo", async (campo, overrides, mensaje) => {
+    const res = await crear(body(overrides), await loginComo(app, FENIX));
+    expect(res.status).toBe(422);
+    expect(res.body.details).toEqual([{ campo, mensaje }]);
+  });
+
   it.each([
     ["sin tiposEntrada", { tiposEntrada: undefined }],
     ["con 11 tipos", { tiposEntrada: tipos(11) }],

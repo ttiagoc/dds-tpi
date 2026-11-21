@@ -1,4 +1,6 @@
+import { AccessibilityInfo } from "react-native";
 import { act, fireEvent, screen } from "@testing-library/react-native";
+import { ultimasProps } from "react-native-paper-dates";
 import { router } from "expo-router";
 import CrearEvento from "./CrearEvento";
 import { crearEvento } from "../../api/eventosApi";
@@ -22,7 +24,7 @@ async function abrir() {
   await screen.findByTestId("evento-categoria");
 }
 
-async function completar() {
+async function completar({ sinHora = false } = {}) {
   await escribir("evento-nombre", "  Stand-up en el Konex ");
   await escribir("evento-descripcion", "Noche de humor");
   await escribir("evento-lugar", "Ciudad Cultural Konex");
@@ -30,8 +32,10 @@ async function completar() {
   await fireEvent.press(await screen.findByTestId("categoria-6"));
   await fireEvent.press(screen.getByTestId("evento-fecha"));
   await fireEvent.press(screen.getByTestId("modal-fecha-ok"));
-  await fireEvent.press(screen.getByTestId("evento-hora"));
-  await fireEvent.press(screen.getByTestId("modal-hora-ok"));
+  if (!sinHora) {
+    await fireEvent.press(screen.getByTestId("evento-hora"));
+    await fireEvent.press(screen.getByTestId("modal-hora-ok"));
+  }
   await escribir("tipo-0-nombre", "General");
   await escribir("tipo-0-precio", "15000");
   await escribir("tipo-0-cupo", "200");
@@ -44,11 +48,18 @@ beforeEach(() => {
 });
 
 describe("CrearEvento: formulario", () => {
-  it("arranca con un tipo vacío, sin Quitar y con Publicar deshabilitado", async () => {
+  it("arranca con un tipo vacío, sin Quitar y con Publicar habilitado", async () => {
     await abrir();
     expect(screen.getByTestId("tipo-0-nombre")).toBeTruthy();
     expect(screen.queryByTestId("tipo-0-quitar")).toBeNull();
-    expect(publicar()).toBeDisabled();
+    expect(publicar()).toBeEnabled();
+  });
+
+  it("el calendario no deja elegir días anteriores a hoy", async () => {
+    await abrir();
+    const { startDate } = ultimasProps["modal-fecha-ok"].validRange;
+    const hoy = new Date();
+    expect(startDate).toEqual(new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()));
   });
 
   it("muestra la categoría, el día y la hora elegidos", async () => {
@@ -59,15 +70,6 @@ describe("CrearEvento: formulario", () => {
     expect(screen.getByTestId("evento-hora")).toHaveTextContent(/22:00/);
   });
 
-  it("Publicar se habilita recién con el cupo del tipo", async () => {
-    await abrir();
-    await completar();
-    await escribir("tipo-0-cupo", "");
-    expect(publicar()).toBeDisabled();
-    await escribir("tipo-0-cupo", "200");
-    expect(publicar()).toBeEnabled();
-  });
-
   it("agrega tipos y quita cualquiera menos el último", async () => {
     await abrir();
     await fireEvent.press(screen.getByTestId("tipo-agregar"));
@@ -76,6 +78,74 @@ describe("CrearEvento: formulario", () => {
     await fireEvent.press(screen.getByTestId("tipo-0-quitar"));
     expect(screen.getByTestId("tipo-0-nombre")).toHaveProp("value", "Platea");
     expect(screen.queryByTestId("tipo-0-quitar")).toBeNull();
+  });
+});
+
+describe("CrearEvento: validación al publicar", () => {
+  it("vacío marca los errores, no llama a la API, anuncia y enfoca el nombre", async () => {
+    const anunciar = jest.spyOn(AccessibilityInfo, "announceForAccessibility");
+    await abrir();
+    await fireEvent.press(publicar());
+    expect(crearEvento).not.toHaveBeenCalled();
+    expect(screen.getByTestId("evento-nombre-error")).toHaveTextContent(
+      "El nombre tiene que tener entre 3 y 100 caracteres",
+    );
+    expect(screen.getByTestId("evento-categoria-error")).toHaveTextContent("Elegí una categoría");
+    expect(screen.getByTestId("evento-hora-error")).toHaveTextContent("Elegí la hora");
+    expect(screen.getByTestId("tipo-0-cupo-error")).toBeTruthy();
+    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá los 9 campos marcados");
+    expect(anunciar).toHaveBeenCalledWith("Revisá los 9 campos marcados");
+    expect(screen.getByTestId("evento-nombre")).toHaveProp("accessibilityHint", expect.any(String));
+  });
+
+  it("si solo falta la hora, marca solo la hora", async () => {
+    await abrir();
+    await completar({ sinHora: true });
+    await fireEvent.press(publicar());
+    expect(crearEvento).not.toHaveBeenCalled();
+    expect(screen.getByTestId("evento-hora-error")).toHaveTextContent("Elegí la hora");
+    expect(screen.queryByTestId("evento-nombre-error")).toBeNull();
+    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá el campo marcado");
+  });
+
+  it("el error de un campo se borra al editarlo", async () => {
+    await abrir();
+    await fireEvent.press(publicar());
+    await escribir("evento-nombre", "Recital");
+    expect(screen.queryByTestId("evento-nombre-error")).toBeNull();
+    expect(screen.getByTestId("evento-descripcion-error")).toBeTruthy();
+  });
+
+  it("con un cupo inválido marca ese campo", async () => {
+    await abrir();
+    await completar();
+    await escribir("tipo-0-cupo", "1.5");
+    await fireEvent.press(publicar());
+    expect(crearEvento).not.toHaveBeenCalled();
+    expect(screen.getByTestId("tipo-0-cupo-error")).toHaveTextContent(
+      "El cupo tiene que ser un número entero mayor a 0",
+    );
+    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá el campo marcado");
+  });
+
+  it("los details del back se muestran en su campo y en el aviso", async () => {
+    const mensaje = "La fecha del evento tiene que ser futura";
+    crearEvento.mockRejectedValueOnce(errorHttp(422, mensaje, [{ campo: "fecha", mensaje }]));
+    await abrir();
+    await completar();
+    await fireEvent.press(publicar());
+    expect(await screen.findByTestId("evento-fecha-error")).toHaveTextContent(mensaje);
+    expect(screen.getByTestId("evento-aviso-error")).toHaveTextContent(mensaje);
+  });
+
+  it("un 400 con details de un tipo marca ese campo", async () => {
+    crearEvento.mockRejectedValueOnce(
+      errorHttp(400, "Datos inválidos", [{ campo: "tiposEntrada.0.precio", mensaje: "Muy caro" }]),
+    );
+    await abrir();
+    await completar();
+    await fireEvent.press(publicar());
+    expect(await screen.findByTestId("tipo-0-precio-error")).toHaveTextContent("Muy caro");
   });
 });
 
