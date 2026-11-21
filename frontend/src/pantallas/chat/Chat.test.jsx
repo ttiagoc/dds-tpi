@@ -108,12 +108,20 @@ describe("Chat: conversación", () => {
   });
 });
 
-describe("Chat: diseño en iOS", () => {
-  it("el evento va dentro de la lista, que arranca debajo del encabezado", async () => {
+describe("Chat: diseño", () => {
+  it("el encabezado queda fijo fuera de la lista y la lista está invertida", async () => {
     await abrir();
     const lista = screen.getByTestId("lista-mensajes");
-    expect(lista.props.contentInsetAdjustmentBehavior).toBe("automatic");
-    expect(within(lista).getByText("Los Piojos en River")).toBeTruthy();
+    expect(within(lista).queryByTestId("chat-encabezado")).toBeNull();
+    expect(screen.getByTestId("chat-encabezado")).toHaveTextContent(/Los Piojos en River/);
+    expect(lista.props.inverted).toBe(true);
+  });
+
+  it("arriba de todo va el separador de día y abajo el último mensaje", async () => {
+    await abrir();
+    const claves = screen.getByTestId("lista-mensajes").props.data.map((item) => item.clave);
+    expect(claves.at(0)).toBe("mensaje-2");
+    expect(claves.at(-1)).toMatch(/^dia-/);
   });
 });
 
@@ -156,15 +164,26 @@ describe("Chat: mensajes anteriores", () => {
     expect(screen.queryByTestId("chat-ver-anteriores")).toBeNull();
   });
 
-  it("con más mensajes los trae arriba y el botón desaparece", async () => {
+  it.each([
+    [
+      "tocando Ver mensajes anteriores",
+      () => fireEvent.press(screen.getByTestId("chat-ver-anteriores")),
+    ],
+    [
+      "al llegar arriba de la lista",
+      () => fireEvent(screen.getByTestId("lista-mensajes"), "endReached"),
+    ],
+  ])("%s trae los anteriores una sola vez", async (_caso, pedirAnteriores) => {
     listarMensajes
       .mockResolvedValueOnce(paginaDeMensajes([PREGUNTA, RESPUESTA], true))
       .mockResolvedValueOnce(paginaDeMensajes([mensaje({ id: 0, mensaje: "Viejo" })]));
     await abrir();
-    await fireEvent.press(screen.getByTestId("chat-ver-anteriores"));
+    await pedirAnteriores();
     expect(await screen.findByTestId("mensaje-0")).toHaveTextContent(/Viejo/);
     expect(listarMensajes).toHaveBeenLastCalledWith(7, { antesDe: 1 });
     expect(screen.queryByTestId("chat-ver-anteriores")).toBeNull();
+    await fireEvent(screen.getByTestId("lista-mensajes"), "endReached");
+    expect(listarMensajes).toHaveBeenCalledTimes(2);
   });
 
   it("si falla muestra el error del back", async () => {

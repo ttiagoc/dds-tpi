@@ -77,7 +77,7 @@ Specs 23-28, ADR-014. Hallazgos de la prueba en el celular.
 - [x] `fix/teclado-formularios` (spec 24): `Pantalla` sube con el teclado, `CampoNumero` con "Listo".
 - [x] `feature/selector-categoria` (spec 25): `GET /categorias` paginado con `q`, buscador en Nuevo evento.
 - [x] `feature/chips-y-listas` (spec 26): chevron en los chips, espacio en Mis entradas, Explorar de a 6.
-- [ ] `fix/chat-encabezado-fijo` (spec 27): encabezado fijo, lista invertida, anteriores al subir.
+- [x] `fix/chat-encabezado-fijo` (spec 27): encabezado fijo, lista invertida, anteriores al subir.
 - [ ] `feature/como-llegar` (spec 28, ADR-014): dirección geocodificada con Georef y botón "Cómo llegar".
 
 ## It6 — Entrega (29/11-1/12)

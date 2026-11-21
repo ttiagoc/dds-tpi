@@ -103,6 +103,36 @@ describe("useChatCompra: mensajes anteriores", () => {
     expect(result.current.hayAnteriores).toBe(false);
   });
 
+  it("al llegar arriba pide los anteriores una sola vez aunque se dispare dos veces", async () => {
+    let resolver;
+    listarMensajes.mockReturnValueOnce(new Promise((listo) => (resolver = listo)));
+    const { result } = await montar();
+    await act(async () => {
+      result.current.alLlegarArriba();
+      result.current.alLlegarArriba();
+    });
+    await act(async () => resolver(paginaDeMensajes([VIEJO])));
+    expect(listarMensajes).toHaveBeenCalledTimes(2);
+    expect(ids(result)).toEqual([0, 1, 2]);
+  });
+
+  it("al llegar arriba sin más mensajes no pide nada", async () => {
+    listarMensajes.mockResolvedValueOnce(paginaDeMensajes([VIEJO]));
+    const { result } = await montar();
+    await act(async () => result.current.cargarAnteriores());
+    await act(async () => result.current.alLlegarArriba());
+    expect(listarMensajes).toHaveBeenCalledTimes(2);
+  });
+
+  it("después de un error, llegar arriba no reintenta solo", async () => {
+    listarMensajes.mockRejectedValueOnce(errorHttp(500, "Se rompió"));
+    const { result } = await montar();
+    await act(async () => result.current.alLlegarArriba());
+    await act(async () => result.current.alLlegarArriba());
+    expect(listarMensajes).toHaveBeenCalledTimes(2);
+    expect(result.current.errorAnteriores).toBe("Se rompió");
+  });
+
   it("si falla expone el error y no cambia la lista", async () => {
     listarMensajes.mockRejectedValueOnce(errorHttp(500, "Se rompió"));
     const { result } = await montar();

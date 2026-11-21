@@ -37,16 +37,20 @@ const conAnteriores = (anteriores) => (previo) => ({
 function useAnteriores(compraId, historial, setHistorial) {
   const { enCurso, error, enviar } = useEnvio();
   const masViejo = Math.min(...historial.cargados.map((m) => m.id));
+  const cargarAnteriores = () =>
+    enviar(
+      "anteriores",
+      () => listarMensajes(compraId, { antesDe: masViejo }),
+      (anteriores) => setHistorial(conAnteriores(anteriores)),
+    );
   return {
     hayAnteriores: historial.hayAnteriores,
     cargandoAnteriores: enCurso !== null,
     errorAnteriores: error,
-    cargarAnteriores: () =>
-      enviar(
-        "anteriores",
-        () => listarMensajes(compraId, { antesDe: masViejo }),
-        (anteriores) => setHistorial(conAnteriores(anteriores)),
-      ),
+    cargarAnteriores,
+    alLlegarArriba: () => {
+      if (historial.hayAnteriores && !error) cargarAnteriores();
+    },
   };
 }
 

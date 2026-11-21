@@ -16,3 +16,6 @@ export function conSeparadores(mensajes, opciones = {}) {
   }
   return items;
 }
+
+export const paraListaInvertida = (mensajes, opciones) =>
+  conSeparadores(mensajes, opciones).reverse();

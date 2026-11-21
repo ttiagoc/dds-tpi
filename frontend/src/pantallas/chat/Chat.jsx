@@ -1,6 +1,5 @@
-import { useRef } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
-import { Button, HelperText, Icon, Text, useTheme } from "react-native-paper";
+import { ActivityIndicator, Button, HelperText, Icon, Text, useTheme } from "react-native-paper";
 import { useAuth } from "../../auth/AuthContext";
 import { Cargando } from "../../components/Cargando";
 import { ConCompra } from "../../components/ConCompra";
@@ -8,7 +7,7 @@ import { ErrorCarga } from "../../components/ErrorCarga";
 import { Pantalla } from "../../components/Pantalla";
 import { espaciado, radios } from "../../tema/espaciado";
 import { Burbuja } from "./Burbuja";
-import { conSeparadores } from "./conSeparadores";
+import { paraListaInvertida } from "./conSeparadores";
 import { EncabezadoChat } from "./EncabezadoChat";
 import { Redactor } from "./Redactor";
 import { useChatCompra } from "./useChatCompra";
@@ -34,18 +33,33 @@ function SinConexion({ onActualizar }) {
   );
 }
 
+function Encabezado({ compra, chat }) {
+  return (
+    <View style={estilos.encabezado}>
+      <EncabezadoChat compra={compra} />
+      {!chat.conectado && <SinConexion onActualizar={chat.recargar} />}
+      {chat.cargado && chat.error && (
+        <HelperText type="error" visible testID="chat-carga-error">
+          {chat.error}
+        </HelperText>
+      )}
+    </View>
+  );
+}
+
 function VerAnteriores({ chat }) {
   if (!chat.hayAnteriores) return null;
+  if (chat.cargandoAnteriores)
+    return (
+      <ActivityIndicator
+        style={estilos.anteriores}
+        accessibilityLabel="Cargando mensajes anteriores"
+        testID="chat-cargando-anteriores"
+      />
+    );
   return (
     <View style={estilos.anteriores}>
-      <Button
-        mode="text"
-        compact
-        onPress={chat.cargarAnteriores}
-        loading={chat.cargandoAnteriores}
-        disabled={chat.cargandoAnteriores}
-        testID="chat-ver-anteriores"
-      >
+      <Button mode="text" compact onPress={chat.cargarAnteriores} testID="chat-ver-anteriores">
         Ver mensajes anteriores
       </Button>
       {chat.errorAnteriores && (
@@ -54,29 +68,6 @@ function VerAnteriores({ chat }) {
         </HelperText>
       )}
     </View>
-  );
-}
-
-function CabeceraDeMensajes({ encabezado, chat }) {
-  return (
-    <>
-      {encabezado}
-      {chat.error && (
-        <HelperText type="error" visible testID="chat-carga-error">
-          {chat.error}
-        </HelperText>
-      )}
-      <VerAnteriores chat={chat} />
-    </>
-  );
-}
-
-function SinMensajesCargados({ chat, encabezado }) {
-  return (
-    <>
-      {encabezado}
-      {chat.error ? <ErrorCarga mensaje={chat.error} onReintentar={chat.recargar} /> : <Cargando />}
-    </>
   );
 }
 
@@ -93,17 +84,27 @@ function SeparadorDia({ dia }) {
   );
 }
 
-function Mensajes({ chat, encabezado }) {
+function SinMensajes({ chat }) {
+  if (!chat.cargado)
+    return chat.error ? (
+      <ErrorCarga mensaje={chat.error} onReintentar={chat.recargar} />
+    ) : (
+      <Cargando />
+    );
+  return (
+    <Text variant="bodyMedium" style={estilos.vacio} testID="chat-vacio">
+      Todavía no hay mensajes
+    </Text>
+  );
+}
+
+function Mensajes({ chat }) {
   const { usuario } = useAuth();
-  const lista = useRef(null);
-  if (!chat.cargado) return <SinMensajesCargados chat={chat} encabezado={encabezado} />;
+  if (!chat.cargado || chat.mensajes.length === 0) return <SinMensajes chat={chat} />;
   return (
     <FlatList
-      ref={lista}
-      ListHeaderComponent={<CabeceraDeMensajes encabezado={encabezado} chat={chat} />}
-      contentInsetAdjustmentBehavior="automatic"
-      keyboardDismissMode="interactive"
-      data={conSeparadores(chat.mensajes)}
+      inverted
+      data={paraListaInvertida(chat.mensajes)}
       keyExtractor={(item) => item.clave}
       renderItem={({ item }) =>
         item.dia ? (
@@ -112,13 +113,12 @@ function Mensajes({ chat, encabezado }) {
           <Burbuja mensaje={item.mensaje} propia={item.mensaje.usuario.id === usuario?.id} />
         )
       }
+      ListFooterComponent={<VerAnteriores chat={chat} />}
+      onEndReached={chat.alLlegarArriba}
+      onEndReachedThreshold={0.3}
+      keyboardDismissMode="interactive"
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={estilos.mensajes}
-      onContentSizeChange={() => lista.current?.scrollToEnd({ animated: true })}
-      ListEmptyComponent={
-        <Text variant="bodyMedium" style={estilos.vacio} testID="chat-vacio">
-          Todavía no hay mensajes
-        </Text>
-      }
       testID="lista-mensajes"
     />
   );
@@ -131,17 +131,10 @@ function Conversacion({ compra }) {
       style={estilos.pantalla}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Pantalla bordes={["bottom"]}>
+      <Pantalla bordes={["top", "bottom"]}>
+        <Encabezado compra={compra} chat={chat} />
         <View style={estilos.pantalla}>
-          <Mensajes
-            chat={chat}
-            encabezado={
-              <View style={estilos.encabezado}>
-                <EncabezadoChat compra={compra} />
-                {!chat.conectado && <SinConexion onActualizar={chat.recargar} />}
-              </View>
-            }
-          />
+          <Mensajes chat={chat} />
         </View>
         <Redactor chat={chat} />
       </Pantalla>
@@ -155,11 +148,11 @@ export default function Chat() {
 
 const estilos = StyleSheet.create({
   pantalla: { flex: 1 },
-  encabezado: { gap: espaciado.md, paddingBottom: espaciado.sm },
+  encabezado: { gap: espaciado.md },
   mensajes: { gap: espaciado.sm, paddingVertical: espaciado.sm },
   vacio: { textAlign: "center", paddingVertical: espaciado.xl },
   dia: { alignSelf: "center", paddingVertical: espaciado.xs },
-  anteriores: { alignItems: "center" },
+  anteriores: { alignItems: "center", paddingVertical: espaciado.xs },
   sinConexion: {
     flexDirection: "row",
     alignItems: "center",
