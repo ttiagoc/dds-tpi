@@ -2,6 +2,7 @@ import { render } from "@testing-library/react-native";
 import { PaperProvider } from "react-native-paper";
 import { AuthProvider } from "../auth/AuthContext";
 import { temaClaro } from "../tema/tema";
+import { PreferenciaTemaProvider } from "../tema/PreferenciaTemaContext";
 
 export const ANA = {
   id: 3,
@@ -22,9 +23,11 @@ export const FENIX = {
 export function Providers({ children, usuario = null, token = "token-de-prueba" }) {
   const sesionInicial = usuario ? { token, usuario } : null;
   return (
-    <PaperProvider theme={temaClaro}>
-      <AuthProvider sesionInicial={sesionInicial}>{children}</AuthProvider>
-    </PaperProvider>
+    <PreferenciaTemaProvider>
+      <PaperProvider theme={temaClaro}>
+        <AuthProvider sesionInicial={sesionInicial}>{children}</AuthProvider>
+      </PaperProvider>
+    </PreferenciaTemaProvider>
   );
 }
 

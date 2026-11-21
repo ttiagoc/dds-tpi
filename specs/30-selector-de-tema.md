@@ -1,6 +1,6 @@
 # Spec 30 — Elegir tema claro, oscuro o automático
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/selector-de-tema`
 - **Casos de uso:** — (preferencia de la app)
 - **Iteración:** It5c

@@ -5,16 +5,14 @@ import {
   Manrope_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/manrope";
-import { Stack, ThemeProvider } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { StatusBar } from "expo-status-bar";
-import { useColorScheme } from "react-native";
-import { PaperProvider } from "react-native-paper";
 import { AuthProvider, useAuth } from "../auth/AuthContext";
 import { Cargando } from "../components/Cargando";
 import { NoLeidosProvider } from "../mensajes/NoLeidosContext";
-import { temaClaro, temaOscuro, navegacionClara, navegacionOscura } from "../tema/tema";
+import { PreferenciaTemaProvider } from "../tema/PreferenciaTemaContext";
+import { TemaDeLaApp } from "../tema/TemaDeLaApp";
 
 function Navegacion() {
   const { usuario, cargando } = useAuth();
@@ -73,19 +71,17 @@ function useFuentes() {
 }
 
 export default function RootLayout() {
-  const oscuro = useColorScheme() === "dark";
   const fuentesListas = useFuentes();
   if (!fuentesListas) return null;
   return (
-    <PaperProvider theme={oscuro ? temaOscuro : temaClaro}>
-      <ThemeProvider value={oscuro ? navegacionOscura : navegacionClara}>
+    <PreferenciaTemaProvider>
+      <TemaDeLaApp>
         <AuthProvider>
           <NoLeidosProvider>
-            <StatusBar style="auto" />
             <Navegacion />
           </NoLeidosProvider>
         </AuthProvider>
-      </ThemeProvider>
-    </PaperProvider>
+      </TemaDeLaApp>
+    </PreferenciaTemaProvider>
   );
 }
