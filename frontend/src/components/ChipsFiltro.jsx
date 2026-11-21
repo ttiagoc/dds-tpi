@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { Chip, useTheme } from "react-native-paper";
 import { espaciado, radios } from "../tema/espaciado";
 
@@ -25,31 +25,29 @@ function ChipFiltro({ seleccionado, onPress, testID, children }) {
   );
 }
 
-export function ChipsFiltro({ opciones, seleccionada, onElegir, prefijoTestID }) {
+const TODAS = { valor: null, etiqueta: "Todas" };
+
+export function ChipsFiltro({ opciones, seleccionada, onElegir, prefijoTestID, alLlegarAlFinal }) {
   return (
-    <ScrollView
+    <FlatList
       horizontal
+      testID={`${prefijoTestID}-fila`}
+      data={[TODAS, ...opciones]}
+      keyExtractor={({ valor }) => String(valor)}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={estilos.fila}
-    >
-      <ChipFiltro
-        seleccionado={seleccionada == null}
-        onPress={() => onElegir(null)}
-        testID={`${prefijoTestID}-todas`}
-      >
-        Todas
-      </ChipFiltro>
-      {opciones.map(({ valor, etiqueta }) => (
+      onEndReached={alLlegarAlFinal}
+      onEndReachedThreshold={0.5}
+      renderItem={({ item: { valor, etiqueta } }) => (
         <ChipFiltro
-          key={valor}
-          seleccionado={seleccionada === valor}
-          onPress={() => onElegir(seleccionada === valor ? null : valor)}
-          testID={`${prefijoTestID}-${valor}`}
+          seleccionado={seleccionada === valor || (valor === null && seleccionada == null)}
+          onPress={() => onElegir(valor === null || seleccionada === valor ? null : valor)}
+          testID={`${prefijoTestID}-${valor === null ? "todas" : valor}`}
         >
           {etiqueta}
         </ChipFiltro>
-      ))}
-    </ScrollView>
+      )}
+    />
   );
 }
 

@@ -1,6 +1,6 @@
 ﻿# Spec 25 — Categoría con búsqueda y paginación
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/selector-categoria`
 - **Casos de uso:** CU3, CU4 (ver `planes/00-indice.md`)
 - **Iteración:** It5c

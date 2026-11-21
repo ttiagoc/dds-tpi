@@ -1,6 +1,7 @@
 import { NotFoundError } from "../errors/AppError.js";
 import { Rol } from "./Rol.js";
 import { TipoEntrada } from "./TipoEntrada.js";
+import { normalizar } from "./texto.js";
 import {
   exigir,
   exigirCampo,
@@ -9,8 +10,6 @@ import {
   textoRequerido,
   fechaValida,
 } from "./validaciones.js";
-
-const normalizar = (texto) => texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 function armarTipos(tiposEntrada) {
   exigir(

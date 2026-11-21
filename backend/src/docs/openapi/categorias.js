@@ -1,4 +1,4 @@
-import { ref, ok } from "./comun.js";
+import { error, limit, ok, page, paginado, query, ref } from "./comun.js";
 
 export default {
   tags: [{ name: "Categorías", description: "Categorías para filtrar eventos" }],
@@ -7,7 +7,17 @@ export default {
       get: {
         tags: ["Categorías"],
         summary: "Listar categorías",
-        responses: { 200: ok("Todas las categorías", { type: "array", items: ref("Categoria") }) },
+        description:
+          "Por nombre asc e id asc. `q` filtra por nombre sin distinguir mayúsculas ni acentos (spec 25).",
+        parameters: [
+          query("q", { type: "string", maxLength: 50 }, "Parte del nombre"),
+          page,
+          limit,
+        ],
+        responses: {
+          200: ok("Una página de categorías", paginado("categorias", ref("Categoria"))),
+          400: error("BadRequest"),
+        },
       },
     },
   },

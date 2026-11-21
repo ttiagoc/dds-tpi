@@ -201,3 +201,15 @@ export function conversacion() {
     nuevo: mensaje({ id: 3, mensaje: "¿Hay guardarropas?", enviado: "2026-11-02T10:00:00.000Z" }),
   };
 }
+
+export function paginaDeCategorias(categorias, { page = 1, totalPages = 1, total } = {}) {
+  return { categorias, total: total ?? categorias.length, page, totalPages };
+}
+
+export function dosPaginasDeCategorias(primera, segunda) {
+  const total = primera.length + segunda.length;
+  return [
+    paginaDeCategorias(primera, { totalPages: 2, total }),
+    paginaDeCategorias(segunda, { page: 2, totalPages: 2, total }),
+  ];
+}

@@ -63,8 +63,10 @@ describe("eventosApi", () => {
 
 describe("categorías, organizadores y favoritos", () => {
   it("listarCategorias", async () => {
-    expect(await listarCategorias()).toBe("respuesta");
-    expect(cliente.get).toHaveBeenCalledWith("/categorias");
+    expect(await listarCategorias({ q: "conf", page: 2, limit: 10 })).toBe("respuesta");
+    expect(cliente.get).toHaveBeenCalledWith("/categorias", {
+      params: { q: "conf", page: 2, limit: 10 },
+    });
   });
 
   it("obtenerReseniasDeOrganizador con paginado", async () => {
