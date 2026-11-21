@@ -1,5 +1,5 @@
 import { mensaje } from "../../test-utils/fixtures";
-import { conSeparadores } from "./conSeparadores";
+import { conSeparadores, paraListaInvertida } from "./conSeparadores";
 
 const ZONA = "America/Argentina/Buenos_Aires";
 const ahora = new Date("2026-11-19T15:00:00.000Z");
@@ -24,5 +24,16 @@ describe("conSeparadores", () => {
 
   it("sin mensajes no hay separadores", () => {
     expect(conSeparadores([])).toEqual([]);
+  });
+});
+
+describe("paraListaInvertida", () => {
+  it("da vuelta el orden para que el separador quede arriba de los mensajes de su día", () => {
+    const mensajes = [
+      mensaje({ id: 1, enviado: "2026-11-18T21:00:00.000Z" }),
+      mensaje({ id: 2, enviado: "2026-11-19T13:00:00.000Z" }),
+    ];
+    const claves = paraListaInvertida(mensajes, { ahora, zonaHoraria: ZONA }).map((i) => i.clave);
+    expect(claves).toEqual(["mensaje-2", "dia-2026-11-19", "mensaje-1", "dia-2026-11-18"]);
   });
 });

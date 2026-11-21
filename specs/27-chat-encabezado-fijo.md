@@ -1,6 +1,6 @@
 ﻿# Spec 27 — Chat con encabezado fijo y mensajes anteriores al scrollear
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `fix/chat-encabezado-fijo`
 - **Casos de uso:** CU5, CU6 (ver `planes/00-indice.md`)
 - **Iteración:** It5c
@@ -21,7 +21,8 @@ Sin cambios: `GET /compras/:id/mensajes?antesDe&limit` (30 por defecto).
 
 ## Pantallas
 **Chat**:
-- `EncabezadoChat` y el aviso "Sin conexión en vivo" (`chat-sin-conexion`) quedan **fuera** de la lista, fijos arriba. El redactor queda fijo abajo.
+- `EncabezadoChat` y el aviso "Sin conexión en vivo" (`chat-sin-conexion`) quedan **fuera** de la lista, fijos arriba. El redactor queda fijo abajo. `Pantalla` con `bordes={["top", "bottom"]}`: en iOS 26 el inset superior incluye el encabezado translúcido (spec 17), así que el encabezado fijo no queda tapado; donde el encabezado no es translúcido el inset es 0.
+- Sin mensajes se muestra el vacío fuera de la lista (una lista invertida dibuja su `ListEmptyComponent` dado vuelta).
 - `lista-mensajes` es una `FlatList` invertida: arranca mostrando el último mensaje, sin `scrollToEnd`, y un mensaje nuevo aparece abajo sin saltos. Los separadores de día se arman con el orden cronológico y después se invierten.
 - Al acercarse al tope (`onEndReached`, umbral 0.3) se pide la página anterior, solo si hay más y no hay otro pedido en curso. Mientras carga, un spinner arriba (`chat-cargando-anteriores`).
 - "Ver mensajes anteriores" (`chat-ver-anteriores`) queda como respaldo: aparece si hay más y es la vía para reintentar si falla (`chat-anteriores-error`).
