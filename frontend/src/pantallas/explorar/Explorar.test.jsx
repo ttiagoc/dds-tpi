@@ -77,7 +77,7 @@ describe("Explorar: carga y criterios", () => {
   it("carga la primera página ordenada por fecha más próxima", async () => {
     await abrir();
     expect(buscarEventos).toHaveBeenCalledTimes(1);
-    expect(ultimoPedido()).toEqual({ ordenarPor: "fecha", orden: "asc", page: 1, limit: 10 });
+    expect(ultimoPedido()).toEqual({ ordenarPor: "fecha", orden: "asc", page: 1, limit: 6 });
     expect(screen.getByText("Los Piojos en River")).toBeTruthy();
     expect(screen.getByTestId("orden-menu")).toHaveTextContent(/Fecha: más próximos/);
   });
@@ -143,7 +143,7 @@ describe("Explorar: paginado y refresco", () => {
     await abrir();
     await fireEvent.press(screen.getByTestId("cargar-mas"));
     await screen.findByTestId("tarjeta-evento-2");
-    expect(ultimoPedido()).toMatchObject({ page: 2 });
+    expect(ultimoPedido()).toMatchObject({ page: 2, limit: 6 });
     expect(screen.getByTestId("tarjeta-evento-1")).toBeTruthy();
     expect(screen.queryByTestId("cargar-mas")).toBeNull();
   });
@@ -242,7 +242,7 @@ describe("Explorar: vacío y error", () => {
     await fireEvent.press(screen.getByRole("button", { name: "Limpiar filtros" }));
     await esperar(400);
     expect(buscarEventos).toHaveBeenCalledTimes(1);
-    expect(ultimoPedido()).toEqual({ ordenarPor: "fecha", orden: "asc", page: 1, limit: 10 });
+    expect(ultimoPedido()).toEqual({ ordenarPor: "fecha", orden: "asc", page: 1, limit: 6 });
   });
 
   it("sin resultados y sin filtros no ofrece limpiar", async () => {

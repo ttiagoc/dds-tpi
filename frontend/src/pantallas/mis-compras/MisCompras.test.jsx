@@ -1,9 +1,11 @@
 import { screen, fireEvent, waitFor, act } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import MisCompras from "./MisCompras";
 import { listarMisCompras } from "../../api/comprasApi";
 import { renderConProviders, ANA } from "../../test-utils/renderConProviders";
 import { compraResumen, paginaDeCompras } from "../../test-utils/fixtures";
+import { espaciado } from "../../tema/espaciado";
 
 jest.mock("../../api/comprasApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
@@ -21,6 +23,15 @@ async function abrir() {
 beforeEach(() => {
   jest.clearAllMocks();
   listarMisCompras.mockResolvedValue(paginaDeCompras([CONFIRMADA, REEMBOLSADA]));
+});
+
+describe("MisCompras: encabezado", () => {
+  it("separa el título de los filtros", async () => {
+    await abrir();
+    const encabezado = screen.getByTestId("lista-compras-encabezado");
+    expect(StyleSheet.flatten(encabezado.props.style).gap).toBe(espaciado.md);
+    expect(screen.getByTestId("titulo-pestania")).toHaveTextContent("Mis entradas");
+  });
 });
 
 describe("MisCompras: lista y filtro", () => {

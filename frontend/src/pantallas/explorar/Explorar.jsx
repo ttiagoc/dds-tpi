@@ -16,6 +16,7 @@ import { ChipsCategorias } from "./ChipsCategorias";
 import { MenuOrden, OPCIONES_ORDEN } from "./MenuOrden";
 
 const DEMORA_BUSQUEDA = 300;
+export const EVENTOS_POR_PAGINA = 6;
 
 const pedirEventos = paginaDe(buscarEventos, "eventos");
 
@@ -105,7 +106,9 @@ function SinEventos({ filtros }) {
 
 export default function Explorar() {
   const filtros = useFiltros();
-  const lista = useListaPaginada(pedirEventos, filtros.criterio);
+  const lista = useListaPaginada(pedirEventos, filtros.criterio, {
+    porPagina: EVENTOS_POR_PAGINA,
+  });
   return (
     <Pantalla bordes={["top"]}>
       <ListaPaginada

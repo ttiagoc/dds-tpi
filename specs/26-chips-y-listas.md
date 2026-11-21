@@ -1,6 +1,6 @@
 ﻿# Spec 26 — Chips de filtro que se ven deslizables, y listas
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/chips-y-listas`
 - **Casos de uso:** CU1, CU2, CU3 (ver `planes/00-indice.md`)
 - **Iteración:** It5c
@@ -19,7 +19,7 @@ Ninguna.
 Sin cambios. Explorar manda `limit=6` a `GET /eventos`.
 
 ## Pantallas
-- **`ChipsFiltro`** (todas las filas de chips): mide el ancho visible y el del contenido. Si queda contenido a la derecha, muestra al final un degradado con el color del fondo y un botón con chevron (`<prefijo>-mas`, `accessibilityLabel="Ver más filtros"`) que desplaza la fila. Al llegar al final, se oculta. Si todo entra, no se muestra.
+- **`ChipsFiltro`** (todas las filas de chips): mide el ancho visible y el del contenido. Si queda contenido a la derecha, muestra al final, sobre la fila, un botón redondo con chevron (superficie y borde, sin degradado para no sumar `expo-linear-gradient`) (`<prefijo>-mas`, `accessibilityLabel="Ver más filtros"`) que desplaza la fila. Al llegar al final, se oculta. Si todo entra, no se muestra.
 - **Mis entradas**: el título y los chips quedan separados por `espaciado.md`. Se ajusta el encabezado que arma `ListaDeCompras`, así Compras del evento queda igual.
 - **Explorar**: 6 eventos por página. `useListaPaginada(pedir, criterio, { porPagina })` mantiene 10 por defecto para el resto de las pantallas.
 
@@ -51,4 +51,4 @@ Escenario: Explorar pagina de a 6
 - Cambiar la paginación de otras pantallas.
 
 ## Notas de IA
-La IA propuso un degradado más un chevron tocable (no solo decorativo), para que también sirva con lector de pantalla.
+La IA propuso un degradado más un chevron tocable (no solo decorativo), para que también sirva con lector de pantalla. Al implementar quedó solo el botón: el degradado pedía una dependencia nueva.

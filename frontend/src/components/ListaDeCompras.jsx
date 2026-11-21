@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import { useTheme } from "react-native-paper";
 import { EstadoVacio } from "./EstadoVacio";
@@ -7,6 +8,7 @@ import { ListaPaginada } from "./ListaPaginada";
 import { TarjetaCompra } from "./TarjetaCompra";
 import { useListaPaginada } from "../hooks/useListaPaginada";
 import { useRecargarAlVolver } from "../hooks/useRecargarAlVolver";
+import { espaciado } from "../tema/espaciado";
 
 function SinCompras({ estado, textoFiltrada, sinFiltro, onVerTodas, testID }) {
   const { estados } = useTheme();
@@ -46,8 +48,14 @@ export function ListaDeCompras({
           onPress={() => router.push(`/compras/${compra.id}`)}
         />
       )}
-      encabezado={encabezado({ extra: lista.extra, filtro })}
+      encabezado={
+        <View style={estilos.encabezado} testID={`${testID}-encabezado`}>
+          {encabezado({ extra: lista.extra, filtro })}
+        </View>
+      }
       vacio={<SinCompras estado={estado} onVerTodas={() => setEstado(null)} {...vacio} />}
     />
   );
 }
+
+const estilos = StyleSheet.create({ encabezado: { gap: espaciado.md } });

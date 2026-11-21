@@ -19,10 +19,10 @@ export const paginaDe = (listar, campo) => (criterio, pagina) =>
     totalPages: respuesta.totalPages,
   }));
 
-const pedirPagina = (pedir, claveCriterio, page) =>
-  pedir(JSON.parse(claveCriterio), { page, limit: POR_PAGINA });
+const pedirPagina = (pedir, claveCriterio, page, limit) =>
+  pedir(JSON.parse(claveCriterio), { page, limit });
 
-function usePrimeraPagina(pedir, claveCriterio, version) {
+function usePrimeraPagina(pedir, claveCriterio, version, porPagina) {
   const [resultado, setResultado] = useState(SIN_RESULTADO);
   useEffect(() => {
     let vigente = true;
@@ -31,7 +31,7 @@ function usePrimeraPagina(pedir, claveCriterio, version) {
       if (vigente) setResultado((previo) => cambios(previo));
     };
     const nuevo = (cambios) => ({ ...SIN_RESULTADO, clave, criterio: claveCriterio, ...cambios });
-    pedirPagina(pedir, claveCriterio, 1).then(
+    pedirPagina(pedir, claveCriterio, 1, porPagina).then(
       ({ items, page, totalPages, extra = null }) =>
         terminar(() => nuevo({ items, page, totalPages, extra })),
       (error) =>
@@ -44,11 +44,11 @@ function usePrimeraPagina(pedir, claveCriterio, version) {
     return () => {
       vigente = false;
     };
-  }, [pedir, claveCriterio, version]);
+  }, [pedir, claveCriterio, version, porPagina]);
   return [resultado, setResultado];
 }
 
-function useCargarMas(pedir, claveCriterio, resultado, setResultado) {
+function useCargarMas(pedir, claveCriterio, porPagina, { resultado, setResultado }) {
   const { clave, page } = resultado;
   const enCurso = useRef(false);
   return useCallback(() => {
@@ -59,7 +59,7 @@ function useCargarMas(pedir, claveCriterio, resultado, setResultado) {
         previo.clave === clave ? { ...previo, ...cambios(previo) } : previo,
       );
     siSigueVigente(() => ({ cargandoMas: true, errorMas: null }));
-    pedirPagina(pedir, claveCriterio, page + 1)
+    pedirPagina(pedir, claveCriterio, page + 1, porPagina)
       .then(
         (siguiente) =>
           siSigueVigente((previo) => ({
@@ -73,16 +73,10 @@ function useCargarMas(pedir, claveCriterio, resultado, setResultado) {
       .finally(() => {
         enCurso.current = false;
       });
-  }, [pedir, claveCriterio, clave, page, setResultado]);
+  }, [pedir, claveCriterio, porPagina, clave, page, setResultado]);
 }
 
-export function useListaPaginada(pedir, criterio) {
-  const claveCriterio = JSON.stringify(criterio);
-  const [version, setVersion] = useState(0);
-  const [resultado, setResultado] = usePrimeraPagina(pedir, claveCriterio, version);
-  const cargarMas = useCargarMas(pedir, claveCriterio, resultado, setResultado);
-  const recargar = useCallback(() => setVersion((v) => v + 1), []);
-  const cargando = resultado.clave !== `${claveCriterio}#${version}`;
+function estadoDeLista(resultado, { claveCriterio, cargando }) {
   return {
     items: resultado.criterio === claveCriterio ? resultado.items : [],
     extra: resultado.extra,
@@ -92,9 +86,17 @@ export function useListaPaginada(pedir, criterio) {
     cargandoMas: !!resultado.cargandoMas,
     errorMas: resultado.errorMas ?? null,
     errorRefresco: cargando ? null : (resultado.errorRefresco ?? null),
-    cargarMas,
-    recargar,
   };
+}
+
+export function useListaPaginada(pedir, criterio, { porPagina = POR_PAGINA } = {}) {
+  const claveCriterio = JSON.stringify(criterio);
+  const [version, setVersion] = useState(0);
+  const [resultado, setResultado] = usePrimeraPagina(pedir, claveCriterio, version, porPagina);
+  const cargarMas = useCargarMas(pedir, claveCriterio, porPagina, { resultado, setResultado });
+  const recargar = useCallback(() => setVersion((v) => v + 1), []);
+  const cargando = resultado.clave !== `${claveCriterio}#${version}`;
+  return { ...estadoDeLista(resultado, { claveCriterio, cargando }), cargarMas, recargar };
 }
 
 export function useRefresco(lista) {

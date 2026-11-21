@@ -185,6 +185,42 @@ describe("ChipsFiltro", () => {
     }
     expect(elegido.borderColor).toBe(elegido.backgroundColor);
   });
+
+  const OPCIONES = ["A", "B", "C", "D"].map((valor) => ({ valor, etiqueta: valor }));
+  const medir = async ({ visible, contenido }) => {
+    const fila = screen.getByTestId("filtro-fila");
+    await fireEvent(fila, "layout", { nativeEvent: { layout: { width: visible, height: 40 } } });
+    await fireEvent(fila, "contentSizeChange", contenido, 40);
+  };
+  const desplazar = (x) =>
+    fireEvent.scroll(screen.getByTestId("filtro-fila"), {
+      nativeEvent: {
+        contentOffset: { x, y: 0 },
+        contentSize: { width: 600, height: 40 },
+        layoutMeasurement: { width: 300, height: 40 },
+      },
+    });
+  const renderFila = () =>
+    renderConProviders(
+      <ChipsFiltro opciones={OPCIONES} onElegir={jest.fn()} prefijoTestID="filtro" />,
+    );
+
+  it("si hay chips a la derecha muestra el chevron y se oculta al llegar al final", async () => {
+    await renderFila();
+    await medir({ visible: 300, contenido: 600 });
+    expect(screen.getByLabelText("Ver más filtros")).toBeTruthy();
+    await fireEvent.press(screen.getByTestId("filtro-mas"));
+    await desplazar(300);
+    expect(screen.queryByTestId("filtro-mas")).toBeNull();
+    await desplazar(100);
+    expect(screen.getByTestId("filtro-mas")).toBeTruthy();
+  });
+
+  it("si todos los chips entran no muestra el chevron", async () => {
+    await renderFila();
+    await medir({ visible: 400, contenido: 380 });
+    expect(screen.queryByTestId("filtro-mas")).toBeNull();
+  });
 });
 
 describe("ConCarga", () => {
