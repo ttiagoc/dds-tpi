@@ -12,6 +12,8 @@ import {
   tipoVacio,
   validarEvento,
 } from "./armarEvento";
+import { CAMPOS_DIRECCION } from "./direccionDelEvento";
+import { conCambio, useUbicacionDelEvento } from "./useUbicacionDelEvento";
 
 const sinClave = (errores, clave) => {
   if (!(clave in errores)) return errores;
@@ -24,7 +26,11 @@ const sinErroresDeTipos = (errores) =>
     Object.entries(errores).filter(([clave]) => !clave.startsWith("tiposEntrada.")),
   );
 
-const CLAVES_QUE_LIMPIA = { dia: ["fecha"], hora: ["hora", "fecha"] };
+const CLAVES_QUE_LIMPIA = {
+  dia: ["fecha"],
+  hora: ["hora", "fecha"],
+  ...Object.fromEntries(CAMPOS_DIRECCION.map((campo) => [campo, [campo, "ubicacion"]])),
+};
 
 export const resumenDeErrores = (cantidad) =>
   cantidad === 1 ? "Revisá el campo marcado" : `Revisá los ${cantidad} campos marcados`;
@@ -109,8 +115,9 @@ export function useFormularioEvento({ alMarcarErrores = () => {}, ahora = () => 
     ...errores,
     cambiar: (campo, valor) => {
       limpiar(campo);
-      setValores((actual) => ({ ...actual, [campo]: valor }));
+      setValores((actual) => conCambio(actual, campo, valor, CAMPOS_DIRECCION.includes(campo)));
     },
+    ...useUbicacionDelEvento(valores, { setValores, setErrores }),
     ...useTipos(setValores, setErrores),
     puedeAgregarTipo: valores.tipos.length < MAXIMO_TIPOS && !enviando,
     enviando,

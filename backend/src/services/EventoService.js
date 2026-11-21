@@ -4,16 +4,13 @@ import { errorDeCampo } from "../domain/validaciones.js";
 import {
   GeocodificadorNoDisponible,
   GeorefGeocodificador,
+  ubicarOFallar,
 } from "./geocodificacion/GeorefGeocodificador.js";
 import { Resenia } from "../domain/Resenia.js";
 import { Rol } from "../domain/Rol.js";
 import { relojSistema } from "../config/reloj.js";
 import { paginar } from "./paginacion.js";
-import {
-  MENSAJE_CATEGORIA_INEXISTENTE,
-  MENSAJE_DIRECCION_INEXISTENTE,
-  MENSAJE_EVENTO_INEXISTENTE,
-} from "../errors/mensajes.js";
+import { MENSAJE_CATEGORIA_INEXISTENTE, MENSAJE_EVENTO_INEXISTENTE } from "../errors/mensajes.js";
 
 const CRITERIOS = {
   fecha: (evento) => evento.fecha.getTime(),
@@ -115,16 +112,13 @@ export class EventoService {
   }
 
   async geocodificar(direccion) {
-    let ubicacion;
     try {
-      ubicacion = await this.geocodificador.ubicar(direccion);
+      return await ubicarOFallar(this.geocodificador, direccion);
     } catch (error) {
       if (!(error instanceof GeocodificadorNoDisponible)) throw error;
       console.warn(`Evento sin ubicación: ${error.message}`);
       return null;
     }
-    if (!ubicacion) throw errorDeCampo("direccion", MENSAJE_DIRECCION_INEXISTENTE);
-    return ubicacion;
   }
 
   async listarDelOrganizador(usuario, paginacion) {

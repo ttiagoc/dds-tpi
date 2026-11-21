@@ -113,6 +113,7 @@ export const respuestasComunes = {
   NotFound: respuestaDeError("El recurso no existe"),
   Conflict: respuestaDeError("El recurso ya existe (por ejemplo, una reseña repetida)"),
   UnprocessableEntity: respuestaDeError("Se viola una regla de negocio"),
+  ServiceUnavailable: respuestaDeError("Un servicio externo (Georef) no respondió"),
 };
 
 export const seguridad = {

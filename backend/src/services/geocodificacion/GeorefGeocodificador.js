@@ -1,10 +1,18 @@
 import { partesDeDireccion } from "../../domain/direccion.js";
+import { errorDeCampo } from "../../domain/validaciones.js";
+import { MENSAJE_DIRECCION_INEXISTENTE } from "../../errors/mensajes.js";
 
 export const GEOREF_URL = "https://apis.datos.gob.ar/georef/api";
 const TIMEOUT_MS = 5000;
 const MAXIMO_RESULTADOS = 5;
 
 export class GeocodificadorNoDisponible extends Error {}
+
+export async function ubicarOFallar(geocodificador, direccion) {
+  const ubicacion = await geocodificador.ubicar(direccion);
+  if (!ubicacion) throw errorDeCampo("direccion", MENSAJE_DIRECCION_INEXISTENTE);
+  return ubicacion;
+}
 
 const filtros = (calle, otros) => ({ direccion: calle, ...otros });
 

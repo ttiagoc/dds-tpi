@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import CrearEvento from "./CrearEvento";
 import { crearEvento } from "../../api/eventosApi";
 import { listarCategorias } from "../../api/categoriasApi";
+import { ubicarDireccion } from "../../api/direccionesApi";
 import { FENIX, renderConProviders } from "../../test-utils/renderConProviders";
 import {
   errorHttp,
@@ -14,14 +15,22 @@ import {
   promesaManual,
 } from "../../test-utils/fixtures";
 
+jest.setTimeout(20000);
+
 jest.mock("../../api/eventosApi");
 jest.mock("../../api/categoriasApi");
+jest.mock("../../api/direccionesApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
 
 const CATEGORIAS = [
   { id: 1, nombre: "Recitales" },
   { id: 6, nombre: "Stand-up" },
 ];
+const UBICADA = {
+  direccion: "Sarmiento 3131, Balvanera, Ciudad Autónoma de Buenos Aires",
+  latitud: -34.6067,
+  longitud: -58.4104,
+};
 const publicar = () => screen.getByTestId("evento-guardar");
 const escribir = (testID, texto) => fireEvent.changeText(screen.getByTestId(testID), texto);
 
@@ -30,11 +39,23 @@ async function abrir() {
   await screen.findByTestId("evento-categoria");
 }
 
+const buscar = () => fireEvent.press(screen.getByTestId("direccion-buscar"));
+
+async function completarDireccion() {
+  await escribir("direccion-calle", "Sarmiento");
+  await escribir("direccion-numero", "3131");
+  await escribir("direccion-localidad", "Balvanera");
+  await fireEvent.press(screen.getByTestId("direccion-provincia"));
+  await fireEvent.press(screen.getByTestId("provincia-Ciudad Autónoma de Buenos Aires"));
+}
+
 async function completar({ sinHora = false } = {}) {
   await escribir("evento-nombre", "  Stand-up en el Konex ");
   await escribir("evento-descripcion", "Noche de humor");
   await escribir("evento-lugar", "Ciudad Cultural Konex");
-  await escribir("evento-direccion", "Sarmiento 3131, CABA, Buenos Aires");
+  await completarDireccion();
+  await fireEvent.press(screen.getByTestId("direccion-buscar"));
+  await fireEvent.press(await screen.findByTestId("ubicacion-confirmar"));
   await fireEvent(screen.getByTestId("evento-categoria"), "focus");
   await fireEvent.press(await screen.findByTestId("categoria-6"));
   await fireEvent.press(screen.getByTestId("evento-fecha"));
@@ -52,6 +73,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   listarCategorias.mockResolvedValue(paginaDeCategorias(CATEGORIAS));
   crearEvento.mockResolvedValue(eventoDetalle({ id: 20 }));
+  ubicarDireccion.mockResolvedValue(UBICADA);
 });
 
 describe("CrearEvento: formulario", () => {
@@ -101,8 +123,8 @@ describe("CrearEvento: validación al publicar", () => {
     expect(screen.getByTestId("evento-categoria-error")).toHaveTextContent("Elegí una categoría");
     expect(screen.getByTestId("evento-hora-error")).toHaveTextContent("Elegí la hora");
     expect(screen.getByTestId("tipo-0-cupo-error")).toBeTruthy();
-    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá los 10 campos marcados");
-    expect(anunciar).toHaveBeenCalledWith("Revisá los 10 campos marcados");
+    expect(screen.getByTestId("evento-error")).toHaveTextContent("Revisá los 13 campos marcados");
+    expect(anunciar).toHaveBeenCalledWith("Revisá los 13 campos marcados");
     expect(screen.getByTestId("evento-nombre")).toHaveProp("accessibilityHint", expect.any(String));
   });
 
@@ -152,12 +174,7 @@ describe("CrearEvento: validación al publicar", () => {
     await abrir();
     await completar();
     await fireEvent.press(publicar());
-    expect(await screen.findByTestId("evento-direccion-error")).toHaveTextContent(mensaje);
-  });
-
-  it("la dirección muestra cómo escribirla", async () => {
-    await abrir();
-    expect(screen.getByText("Calle y número, localidad, provincia")).toBeTruthy();
+    expect(await screen.findByTestId("direccion-error")).toHaveTextContent(mensaje);
   });
 
   it("un 400 con details de un tipo marca ese campo", async () => {
@@ -182,7 +199,7 @@ describe("CrearEvento: envío", () => {
       categoriaId: 6,
       fecha: new Date(2026, 11, 5, 22, 0).toISOString(),
       lugar: "Ciudad Cultural Konex",
-      direccion: "Sarmiento 3131, CABA, Buenos Aires",
+      direccion: "Sarmiento 3131, Balvanera, Ciudad Autónoma de Buenos Aires",
       multimedia: [],
       tiposEntrada: [{ nombre: "General", precio: 15000, cupo: 200 }],
     });
@@ -288,5 +305,85 @@ describe("CrearEvento: categorías", () => {
     );
     await fireEvent.press(screen.getByRole("button", { name: "Reintentar" }));
     expect(await screen.findByTestId("categoria-1")).toBeTruthy();
+  });
+});
+
+describe("CrearEvento: dirección y mapa", () => {
+  it("cada campo tiene un ejemplo", async () => {
+    await abrir();
+    expect(screen.getByTestId("direccion-calle")).toHaveProp("placeholder", "Ej.: Av. Corrientes");
+    expect(screen.getByTestId("direccion-numero")).toHaveProp("placeholder", "Ej.: 1234");
+    expect(screen.getByTestId("direccion-localidad")).toHaveProp("placeholder", "Ej.: Palermo");
+  });
+
+  it("buscar con campos vacíos marca los que faltan sin consultar", async () => {
+    await abrir();
+    await buscar();
+    expect(ubicarDireccion).not.toHaveBeenCalled();
+    expect(screen.getByTestId("direccion-calle-error")).toHaveTextContent("Indicá la calle");
+    expect(screen.getByTestId("direccion-provincia-error")).toHaveTextContent("Elegí la provincia");
+  });
+
+  it("muestra el mapa con el pin y se confirma", async () => {
+    await abrir();
+    await completarDireccion();
+    await buscar();
+    expect(ubicarDireccion).toHaveBeenCalledWith({
+      calle: "Sarmiento",
+      numero: "3131",
+      localidad: "Balvanera",
+      provincia: "Ciudad Autónoma de Buenos Aires",
+    });
+    expect(await screen.findByTestId("ubicacion-mapa")).toBeTruthy();
+    expect(screen.getByTestId("mapa-marcador")).toHaveProp("coordinate", {
+      latitude: -34.6067,
+      longitude: -58.4104,
+    });
+    expect(screen.getByTestId("ubicacion-direccion")).toHaveTextContent(UBICADA.direccion);
+    await fireEvent.press(screen.getByTestId("ubicacion-confirmar"));
+    expect(screen.getByTestId("ubicacion-confirmada")).toHaveTextContent(/Ubicación confirmada/);
+  });
+
+  it("cambiar un campo después de confirmar pierde la confirmación", async () => {
+    await abrir();
+    await completarDireccion();
+    await buscar();
+    await fireEvent.press(await screen.findByTestId("ubicacion-confirmar"));
+    await escribir("direccion-numero", "3132");
+    expect(screen.queryByTestId("ubicacion-mapa")).toBeNull();
+    expect(screen.queryByTestId("ubicacion-confirmada")).toBeNull();
+  });
+
+  it("publicar sin confirmar pide confirmar la ubicación", async () => {
+    await abrir();
+    await completarDireccion();
+    await fireEvent.press(screen.getByTestId("evento-guardar"));
+    expect(crearEvento).not.toHaveBeenCalled();
+    expect(screen.getByTestId("direccion-error")).toHaveTextContent(
+      "Confirmá la ubicación en el mapa",
+    );
+  });
+
+  it("si no encuentra la dirección muestra el mensaje del back", async () => {
+    ubicarDireccion.mockRejectedValue(errorHttp(422, "No encontramos esa dirección"));
+    await abrir();
+    await completarDireccion();
+    await buscar();
+    expect(await screen.findByTestId("direccion-error")).toHaveTextContent(
+      "No encontramos esa dirección",
+    );
+    expect(screen.queryByTestId("ubicacion-mapa")).toBeNull();
+  });
+
+  it("si el mapa no responde avisa y deja publicar sin confirmar", async () => {
+    ubicarDireccion.mockRejectedValue(errorHttp(503, "No pudimos consultar el mapa"));
+    await abrir();
+    await completarDireccion();
+    await buscar();
+    expect(await screen.findByTestId("direccion-error")).toHaveTextContent(
+      "No pudimos mostrar el mapa. Podés publicar igual",
+    );
+    await fireEvent.press(screen.getByTestId("evento-guardar"));
+    expect(screen.queryByText("Confirmá la ubicación en el mapa")).toBeNull();
   });
 });

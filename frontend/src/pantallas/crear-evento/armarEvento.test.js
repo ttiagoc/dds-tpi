@@ -6,12 +6,18 @@ import {
   tipoVacio,
   validarEvento,
 } from "./armarEvento";
+import { MENSAJES_DIRECCION } from "./direccionDelEvento";
 
 const COMPLETO = {
   nombre: "  Stand-up en el Konex ",
   descripcion: " Noche de humor ",
   lugar: " Ciudad Cultural Konex ",
-  direccion: " Sarmiento 3131, CABA, Buenos Aires ",
+  calle: " Sarmiento ",
+  numero: "3131",
+  localidad: " Balvanera ",
+  provincia: "Ciudad Autónoma de Buenos Aires",
+  ubicacion: { direccion: "x", latitud: -34.6, longitud: -58.4, confirmada: true },
+  mapaNoDisponible: false,
   imagen: "",
   categoria: { id: 6, nombre: "Stand-up" },
   dia: new Date(2026, 11, 5),
@@ -27,7 +33,7 @@ describe("armarEvento", () => {
       categoriaId: 6,
       fecha: new Date(2026, 11, 5, 22, 0).toISOString(),
       lugar: "Ciudad Cultural Konex",
-      direccion: "Sarmiento 3131, CABA, Buenos Aires",
+      direccion: "Sarmiento 3131, Balvanera, Ciudad Autónoma de Buenos Aires",
       multimedia: [],
       tiposEntrada: [{ nombre: "General", precio: 15000, cupo: 200 }],
     });
@@ -64,12 +70,20 @@ describe("validarEvento", () => {
     expect(validarEvento(COMPLETO, AHORA)).toEqual({});
   });
 
+  it("si el mapa no estuvo disponible no pide confirmar", () => {
+    const sinMapa = { ...COMPLETO, ubicacion: null, mapaNoDisponible: true };
+    expect(validarEvento(sinMapa, AHORA)).toEqual({});
+  });
+
   it("un formulario recién abierto marca todos los campos en orden", () => {
     expect(Object.entries(validarEvento(formularioVacio(), AHORA))).toEqual([
       ["nombre", MENSAJES.nombre],
       ["descripcion", MENSAJES.descripcion],
       ["lugar", MENSAJES.lugar],
-      ["direccion", MENSAJES.direccion],
+      ["calle", MENSAJES_DIRECCION.calle],
+      ["numero", MENSAJES_DIRECCION.numero],
+      ["localidad", MENSAJES_DIRECCION.localidad],
+      ["provincia", MENSAJES_DIRECCION.provincia],
       ["categoria", MENSAJES.categoria],
       ["fecha", MENSAJES.fecha],
       ["hora", MENSAJES.hora],
@@ -84,8 +98,12 @@ describe("validarEvento", () => {
     ["nombre largo", { nombre: "a".repeat(101) }, "nombre"],
     ["sin hora", { hora: null }, "hora"],
     ["sin categoría", { categoria: null }, "categoria"],
-    ["dirección sin localidad", { direccion: "Sarmiento 3131" }, "direccion"],
-    ["dirección sin número", { direccion: "Sarmiento, CABA" }, "direccion"],
+    ["sin localidad", { localidad: " " }, "localidad"],
+    ["número con letras", { numero: "12a" }, "numero"],
+    ["número 0", { numero: "0" }, "numero"],
+    ["sin provincia", { provincia: null }, "provincia"],
+    ["la ubicación sin confirmar", { ubicacion: { latitud: 1, longitud: 1 } }, "ubicacion"],
+    ["sin buscar en el mapa", { ubicacion: null }, "ubicacion"],
   ])("con %s marca solo ese campo", (_, cambio, campo) => {
     expect(Object.keys(validarEvento({ ...COMPLETO, ...cambio }, AHORA))).toEqual([campo]);
   });

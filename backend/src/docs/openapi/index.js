@@ -8,8 +8,19 @@ import organizadores from "./organizadores.js";
 import compras from "./compras.js";
 import favoritos from "./favoritos.js";
 import mensajes from "./mensajes.js";
+import direcciones from "./direcciones.js";
 
-const modulos = [sistema, auth, categorias, eventos, organizadores, compras, mensajes, favoritos];
+const modulos = [
+  sistema,
+  auth,
+  categorias,
+  eventos,
+  direcciones,
+  organizadores,
+  compras,
+  mensajes,
+  favoritos,
+];
 
 export function unir(partes, clave) {
   const resultado = {};

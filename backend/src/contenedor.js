@@ -12,6 +12,7 @@ import { CompraService } from "./services/CompraService.js";
 import { ReseniaService } from "./services/ReseniaService.js";
 import { FavoritoService } from "./services/FavoritoService.js";
 import { MensajeService } from "./services/MensajeService.js";
+import { DireccionService } from "./services/DireccionService.js";
 import { GeorefGeocodificador } from "./services/geocodificacion/GeorefGeocodificador.js";
 import { sembrar } from "./seeds/sembrar.js";
 import { notificadorNulo } from "./sockets/notificador.js";
@@ -52,7 +53,8 @@ function crearServiciosDeCompras(repos, { reloj, notificador }) {
   };
 }
 
-function crearServicios(repos, { reloj, entorno, notificador, geocodificador }) {
+function crearServicios(repos, { reloj, entorno, notificador, geocodificador: inyectado }) {
+  const geocodificador = inyectado ?? new GeorefGeocodificador({ url: entorno.georefUrl });
   const servicios = {
     authService: new AuthService({
       usuarioRepository: repos.usuarioRepository,
@@ -65,10 +67,11 @@ function crearServicios(repos, { reloj, entorno, notificador, geocodificador }) 
       usuarioRepository: repos.usuarioRepository,
       categoriaRepository: repos.categoriaRepository,
       compraRepository: repos.compraRepository,
-      geocodificador: geocodificador ?? new GeorefGeocodificador({ url: entorno.georefUrl }),
+      geocodificador,
       reloj,
     }),
     categoriaService: new CategoriaService({ categoriaRepository: repos.categoriaRepository }),
+    direccionService: new DireccionService({ geocodificador }),
     ...crearServiciosDeCompras(repos, { reloj, notificador }),
   };
   servicios.favoritoService = new FavoritoService({
