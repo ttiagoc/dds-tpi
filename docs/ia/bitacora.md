@@ -6,9 +6,9 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 17 |
-| Features cerradas | 29 (It1 a It4 cerradas, It5b de rediseño) |
-| Correcciones relevantes a la IA | 6 |
+| Sesiones | 18 |
+| Features cerradas | 35 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
+| Correcciones relevantes a la IA | 7 |
 | Skills creadas / mejoradas | 12 / 3 |
 
 ### Errores típicos de la IA (se actualiza)
@@ -24,6 +24,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 10. Tests que verifican el mecanismo interno y no el comportamiento: un test de limpieza contaba los oyentes registrados en el socket y siguió pasando ante un refactor que cambiaba cómo se registraban; se reescribió para comprobar que un evento posterior ya no llega.
 11. Selectores e2e por prefijo que coinciden con elementos de otra pantalla: en la versión web, las pantallas inferiores de la pila siguen montadas, y un selector de tipo de entrada eligió el del detalle del evento, oculto debajo de la pantalla de compra. Se acotó a elementos visibles.
 12. Verificaciones visuales sobre un servidor desactualizado: la versión web se levantó en modo CI, que no vigila los archivos, y las primeras capturas mostraban el código anterior al cambio; la IA lo detectó al comparar las capturas con lo implementado.
+13. Cambios de contrato que no llegan a la validación: el contrato pasó a aceptar rutas relativas de imágenes, pero la validación del cuerpo seguía exigiendo URLs absolutas; los tests no cubrían el flujo real de subir una foto y publicar, y el error lo encontró el usuario en el celular.
 
 ---
 
@@ -370,3 +371,23 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - El resumen de Mis eventos se calcula en el back — sumar solo la página visible daba un total incorrecto — detectado por la IA al escribir la spec.
   - El usuario autorizó encadenar las cinco ramas (commit y merge al cerrar cada una) y aplicar los hallazgos de calidad sin aprobación previa; la revisión unificó tarjetas y barras repetidas en componentes compartidos.
 - **Aprendizaje:** aprobar las cinco specs juntas, con las maquetas ya validadas, permitió encadenar el trabajo sin interrupciones. En la verificación visual hizo falta confirmar que el servidor servía el código actual: con un proceso de una corrida anterior o un servidor sin vigilancia de archivos, las capturas parecían correctas pero mostraban la versión previa.
+
+## Sesión 18 — 2026-11-21 — Ajustes de UX tras la prueba en el celular (It5c)
+
+- **Objetivo:** resolver los problemas que el usuario encontró al probar el rediseño en un iPhone con Expo Go.
+- **Avances:**
+  - Se levantó el entorno local para la prueba en el dispositivo: la red local y la sesión de Expo eran los bloqueos, no la aplicación.
+  - Seis specs (23 a 28), un ADR y los planes de dominio, contratos y pantallas actualizados, implementados en seis ramas mergeadas a `develop`:
+    - Publicar evento: el botón queda siempre habilitado; al tocarlo, el front valida, marca cada campo con su error, lleva el foco al primero y lo anuncia al lector de pantalla. El calendario no permite días pasados y los 422 del back indican el campo afectado.
+    - Teclado: las pantallas con scroll se desplazan con el teclado y el teclado numérico de iOS tiene un botón "Listo".
+    - Categorías: `GET /categorias` pasa a ser paginado con búsqueda sin acentos; en Nuevo evento se escribe para filtrar (con debounce) y la lista carga más al llegar al final.
+    - Listas: un indicador en las filas de chips señala que hay más filtros, Mis entradas separa el título de los chips y Explorar pagina de a 6.
+    - Chat: el encabezado queda fijo, la lista se invirtió y los mensajes anteriores se cargan al llegar arriba.
+    - Cómo llegar: dirección obligatoria geocodificada con la API Georef (reglas R13 a R15) y un botón que abre Google Maps con la ruta.
+  - Verificación: 922 tests del back, 491 del front y 5/5 flujos e2e en verde (uno nuevo); clones de código sin cambios (6).
+- **Decisiones:**
+  - Georef con coordenadas en lugar de abrir Maps con el texto de la dirección — misma solución que en el TPA de DSI, gratuita y pensada para direcciones argentinas — opción elegida por el usuario entre dos propuestas de la IA (ADR-014).
+  - Si Georef no responde, el evento se publica sin coordenadas y el botón busca por texto — la publicación no depende de un servicio externo — propuesta de la IA, aceptada.
+  - El buscador de categorías solo filtra, no crea categorías — no hay ABM de categorías en el dominio — el usuario descartó la alternativa de crearlas.
+  - El encabezado fijo del chat usa el margen seguro superior en vez de quedar dentro de la lista — en iOS 26 ese margen incluye el encabezado translúcido — propuesta de la IA.
+- **Aprendizaje:** el error principal ("Datos inválidos" al publicar con foto) lo había introducido la IA en la sesión anterior: actualizó el contrato para aceptar rutas relativas, pero no la validación, y ningún test creaba un evento con la ruta real de una imagen subida. Lo detectó el usuario en el celular, no la suite.
