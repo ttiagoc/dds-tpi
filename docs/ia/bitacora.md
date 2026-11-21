@@ -7,8 +7,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 18 |
-| Features cerradas | 35 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
-| Correcciones relevantes a la IA | 7 |
+| Features cerradas | 38 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
+| Correcciones relevantes a la IA | 9 |
 | Skills creadas / mejoradas | 12 / 3 |
 
 ### Errores típicos de la IA (se actualiza)
@@ -25,6 +25,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 11. Selectores e2e por prefijo que coinciden con elementos de otra pantalla: en la versión web, las pantallas inferiores de la pila siguen montadas, y un selector de tipo de entrada eligió el del detalle del evento, oculto debajo de la pantalla de compra. Se acotó a elementos visibles.
 12. Verificaciones visuales sobre un servidor desactualizado: la versión web se levantó en modo CI, que no vigila los archivos, y las primeras capturas mostraban el código anterior al cambio; la IA lo detectó al comparar las capturas con lo implementado.
 13. Cambios de contrato que no llegan a la validación: el contrato pasó a aceptar rutas relativas de imágenes, pero la validación del cuerpo seguía exigiendo URLs absolutas; los tests no cubrían el flujo real de subir una foto y publicar, y el error lo encontró el usuario en el celular.
+14. Supuestos de plataforma que los tests no pueden verificar: dar por hecho que el margen seguro incluye la barra de navegación translúcida de iOS 26 y que una barra sobre el teclado numérico aparece en Expo Go. Los dos pasaron la suite y fallaron en el iPhone.
 
 ---
 
@@ -391,3 +392,20 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - El buscador de categorías solo filtra, no crea categorías — no hay ABM de categorías en el dominio — el usuario descartó la alternativa de crearlas.
   - El encabezado fijo del chat usa el margen seguro superior en vez de quedar dentro de la lista — en iOS 26 ese margen incluye el encabezado translúcido — propuesta de la IA.
 - **Aprendizaje:** el error principal ("Datos inválidos" al publicar con foto) lo había introducido la IA en la sesión anterior: actualizó el contrato para aceptar rutas relativas, pero no la validación, y ningún test creaba un evento con la ruta real de una imagen subida. Lo detectó el usuario en el celular, no la suite.
+
+### Sesión 18 (continuación) — segunda prueba en el iPhone
+
+- **Avances:** tres specs más (29 a 31) en tres ramas mergeadas a `develop`:
+  - Las flechas de los filtros pasan a ser visibles, a los dos lados y rellenas con el color de tinta.
+  - El chat tiene un encabezado propio con botón Volver.
+  - El teclado numérico de iOS tiene tecla de confirmar.
+  - En Perfil se elige el tema (claro por defecto, como las maquetas).
+  - La dirección del evento se carga por campos y se confirma en un mapa (`react-native-maps`) antes de publicar, con un endpoint nuevo de vista previa, `GET /direcciones/ubicacion`.
+  - Verificación: 939 tests del back, 518 del front y 5/5 flujos e2e.
+- **Decisiones:**
+  - Encabezado propio en el chat en lugar de calcular el alto de la barra nativa — Expo Router 58 no expone ese alto y el margen seguro no lo incluye — propuesta de la IA.
+  - Teclado `numbers-and-punctuation` en iOS en lugar de una barra sobre el teclado — la barra no apareció en Expo Go y no se puede verificar en los tests — propuesta de la IA, aceptada.
+  - Selector de tema con claro por defecto — el usuario eligió el selector; la IA propuso el valor por defecto.
+  - Búsqueda en el mapa con un botón y confirmación obligatoria; el back vuelve a geocodificar al publicar y no acepta coordenadas del cliente — el usuario eligió el botón; la IA propuso no confiar en el cliente.
+- **Aprendizaje:** dos supuestos de la IA sobre iOS (el margen seguro con la barra translúcida y la barra sobre el teclado numérico) pasaron los tests y fallaron en el dispositivo. La prueba en el celular encontró lo que la suite no podía ver. También se repitió un error ya registrado: dos archivos que difieren solo en mayúsculas (`PreferenciaTema.jsx` y `preferenciaTema.js`), que la IA detectó al correr los tests.
+
