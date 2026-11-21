@@ -83,7 +83,7 @@ Specs 23-28, ADR-014. Hallazgos de la prueba en el celular.
 Segunda tanda (specs 29-31), tras probar en el iPhone:
 - [x] `fix/ajustes-chips-chat-teclado` (spec 29): flechas visibles a los dos lados, encabezado propio del chat, teclado numérico con tecla de confirmar.
 - [x] `feature/selector-de-tema` (spec 30): Claro / Oscuro / Automático en Perfil, por defecto Claro.
-- [ ] `feature/direccion-con-mapa` (spec 31): dirección por campos, `GET /direcciones/ubicacion` y confirmación en el mapa.
+- [x] `feature/direccion-con-mapa` (spec 31): dirección por campos, `GET /direcciones/ubicacion` y confirmación en el mapa.
 
 ## It6 — Entrega (29/11-1/12)
 - [ ] Guion final (`planes/08`), ensayo, grabación 5-10 min.

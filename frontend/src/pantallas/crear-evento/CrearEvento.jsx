@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, HelperText, Snackbar, TextInput } from "react-native-paper";
 import { Pantalla } from "../../components/Pantalla";
 import { espaciado } from "../../tema/espaciado";
+import { CamposDireccion } from "./CamposDireccion";
 import { ErrorCampo } from "./ErrorCampo";
 import { SelectorCategoria } from "./SelectorCategoria";
 import { SelectorFechaHora } from "./SelectorFechaHora";
@@ -15,16 +16,10 @@ const TEXTOS = [
   { campo: "nombre", etiqueta: "Nombre", testID: "evento-nombre" },
   { campo: "descripcion", etiqueta: "Descripción", testID: "evento-descripcion", multilinea: true },
   { campo: "lugar", etiqueta: "Lugar", testID: "evento-lugar" },
-  {
-    campo: "direccion",
-    etiqueta: "Dirección",
-    testID: "evento-direccion",
-    ayuda: "Calle y número, localidad, provincia",
-  },
 ];
 
 function CampoTexto({ definicion, formulario, foco }) {
-  const { campo, etiqueta, testID, multilinea, ayuda } = definicion;
+  const { campo, etiqueta, testID, multilinea } = definicion;
   const error = formulario.errores[campo];
   return (
     <View {...foco.registrar(campo)} style={estilos.campo}>
@@ -42,7 +37,6 @@ function CampoTexto({ definicion, formulario, foco }) {
         testID={testID}
       />
       <ErrorCampo mensaje={error} testID={`${testID}-error`} />
-      {ayuda && !error && <HelperText type="info">{ayuda}</HelperText>}
     </View>
   );
 }
@@ -94,6 +88,7 @@ function DatosDelEvento({ formulario, foco }) {
           foco={foco}
         />
       ))}
+      <CamposDireccion formulario={formulario} foco={foco} />
       <SelectorCategoria
         categoria={valores.categoria}
         onElegir={(categoria) => cambiar("categoria", categoria)}

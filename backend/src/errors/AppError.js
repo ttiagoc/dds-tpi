@@ -22,3 +22,4 @@ export class ForbiddenError extends conCodigo(403) {}
 export class NotFoundError extends conCodigo(404) {}
 export class ConflictError extends conCodigo(409) {}
 export class UnprocessableEntityError extends conCodigo(422) {}
+export class ServiceUnavailableError extends conCodigo(503) {}

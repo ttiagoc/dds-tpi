@@ -13,6 +13,7 @@ const OPERACIONES_DE_PLANES_03 = [
   "POST /eventos",
   "GET /eventos/{id}",
   "GET /eventos/{id}/compras",
+  "GET /direcciones/ubicacion",
   "GET /organizadores/yo/eventos",
   "GET /organizadores/{id}/resenias",
   "GET /compras",

@@ -1,6 +1,6 @@
 # Spec 31 — Dirección por campos y confirmación en el mapa
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/direccion-con-mapa`
 - **Casos de uso:** CU4
 - **Iteración:** It5c

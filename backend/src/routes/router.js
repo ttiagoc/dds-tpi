@@ -7,6 +7,7 @@ import { crearOrganizadorRoutes } from "./OrganizadorRoutes.js";
 import { crearCompraRoutes } from "./CompraRoutes.js";
 import { crearUsuarioRoutes } from "./UsuarioRoutes.js";
 import { crearImagenRoutes } from "./ImagenRoutes.js";
+import { crearDireccionRoutes } from "./DireccionRoutes.js";
 import { crearAutenticar, crearAutenticarOpcional } from "../middlewares/autenticar.js";
 
 export function crearRouter(contenedor, { nodeEnv, carpetaImagenes }) {
@@ -24,6 +25,7 @@ export function crearRouter(contenedor, { nodeEnv, carpetaImagenes }) {
   router.use("/compras", crearCompraRoutes(contenedor.servicios, auth));
   router.use("/usuarios", crearUsuarioRoutes(contenedor.servicios, auth));
   router.use("/imagenes", crearImagenRoutes(auth, { carpetaImagenes }));
+  router.use("/direcciones", crearDireccionRoutes(contenedor.servicios, auth));
   if (nodeEnv === "test") router.use("/test", crearTestRoutes(contenedor));
   return router;
 }
