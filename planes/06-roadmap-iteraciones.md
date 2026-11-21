@@ -80,6 +80,11 @@ Specs 23-28, ADR-014. Hallazgos de la prueba en el celular.
 - [x] `fix/chat-encabezado-fijo` (spec 27): encabezado fijo, lista invertida, anteriores al subir.
 - [x] `feature/como-llegar` (spec 28, ADR-014): dirección geocodificada con Georef y botón "Cómo llegar".
 
+Segunda tanda (specs 29-31), tras probar en el iPhone:
+- [ ] `fix/ajustes-chips-chat-teclado` (spec 29): flechas visibles a los dos lados, encabezado propio del chat, teclado numérico con tecla de confirmar.
+- [ ] `feature/selector-de-tema` (spec 30): Claro / Oscuro / Automático en Perfil, por defecto Claro.
+- [ ] `feature/direccion-con-mapa` (spec 31): dirección por campos, `GET /direcciones/ubicacion` y confirmación en el mapa.
+
 ## It6 — Entrega (29/11-1/12)
 - [ ] Guion final (`planes/08`), ensayo, grabación 5-10 min.
 - [ ] Conclusión armada desde `docs/ia/bitacora.md`.
