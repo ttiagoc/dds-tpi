@@ -5,6 +5,7 @@ import { espaciado, radios } from "../tema/espaciado";
 
 const TOLERANCIA = 4;
 const AVANCE = 0.7;
+const TAMANIO_FLECHA = 36;
 
 function ChipFiltro({ seleccionado, onPress, testID, children }) {
   const { colors } = useTheme();
@@ -33,29 +34,39 @@ function useDesborde(fila) {
   const [medidas, setMedidas] = useState({ visible: 0, contenido: 0, desplazado: 0 });
   const medir = (cambios) => setMedidas((actuales) => ({ ...actuales, ...cambios }));
   const { visible, contenido, desplazado } = medidas;
+  const desplazarA = (offset) =>
+    fila.current?.scrollToOffset({ offset: Math.max(0, offset), animated: true });
   return {
     hayMas: visible > 0 && contenido - visible - desplazado > TOLERANCIA,
+    hayAnteriores: desplazado > TOLERANCIA,
     onLayout: (evento) => medir({ visible: evento.nativeEvent.layout.width }),
     onContentSizeChange: (ancho) => medir({ contenido: ancho }),
     onScroll: (evento) => medir({ desplazado: evento.nativeEvent.contentOffset.x }),
-    avanzar: () =>
-      fila.current?.scrollToOffset({ offset: desplazado + visible * AVANCE, animated: true }),
+    avanzar: () => desplazarA(desplazado + visible * AVANCE),
+    retroceder: () => desplazarA(desplazado - visible * AVANCE),
   };
 }
 
-function VerMas({ onPress, testID }) {
+const FLECHAS = {
+  derecha: { icono: "chevron-right", etiqueta: "Ver más filtros", sufijo: "mas" },
+  izquierda: { icono: "chevron-left", etiqueta: "Ver filtros anteriores", sufijo: "menos" },
+};
+
+function Flecha({ lado, onPress, prefijoTestID }) {
   const { colors } = useTheme();
+  const { icono, etiqueta, sufijo } = FLECHAS[lado];
   return (
-    <View style={estilos.verMas} pointerEvents="box-none">
+    <View style={[estilos.flecha, estilos[lado]]} pointerEvents="box-none">
       <IconButton
-        icon="chevron-right"
-        size={18}
-        mode="outlined"
-        containerColor={colors.surface}
-        style={{ borderColor: colors.outlineVariant }}
+        icon={icono}
+        size={20}
+        mode="contained"
+        containerColor={colors.onSurface}
+        iconColor={colors.surface}
+        style={estilos.botonFlecha}
         onPress={onPress}
-        accessibilityLabel="Ver más filtros"
-        testID={testID}
+        accessibilityLabel={etiqueta}
+        testID={`${prefijoTestID}-${sufijo}`}
       />
     </View>
   );
@@ -92,13 +103,21 @@ export function ChipsFiltro({ opciones, seleccionada, onElegir, prefijoTestID, a
           </ChipFiltro>
         )}
       />
-      {desborde.hayMas && <VerMas onPress={desborde.avanzar} testID={`${prefijoTestID}-mas`} />}
+      {desborde.hayAnteriores && (
+        <Flecha lado="izquierda" onPress={desborde.retroceder} prefijoTestID={prefijoTestID} />
+      )}
+      {desborde.hayMas && (
+        <Flecha lado="derecha" onPress={desborde.avanzar} prefijoTestID={prefijoTestID} />
+      )}
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  fila: { gap: espaciado.sm, paddingRight: espaciado.xxl },
+  fila: { gap: espaciado.sm, paddingHorizontal: TAMANIO_FLECHA },
   chip: { borderRadius: radios.pill },
-  verMas: { position: "absolute", right: 0, top: 0, bottom: 0, justifyContent: "center" },
+  flecha: { position: "absolute", top: 0, bottom: 0, justifyContent: "center" },
+  izquierda: { left: -espaciado.xs },
+  derecha: { right: -espaciado.xs },
+  botonFlecha: { width: TAMANIO_FLECHA, height: TAMANIO_FLECHA, margin: 0 },
 });
