@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, within } from "@testing-library/react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ultimoSocket } from "socket.io-client";
 import Chat from "./Chat";
 import { enviarMensaje, listarMensajes, obtenerCompra } from "../../api/comprasApi";
@@ -115,6 +115,12 @@ describe("Chat: diseño", () => {
     expect(within(lista).queryByTestId("chat-encabezado")).toBeNull();
     expect(screen.getByTestId("chat-encabezado")).toHaveTextContent(/Los Piojos en River/);
     expect(lista.props.inverted).toBe(true);
+  });
+
+  it("tiene su propio botón Volver", async () => {
+    await abrir();
+    await fireEvent.press(screen.getByLabelText("Volver"));
+    expect(router.back).toHaveBeenCalled();
   });
 
   it("arriba de todo va el separador de día y abajo el último mensaje", async () => {

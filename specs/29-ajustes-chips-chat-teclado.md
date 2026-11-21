@@ -1,6 +1,6 @@
 # Spec 29 — Chips con flechas visibles, encabezado propio del chat y teclado numérico
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `fix/ajustes-chips-chat-teclado`
 - **Casos de uso:** CU1, CU3, CU4, CU5, CU6
 - **Iteración:** It5c

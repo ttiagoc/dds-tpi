@@ -1,5 +1,5 @@
 import { Text } from "react-native-paper";
-import { Keyboard, StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { screen, fireEvent, within } from "@testing-library/react-native";
 import { renderConProviders } from "../test-utils/renderConProviders";
 import { BarraDeVentas } from "./BarraDeVentas";
@@ -15,6 +15,7 @@ import { EstadoVacio } from "./EstadoVacio";
 import { Cargando } from "./Cargando";
 import { Pantalla } from "./Pantalla";
 import { espaciado } from "../tema/espaciado";
+import { temaClaro } from "../tema/tema";
 
 describe("ChipEstado", () => {
   it.each([
@@ -125,22 +126,33 @@ describe("Cargando y Pantalla", () => {
 });
 
 describe("CampoNumero", () => {
-  it("usa el teclado decimal o entero y Listo cierra el teclado", async () => {
-    const cerrar = jest.spyOn(Keyboard, "dismiss");
-    const onChangeText = jest.fn();
-    await renderConProviders(
+  const renderCampos = (onChangeText = jest.fn()) =>
+    renderConProviders(
       <>
         <CampoNumero label="Precio" decimal value="" onChangeText={onChangeText} testID="precio" />
         <CampoNumero label="Cupo" value="" onChangeText={() => {}} testID="cupo" />
       </>,
     );
-    expect(screen.getByTestId("precio")).toHaveProp("keyboardType", "decimal-pad");
-    expect(screen.getByTestId("cupo")).toHaveProp("keyboardType", "number-pad");
+
+  it("en iOS usa el teclado con tecla de confirmar y propaga lo escrito", async () => {
+    const onChangeText = jest.fn();
+    await renderCampos(onChangeText);
+    expect(screen.getByTestId("precio")).toHaveProp("keyboardType", "numbers-and-punctuation");
     expect(screen.getByTestId("precio")).toHaveProp("returnKeyType", "done");
     await fireEvent.changeText(screen.getByTestId("precio"), "1500");
     expect(onChangeText).toHaveBeenCalledWith("1500");
-    await fireEvent.press(screen.getByTestId("precio-listo"));
-    expect(cerrar).toHaveBeenCalled();
+  });
+
+  it("en Android usa el teclado decimal o entero", async () => {
+    const original = Platform.OS;
+    Platform.OS = "android";
+    try {
+      await renderCampos();
+      expect(screen.getByTestId("precio")).toHaveProp("keyboardType", "decimal-pad");
+      expect(screen.getByTestId("cupo")).toHaveProp("keyboardType", "number-pad");
+    } finally {
+      Platform.OS = original;
+    }
   });
 });
 
@@ -205,15 +217,30 @@ describe("ChipsFiltro", () => {
       <ChipsFiltro opciones={OPCIONES} onElegir={jest.fn()} prefijoTestID="filtro" />,
     );
 
-  it("si hay chips a la derecha muestra el chevron y se oculta al llegar al final", async () => {
+  it("muestra la flecha de cada lado solo si hay chips de ese lado", async () => {
     await renderFila();
     await medir({ visible: 300, contenido: 600 });
     expect(screen.getByLabelText("Ver más filtros")).toBeTruthy();
+    expect(screen.queryByTestId("filtro-menos")).toBeNull();
     await fireEvent.press(screen.getByTestId("filtro-mas"));
+    await desplazar(100);
+    expect(screen.getByLabelText("Ver filtros anteriores")).toBeTruthy();
+    expect(screen.getByTestId("filtro-mas")).toBeTruthy();
     await desplazar(300);
     expect(screen.queryByTestId("filtro-mas")).toBeNull();
-    await desplazar(100);
-    expect(screen.getByTestId("filtro-mas")).toBeTruthy();
+    await fireEvent.press(screen.getByTestId("filtro-menos"));
+    await desplazar(0);
+    expect(screen.queryByTestId("filtro-menos")).toBeNull();
+  });
+
+  it("las flechas van rellenas con la tinta para distinguirse del fondo", async () => {
+    await renderFila();
+    await medir({ visible: 300, contenido: 600 });
+    const fondos = [];
+    for (let nodo = screen.getByTestId("filtro-mas"); nodo; nodo = nodo.parent) {
+      fondos.push(StyleSheet.flatten(nodo.props.style)?.backgroundColor);
+    }
+    expect(fondos).toContain(temaClaro.colors.onSurface);
   });
 
   it("si todos los chips entran no muestra el chevron", async () => {
