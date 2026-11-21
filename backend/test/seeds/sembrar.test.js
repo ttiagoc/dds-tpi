@@ -27,7 +27,7 @@ describe("sembrar", () => {
 
   const usuario = (email) => todo.usuarios.find((u) => u.email === email);
 
-  it("carga 4 usuarios, 6 categorías y 12 eventos", () => {
+  it("carga 4 usuarios, 15 categorías y 12 eventos", () => {
     expect(todo.usuarios.map((u) => u.email).sort()).toEqual([
       "ana@aiticket.com",
       "bruno@aiticket.com",
@@ -41,6 +41,15 @@ describe("sembrar", () => {
       "Conferencias",
       "Deportes",
       "Stand-up",
+      "Danza",
+      "Cine",
+      "Infantiles",
+      "Ferias",
+      "Exposiciones",
+      "Gastronomía",
+      "Electrónica",
+      "Jazz",
+      "Tango",
     ]);
     expect(todo.eventos).toHaveLength(12);
   });
@@ -64,8 +73,8 @@ describe("sembrar", () => {
     expect(organizadoresConPasados.size).toBe(2);
   });
 
-  it("cada categoría tiene al menos un evento", () => {
-    for (const categoria of todo.categorias) {
+  it("cada una de las 6 primeras categorías tiene al menos un evento", () => {
+    for (const categoria of todo.categorias.slice(0, 6)) {
       expect(todo.eventos.some((e) => e.categoria === categoria)).toBe(true);
     }
   });

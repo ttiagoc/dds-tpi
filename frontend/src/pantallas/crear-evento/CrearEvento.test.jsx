@@ -6,7 +6,13 @@ import CrearEvento from "./CrearEvento";
 import { crearEvento } from "../../api/eventosApi";
 import { listarCategorias } from "../../api/categoriasApi";
 import { FENIX, renderConProviders } from "../../test-utils/renderConProviders";
-import { errorHttp, eventoDetalle, promesaManual } from "../../test-utils/fixtures";
+import {
+  errorHttp,
+  eventoDetalle,
+  paginaDeCategorias,
+  dosPaginasDeCategorias,
+  promesaManual,
+} from "../../test-utils/fixtures";
 
 jest.mock("../../api/eventosApi");
 jest.mock("../../api/categoriasApi");
@@ -28,7 +34,7 @@ async function completar({ sinHora = false } = {}) {
   await escribir("evento-nombre", "  Stand-up en el Konex ");
   await escribir("evento-descripcion", "Noche de humor");
   await escribir("evento-lugar", "Ciudad Cultural Konex");
-  await fireEvent.press(screen.getByTestId("evento-categoria"));
+  await fireEvent(screen.getByTestId("evento-categoria"), "focus");
   await fireEvent.press(await screen.findByTestId("categoria-6"));
   await fireEvent.press(screen.getByTestId("evento-fecha"));
   await fireEvent.press(screen.getByTestId("modal-fecha-ok"));
@@ -43,7 +49,7 @@ async function completar({ sinHora = false } = {}) {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  listarCategorias.mockResolvedValue(CATEGORIAS);
+  listarCategorias.mockResolvedValue(paginaDeCategorias(CATEGORIAS));
   crearEvento.mockResolvedValue(eventoDetalle({ id: 20 }));
 });
 
@@ -65,7 +71,8 @@ describe("CrearEvento: formulario", () => {
   it("muestra la categoría, el día y la hora elegidos", async () => {
     await abrir();
     await completar();
-    expect(screen.getByTestId("evento-categoria")).toHaveTextContent(/Stand-up/);
+    expect(screen.getByTestId("evento-categoria")).toHaveProp("value", "Stand-up");
+    expect(screen.queryByTestId("categorias-lista")).toBeNull();
     expect(screen.getByTestId("evento-fecha")).toHaveTextContent(/5 dic 2026/);
     expect(screen.getByTestId("evento-hora")).toHaveTextContent(/22:00/);
   });
@@ -199,24 +206,71 @@ describe("CrearEvento: envío", () => {
   });
 });
 
+const esperar = (ms) => act(() => new Promise((listo) => setTimeout(listo, ms)));
+const abrirCategorias = () => fireEvent(screen.getByTestId("evento-categoria"), "focus");
+
 describe("CrearEvento: categorías", () => {
-  it("mientras cargan muestra un indicador", async () => {
-    const pedido = promesaManual();
-    listarCategorias.mockReturnValue(pedido.promesa);
-    await renderConProviders(<CrearEvento />, { usuario: FENIX });
-    expect(screen.getByLabelText("Cargando categorías")).toBeTruthy();
-    await act(async () => pedido.resolver(CATEGORIAS));
-    expect(await screen.findByTestId("evento-categoria")).toBeTruthy();
+  it("al enfocar muestra la primera página de categorías", async () => {
+    await abrir();
+    await abrirCategorias();
+    expect(await screen.findByTestId("categoria-1")).toBeTruthy();
+    expect(listarCategorias).toHaveBeenLastCalledWith({ page: 1, limit: 10 });
+  });
+
+  it("escribir filtra con debounce", async () => {
+    await abrir();
+    await abrirCategorias();
+    await fireEvent.changeText(screen.getByTestId("evento-categoria"), "conf");
+    expect(listarCategorias).not.toHaveBeenCalledWith(expect.objectContaining({ q: "conf" }));
+    await esperar(350);
+    expect(listarCategorias).toHaveBeenLastCalledWith({ q: "conf", page: 1, limit: 10 });
+  });
+
+  it("al llegar al final de la lista carga la página siguiente", async () => {
+    const [primera, segunda] = dosPaginasDeCategorias(CATEGORIAS, [{ id: 9, nombre: "Tango" }]);
+    listarCategorias.mockResolvedValueOnce(primera).mockResolvedValueOnce(segunda);
+    await abrir();
+    await abrirCategorias();
+    await screen.findByTestId("categoria-1");
+    await fireEvent.scroll(screen.getByTestId("categorias-lista"), {
+      nativeEvent: {
+        layoutMeasurement: { height: 240 },
+        contentOffset: { y: 100 },
+        contentSize: { height: 340 },
+      },
+    });
+    expect(await screen.findByTestId("categoria-9")).toBeTruthy();
+    expect(listarCategorias).toHaveBeenLastCalledWith({ page: 2, limit: 10 });
+  });
+
+  it("sin coincidencias avisa", async () => {
+    await abrir();
+    listarCategorias.mockResolvedValue(paginaDeCategorias([]));
+    await abrirCategorias();
+    await fireEvent.changeText(screen.getByTestId("evento-categoria"), "zzz");
+    await esperar(350);
+    expect(await screen.findByTestId("categorias-vacio")).toHaveTextContent(
+      "No hay categorías con ese nombre",
+    );
+  });
+
+  it("editar después de elegir deja la categoría sin elegir", async () => {
+    await abrir();
+    await completar();
+    await fireEvent.changeText(screen.getByTestId("evento-categoria"), "Stand-u");
+    await fireEvent.press(publicar());
+    expect(crearEvento).not.toHaveBeenCalled();
+    expect(screen.getByTestId("evento-categoria-error")).toHaveTextContent("Elegí una categoría");
   });
 
   it("si no cargan muestra el error y Reintentar las vuelve a pedir", async () => {
     listarCategorias.mockRejectedValueOnce(new Error("red"));
-    await renderConProviders(<CrearEvento />, { usuario: FENIX });
+    await abrir();
+    await abrirCategorias();
     expect(await screen.findByTestId("categorias-error")).toHaveTextContent(
       "No pudimos conectar con el servidor",
     );
     await fireEvent.press(screen.getByRole("button", { name: "Reintentar" }));
-    expect(await screen.findByTestId("evento-categoria")).toBeTruthy();
-    expect(listarCategorias).toHaveBeenCalledTimes(2);
+    expect(await screen.findByTestId("categoria-1")).toBeTruthy();
   });
 });

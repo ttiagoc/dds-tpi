@@ -40,6 +40,7 @@ import {
   paginaDeConversaciones,
   paginaDeEventos,
   reseniasDe,
+  paginaDeCategorias,
 } from "../test-utils/fixtures";
 
 jest.mock("../auth/sesion");
@@ -82,7 +83,7 @@ const abrirApp = (initialUrl = "/") => renderRouter(RUTAS, { initialUrl });
 beforeEach(() => {
   jest.clearAllMocks();
   leerSesion.mockResolvedValue(null);
-  listarCategorias.mockResolvedValue([]);
+  listarCategorias.mockResolvedValue(paginaDeCategorias([]));
   buscarEventos.mockResolvedValue(paginaDeEventos([eventoResumen()]));
   obtenerEvento.mockResolvedValue(eventoDetalle());
   obtenerReseniasDeOrganizador.mockResolvedValue(reseniasDe([]));

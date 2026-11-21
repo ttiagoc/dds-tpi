@@ -1,64 +1,60 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { ActivityIndicator, Button, Menu, Text, useTheme } from "react-native-paper";
+import { Keyboard, StyleSheet, View } from "react-native";
+import { TextInput } from "react-native-paper";
 import { listarCategorias } from "../../api/categoriasApi";
-import { ErrorEnLinea } from "../../components/ErrorEnLinea";
-import { useCargar } from "../../hooks/useCargar";
+import { useDebounce } from "../../hooks/useDebounce";
+import { paginaDe, useListaPaginada } from "../../hooks/useListaPaginada";
 import { espaciado } from "../../tema/espaciado";
 import { ErrorCampo } from "./ErrorCampo";
+import { ListaDeCategorias } from "./ListaDeCategorias";
 
-function BotonCategoria({ texto, error, deshabilitado, onPress }) {
-  const { colors } = useTheme();
-  return (
-    <Button
-      mode="outlined"
-      icon="shape-outline"
-      disabled={deshabilitado}
-      onPress={onPress}
-      style={error ? { borderColor: colors.error } : undefined}
-      accessibilityLabel={error ? `Categoría: ${texto}. ${error}` : `Categoría: ${texto}`}
-      testID="evento-categoria"
-    >
-      {texto}
-    </Button>
-  );
+export const DEMORA_BUSQUEDA = 300;
+const pedirCategorias = paginaDe(listarCategorias, "categorias");
+
+function useBuscadorDeCategorias(categoria, onElegir) {
+  const [texto, setTexto] = useState(categoria?.nombre ?? "");
+  const [abierta, setAbierta] = useState(false);
+  const demorado = useDebounce(texto.trim(), DEMORA_BUSQUEDA);
+  const lista = useListaPaginada(pedirCategorias, { q: demorado || undefined });
+  return {
+    texto,
+    abierta,
+    lista,
+    abrir: () => setAbierta(true),
+    escribir: (nuevo) => {
+      setTexto(nuevo);
+      setAbierta(true);
+      if (categoria) onElegir(null);
+    },
+    elegir: (opcion) => {
+      setTexto(opcion.nombre);
+      setAbierta(false);
+      onElegir(opcion);
+      Keyboard.dismiss();
+    },
+  };
 }
 
 export function SelectorCategoria({ categoria, onElegir, deshabilitado, error, foco }) {
-  const [abierto, setAbierto] = useState(false);
-  const { datos: categorias, error: errorCarga, recargar } = useCargar(listarCategorias);
-  if (errorCarga)
-    return <ErrorEnLinea mensaje={errorCarga} onReintentar={recargar} testID="categorias-error" />;
-  if (!categorias)
-    return <ActivityIndicator size="small" accessibilityLabel="Cargando categorías" />;
+  const buscador = useBuscadorDeCategorias(categoria, onElegir);
   return (
     <View {...foco.registrar("categoria")} style={estilos.campo}>
-      <Text variant="labelLarge">Categoría</Text>
-      <Menu
-        visible={abierto}
-        onDismiss={() => setAbierto(false)}
-        anchor={
-          <BotonCategoria
-            texto={categoria?.nombre ?? "Elegí una categoría"}
-            error={error}
-            deshabilitado={deshabilitado}
-            onPress={() => setAbierto(true)}
-          />
-        }
-      >
-        {categorias.map((opcion) => (
-          <Menu.Item
-            key={opcion.id}
-            title={opcion.nombre}
-            onPress={() => {
-              setAbierto(false);
-              onElegir(opcion);
-            }}
-            testID={`categoria-${opcion.id}`}
-          />
-        ))}
-      </Menu>
+      <TextInput
+        ref={foco.registrarEntrada("categoria")}
+        mode="outlined"
+        label="Categoría"
+        placeholder="Buscá o elegí una categoría"
+        value={buscador.texto}
+        onChangeText={buscador.escribir}
+        onFocus={buscador.abrir}
+        left={<TextInput.Icon icon="magnify" />}
+        disabled={deshabilitado}
+        error={!!error}
+        accessibilityHint={error}
+        testID="evento-categoria"
+      />
       <ErrorCampo mensaje={error} testID="evento-categoria-error" />
+      {buscador.abierta && <ListaDeCategorias lista={buscador.lista} onElegir={buscador.elegir} />}
     </View>
   );
 }

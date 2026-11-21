@@ -10,6 +10,8 @@ import {
   eventoResumen,
   paginaDeEventos,
   promesaManual,
+  paginaDeCategorias,
+  dosPaginasDeCategorias,
 } from "../../test-utils/fixtures";
 
 jest.mock("../../api/eventosApi");
@@ -33,8 +35,19 @@ async function abrir() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  listarCategorias.mockResolvedValue(CATEGORIAS);
+  listarCategorias.mockResolvedValue(paginaDeCategorias(CATEGORIAS));
   buscarEventos.mockResolvedValue(paginaDeEventos([PIOJOS]));
+});
+
+describe("Explorar: chips de categorías", () => {
+  it("al llegar al final de la fila pide la página siguiente de categorías", async () => {
+    const [primera, segunda] = dosPaginasDeCategorias(CATEGORIAS, [{ id: 9, nombre: "Tango" }]);
+    listarCategorias.mockResolvedValueOnce(primera).mockResolvedValueOnce(segunda);
+    await abrir();
+    await fireEvent(screen.getByTestId("chip-categoria-fila"), "endReached");
+    expect(await screen.findByTestId("chip-categoria-9")).toBeTruthy();
+    expect(listarCategorias).toHaveBeenLastCalledWith({ page: 2, limit: 10 });
+  });
 });
 
 describe("Explorar: inicio", () => {

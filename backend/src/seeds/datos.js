@@ -33,6 +33,15 @@ export const CATEGORIAS = [
   { nombre: "Conferencias", descripcion: "Charlas, congresos y talleres" },
   { nombre: "Deportes", descripcion: "Partidos y competencias" },
   { nombre: "Stand-up", descripcion: "Humor en vivo" },
+  { nombre: "Danza", descripcion: "Ballet, contemporánea y folklore" },
+  { nombre: "Cine", descripcion: "Funciones especiales y ciclos" },
+  { nombre: "Infantiles", descripcion: "Para ir con chicos" },
+  { nombre: "Ferias", descripcion: "Diseño, libros y productores" },
+  { nombre: "Exposiciones", descripcion: "Muestras de arte y ciencia" },
+  { nombre: "Gastronomía", descripcion: "Degustaciones y festivales de comida" },
+  { nombre: "Electrónica", descripcion: "Fiestas y DJ sets" },
+  { nombre: "Jazz", descripcion: "Clubes y ciclos de jazz" },
+  { nombre: "Tango", descripcion: "Milongas y espectáculos" },
 ];
 
 const tipo = (nombre, precio, cupo, descripcion = "") => ({ nombre, precio, cupo, descripcion });

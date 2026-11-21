@@ -49,11 +49,28 @@ async function agregarOrganizadorSinResenias() {
 }
 
 describe("GET /categorias", () => {
-  it("responde 200 con las 6 categorías sembradas ordenadas por id", async () => {
-    const res = await get("/categorias");
+  it("responde 200 con la primera página de las 15 categorías por nombre", async () => {
+    const res = await get("/categorias?limit=10");
     expect(res.status).toBe(200);
-    expect(res.body.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(res.body[0]).toEqual({ id: 1, nombre: "Recitales", descripcion: "Música en vivo" });
+    expect(res.body).toMatchObject({ total: 15, page: 1, totalPages: 2 });
+    expect(res.body.categorias).toHaveLength(10);
+    expect(res.body.categorias[0]).toMatchObject({ nombre: "Cine" });
+  });
+
+  it("filtra por texto sin acentos", async () => {
+    const res = await get("/categorias?q=gastronomia");
+    expect(res.body).toEqual({
+      categorias: [{ id: 12, nombre: "Gastronomía", descripcion: expect.any(String) }],
+      total: 1,
+      page: 1,
+      totalPages: 1,
+    });
+  });
+
+  it("responde 400 con una query inválida", async () => {
+    const res = await get("/categorias?limit=100");
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("Parámetros de consulta inválidos");
   });
 });
 

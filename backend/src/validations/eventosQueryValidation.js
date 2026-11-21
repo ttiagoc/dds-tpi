@@ -1,17 +1,13 @@
 import { z } from "./zod.js";
 import { paginacionValidation } from "./paginacionValidation.js";
+import { textoDeBusqueda } from "./textoDeBusqueda.js";
 import { vacioComoAusente } from "./vacioComoAusente.js";
 
 const precio = vacioComoAusente(z.coerce.number().min(0).optional());
 
 export const eventosQueryValidation = z
   .object({
-    q: z
-      .string()
-      .transform((texto) => texto.trim())
-      .pipe(z.string().max(100))
-      .transform((texto) => texto || undefined)
-      .optional(),
+    q: textoDeBusqueda(100),
     categoria: vacioComoAusente(z.coerce.number().int().positive().optional()),
     precioMin: precio,
     precioMax: precio,
