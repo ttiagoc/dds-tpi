@@ -104,6 +104,11 @@ Body `POST /eventos`:
 ```
 `multimedia`: URLs `http(s)` o rutas `/imagenes/...` (las que devuelve `POST /imagenes`). `direccion`: 5-200, se geocodifica con Georef (R13-R15, spec 28).
 
+### Direcciones
+| Método | Ruta | Auth | Entrada | Respuesta | Errores |
+|---|---|---|---|---|---|
+| GET | `/direcciones/ubicacion` | 🅞 | `calle` (1-100), `numero` (entero 1-99999), `localidad` (1-100), `provincia` (1-100) | 200 `{ direccion, latitud, longitud }`: vista previa para confirmar en el mapa antes de publicar; `direccion` = "calle número, localidad, provincia". Detalle en `specs/31-direccion-con-mapa.md` | 400, 401, 403, 422 "No encontramos esa dirección", 503 "No pudimos consultar el mapa, probá en un rato" |
+
 ### Imágenes
 | Método | Ruta | Auth | Entrada | Respuesta | Errores |
 |---|---|---|---|---|---|
