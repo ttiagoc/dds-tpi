@@ -72,7 +72,18 @@ function Resumen({ compra }) {
       <Text variant="bodySmall" style={{ color: colors.onSurfaceVariant }}>
         {`Comprada el ${formatearFecha(fechaCompra)}`}
       </Text>
+      <EntradasUsadas entradas={compra.entradas ?? []} />
     </View>
+  );
+}
+
+function EntradasUsadas({ entradas }) {
+  const usadas = entradas.filter((entrada) => entrada.fechaUso !== null).length;
+  if (entradas.length < 2 || usadas === 0) return null;
+  return (
+    <Text variant="bodyMedium" testID="compra-entradas-usadas">
+      {`Entradas usadas: ${usadas} de ${entradas.length}`}
+    </Text>
   );
 }
 

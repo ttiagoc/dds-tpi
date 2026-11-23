@@ -1,6 +1,8 @@
 import { EstadoCompra, TRANSICIONES } from "./EstadoCompra.js";
 import { CambioEstadoCompra } from "./CambioEstadoCompra.js";
+import { Entrada } from "./Entrada.js";
 import { Mensaje } from "./Mensaje.js";
+import { NotFoundError } from "../errors/AppError.js";
 import { exigir, esEnteroPositivo, fechaValida } from "./validaciones.js";
 
 const DIA_EN_MS = 24 * 60 * 60 * 1000;
@@ -21,6 +23,7 @@ export class Compra {
     mensajes = [],
     lecturas = {},
     fechaCompra,
+    entradas,
   }) {
     exigir(comprador, "La compra necesita un comprador");
     exigir(evento, "La compra necesita un evento");
@@ -39,6 +42,13 @@ export class Compra {
     this.mensajes = mensajes.map((mensaje) => new Mensaje(mensaje));
     this.lecturas = { ...lecturas };
     this.fechaCompra = fechaValida(fechaCompra, "La fecha de compra no es válida");
+    this.entradas = entradas
+      ? entradas.map((entrada) => new Entrada(entrada))
+      : Entrada.paraCompra(cantidad);
+    exigir(
+      this.entradas.length === cantidad,
+      "Las entradas no coinciden con la cantidad de la compra",
+    );
   }
 
   static crear({ comprador, evento, tipoEntradaId, cantidad }, ahora) {
@@ -98,6 +108,29 @@ export class Compra {
 
   marcarUtilizada(quien, ahora) {
     this.#actualizarEstado(UTILIZADA, quien, ahora);
+    this.entradas.filter((entrada) => !entrada.estaUsada()).forEach((e) => e.usar(ahora));
+  }
+
+  validarEntrada(numero, quien, ahora) {
+    exigir(this.estado !== PENDIENTE, "La compra todavía no está pagada");
+    exigir(![CANCELADA, REEMBOLSADA].includes(this.estado), "La compra está cancelada");
+    this.#entrada(numero).usar(ahora);
+    if (this.estado === CONFIRMADA) this.#actualizarEstado(UTILIZADA, quien, ahora);
+  }
+
+  #entrada(numero) {
+    const entrada = this.entradas.find((e) => e.numero === numero);
+    if (!entrada) throw new NotFoundError("No existe la entrada");
+    return entrada;
+  }
+
+  entradasPara(usuarioId) {
+    const puedeValidar = this.evento.esDe(usuarioId) && this.sumaAlRecaudado();
+    return this.entradas.map((entrada) => ({
+      numero: entrada.numero,
+      fechaUso: entrada.fechaUso,
+      puedeValidarse: puedeValidar && !entrada.estaUsada(),
+    }));
   }
 
   puedePagarse(ahora) {

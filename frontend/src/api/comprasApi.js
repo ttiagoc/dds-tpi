@@ -22,6 +22,9 @@ export const reseniarCompra = (id, resenia) =>
 export const marcarUtilizada = (id) =>
   cliente.post(`/compras/${id}/uso`).then((respuesta) => respuesta.data);
 
+export const validarEntrada = (id, numero) =>
+  cliente.post(`/compras/${id}/entradas/${numero}/uso`).then((respuesta) => respuesta.data);
+
 export const listarMensajes = (id, cursor = {}) =>
   cliente.get(`/compras/${id}/mensajes`, { params: cursor }).then((respuesta) => respuesta.data);
 

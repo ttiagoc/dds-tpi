@@ -25,6 +25,7 @@ export function crearCompraRoutes(
   router.post("/:id/pago", ...comprador, controller.pagar);
   router.post("/:id/cancelacion", ...comprador, controller.cancelar);
   router.post("/:id/uso", ...organizador, controller.marcarUtilizada);
+  router.post("/:id/entradas/:numero/uso", ...organizador, controller.validarEntrada);
   router.post(
     "/:id/resenia",
     ...comprador,

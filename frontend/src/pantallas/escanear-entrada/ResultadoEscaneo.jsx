@@ -3,14 +3,28 @@ import { ActivityIndicator, Button, HelperText, Icon, Text, useTheme } from "rea
 import { ChipEstado } from "../../components/ChipEstado";
 import { TarjetaPlana } from "../../components/TarjetaPlana";
 import { espaciado } from "../../tema/espaciado";
+import { entradaDe } from "./useEscaneo";
 
 const MOTIVOS = {
-  UTILIZADA: "Esta entrada ya fue utilizada",
   PENDIENTE: "Esta compra todavía no está pagada",
   CANCELADA: "Esta compra está cancelada",
   REEMBOLSADA: "Esta compra está cancelada",
 };
+const MOTIVO_USADA = "Esta entrada ya fue utilizada";
 const MOTIVO_GENERICO = "No podés validar esta entrada";
+
+function motivoDe(compra, entrada) {
+  if (entrada.fechaUso !== null) return MOTIVO_USADA;
+  return MOTIVOS[compra.estado] ?? MOTIVO_GENERICO;
+}
+
+function textoQuedan(compra) {
+  const quedan = compra.entradas.filter((entrada) => entrada.fechaUso === null).length;
+  if (quedan === 0) return null;
+  return quedan === 1
+    ? "Queda 1 entrada de esta compra"
+    : `Quedan ${quedan} entradas de esta compra`;
+}
 
 function EscanearOtra({ onPress }) {
   return (
@@ -31,23 +45,49 @@ function Mensaje({ icono, color, texto, testID }) {
   );
 }
 
-function DatosDeLaCompra({ compra }) {
+function DatosDeLaCompra({ escaneo }) {
   const { colors } = useTheme();
+  const { compra, numero } = escaneo;
   return (
     <View style={estilos.datos}>
       <Text variant="titleMedium">{compra.comprador.nombre}</Text>
       <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
-        {`${compra.tipoEntrada.nombre} × ${compra.cantidad}`}
+        {`Entrada ${numero} de ${compra.cantidad} · ${compra.tipoEntrada.nombre}`}
       </Text>
       <ChipEstado estado={compra.estado} />
     </View>
   );
 }
 
+function Validada({ compra }) {
+  const { colors } = useTheme();
+  const quedan = textoQuedan(compra);
+  return (
+    <>
+      <Mensaje
+        icono="check-circle"
+        color={colors.primary}
+        texto="Entrada validada"
+        testID="escaner-validada"
+      />
+      {quedan && (
+        <Text
+          variant="bodyMedium"
+          style={{ color: colors.onSurfaceVariant }}
+          testID="escaner-quedan"
+        >
+          {quedan}
+        </Text>
+      )}
+    </>
+  );
+}
+
 function Validar({ escaneo }) {
   const { colors } = useTheme();
-  if (!escaneo.compra.acciones.puedeMarcarUtilizada) {
-    const motivo = MOTIVOS[escaneo.compra.estado] ?? MOTIVO_GENERICO;
+  const entrada = entradaDe(escaneo);
+  if (!entrada.puedeValidarse) {
+    const motivo = motivoDe(escaneo.compra, entrada);
     return (
       <Mensaje
         icono="alert-circle-outline"
@@ -93,23 +133,14 @@ function Contenido({ escaneo }) {
       />
     );
   }
-  if (escaneo.fase === "validada") {
-    return (
-      <>
-        <DatosDeLaCompra compra={escaneo.compra} />
-        <Mensaje
-          icono="check-circle"
-          color={colors.primary}
-          texto="Entrada validada"
-          testID="escaner-validada"
-        />
-      </>
-    );
-  }
   return (
     <>
-      <DatosDeLaCompra compra={escaneo.compra} />
-      <Validar escaneo={escaneo} />
+      <DatosDeLaCompra escaneo={escaneo} />
+      {escaneo.fase === "validada" ? (
+        <Validada compra={escaneo.compra} />
+      ) : (
+        <Validar escaneo={escaneo} />
+      )}
     </>
   );
 }

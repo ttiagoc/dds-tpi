@@ -19,6 +19,7 @@ const idPath = (name, description) => ({
   schema: { type: "integer", minimum: 1, example: 1 },
 });
 export const id = (description) => idPath("id", description);
+export const numeroDeEntrada = idPath("numero", "Número de la entrada dentro de la compra");
 export const eventoId = idPath("eventoId", "Id del evento");
 
 export const query = (name, schema, description) => ({ name, in: "query", schema, description });

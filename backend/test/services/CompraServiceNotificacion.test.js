@@ -62,6 +62,15 @@ describe("CompraService notifica el estado final de la compra", () => {
     expect(notificador.estadoCompra).not.toHaveBeenCalled();
   });
 
+  it("validar la primera entrada notifica UTILIZADA y la segunda ya no notifica", async () => {
+    compras = [compraDeAna(CONFIRMADA)];
+    await service.validarEntrada(7, 1, usuarioFenix);
+    expect(notificador.estadoCompra).toHaveBeenCalledWith(7, UTILIZADA);
+    notificador.estadoCompra.mockClear();
+    await service.validarEntrada(7, 2, usuarioFenix);
+    expect(notificador.estadoCompra).not.toHaveBeenCalled();
+  });
+
   it("no notifica al crear una compra", async () => {
     await service.crear({ eventoId: 1, tipoEntradaId: 1, cantidad: 1 }, usuarioAna);
     expect(notificador.estadoCompra).not.toHaveBeenCalled();

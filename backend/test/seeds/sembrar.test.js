@@ -138,6 +138,14 @@ describe("sembrar", () => {
     }
   });
 
+  it("cada compra tiene una entrada por unidad, usadas solo si está UTILIZADA", () => {
+    for (const compra of todo.compras) {
+      const usada = compra.estado === EstadoCompra.UTILIZADA;
+      expect(compra.entradas).toHaveLength(compra.cantidad);
+      expect(compra.entradas.every((e) => e.estaUsada() === usada)).toBe(true);
+    }
+  });
+
   it("cada compra usa la misma instancia de evento que el repo", () => {
     for (const compra of todo.compras) {
       expect(todo.eventos).toContain(compra.evento);

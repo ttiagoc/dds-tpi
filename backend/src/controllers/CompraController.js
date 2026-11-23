@@ -34,6 +34,17 @@ export class CompraController extends BaseController {
 
   marcarUtilizada = (req, res, next) => this.conId("marcarUtilizada", req, res, next);
 
+  validarEntrada = async (req, res, next) => {
+    try {
+      const id = this.parsearId(req.params.id);
+      const numero = this.parsearId(req.params.numero);
+      const compra = await this.compraService.validarEntrada(id, numero, req.usuario);
+      return res.status(200).json(compra);
+    } catch (error) {
+      return next(error);
+    }
+  };
+
   listarDelEvento = async (req, res, next) => {
     try {
       const eventoId = this.parsearId(req.params.id);

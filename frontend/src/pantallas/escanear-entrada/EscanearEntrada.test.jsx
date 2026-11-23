@@ -3,10 +3,9 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams } from "expo-router";
 import { Linking } from "react-native";
 import EscanearEntrada from "./EscanearEntrada";
-import { marcarUtilizada, obtenerCompra } from "../../api/comprasApi";
+import { obtenerCompra, validarEntrada } from "../../api/comprasApi";
 import { FENIX, renderConProviders } from "../../test-utils/renderConProviders";
-import { compraDetalle, errorHttp } from "../../test-utils/fixtures";
-import { SIN_ACCIONES } from "../../test-utils/detalleCompra";
+import { compraDetalle, entrada, errorHttp } from "../../test-utils/fixtures";
 
 jest.mock("../../api/comprasApi");
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
@@ -20,14 +19,21 @@ jest.mock("expo-camera", () => {
 });
 
 const pedirPermiso = jest.fn();
-const CONFIRMADA = compraDetalle({
-  acciones: { ...SIN_ACCIONES, puedeMarcarUtilizada: true },
+const USADA = { fechaUso: "2026-11-20T22:00:00.000Z" };
+const PARA_VALIDAR = compraDetalle({
+  cantidad: 3,
+  entradas: [
+    entrada(1, { puedeValidarse: true }),
+    entrada(2, { puedeValidarse: true }),
+    entrada(3),
+  ],
 });
-const UTILIZADA = compraDetalle({ estado: "UTILIZADA", acciones: SIN_ACCIONES });
+const conEntradas = (estado, entradas) => compraDetalle({ estado, cantidad: 3, entradas });
 
 const conPermiso = (permiso) => useCameraPermissions.mockReturnValue([permiso, pedirPermiso]);
 const camara = () => CameraView.mock.calls.at(-1)[0];
 const escanear = (data) => act(async () => camara().onBarcodeScanned({ type: "qr", data }));
+const QR_ENTRADA_2 = "aiticketit:compra:7:entrada:2";
 
 async function abrir() {
   await renderConProviders(<EscanearEntrada />, { usuario: FENIX });
@@ -38,8 +44,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   useLocalSearchParams.mockReturnValue({ id: "1" });
   conPermiso({ granted: true, canAskAgain: true });
-  obtenerCompra.mockResolvedValue(CONFIRMADA);
-  marcarUtilizada.mockResolvedValue(UTILIZADA);
+  obtenerCompra.mockResolvedValue(PARA_VALIDAR);
+  validarEntrada.mockResolvedValue(
+    conEntradas("UTILIZADA", [entrada(1), entrada(2, USADA), entrada(3)]),
+  );
 });
 
 describe("EscanearEntrada: validar", () => {
@@ -49,68 +57,93 @@ describe("EscanearEntrada: validar", () => {
     expect(screen.getByText("Apuntá al QR de la entrada")).toBeTruthy();
   });
 
-  it("lee la compra, la valida y muestra Entrada validada", async () => {
+  it("lee la entrada, la valida y dice cuántas quedan", async () => {
     await abrir();
-    await escanear("aiticketit:compra:7");
+    await escanear(QR_ENTRADA_2);
     expect(obtenerCompra).toHaveBeenCalledWith(7);
     const resultado = screen.getByTestId("escaner-resultado");
     expect(resultado).toHaveTextContent(/Ana Pérez/);
-    expect(resultado).toHaveTextContent(/Campo × 2/);
+    expect(resultado).toHaveTextContent(/Entrada 2 de 3 · Campo/);
     expect(camara().onBarcodeScanned).toBeUndefined();
     await fireEvent.press(screen.getByTestId("escaner-validar"));
-    expect(marcarUtilizada).toHaveBeenCalledWith(7);
+    expect(validarEntrada).toHaveBeenCalledWith(7, 2);
     expect(await screen.findByTestId("escaner-validada")).toHaveTextContent(/Entrada validada/);
+    expect(screen.getByTestId("escaner-quedan")).toHaveTextContent(
+      "Quedan 2 entradas de esta compra",
+    );
+  });
+
+  it.each([
+    [[entrada(1, USADA), entrada(2, USADA), entrada(3)], "Queda 1 entrada de esta compra"],
+    [[entrada(1, USADA), entrada(2, USADA), entrada(3, USADA)], null],
+  ])("después de validar avisa lo que queda", async (entradas, texto) => {
+    validarEntrada.mockResolvedValue(conEntradas("UTILIZADA", entradas));
+    await abrir();
+    await escanear(QR_ENTRADA_2);
+    await fireEvent.press(screen.getByTestId("escaner-validar"));
+    await screen.findByTestId("escaner-validada");
+    if (texto) expect(screen.getByTestId("escaner-quedan")).toHaveTextContent(texto);
+    else expect(screen.queryByTestId("escaner-quedan")).toBeNull();
   });
 
   it("Escanear otra vuelve a la cámara", async () => {
     await abrir();
-    await escanear("aiticketit:compra:7");
+    await escanear(QR_ENTRADA_2);
     await fireEvent.press(screen.getByTestId("escaner-otra"));
     expect(screen.getByText("Apuntá al QR de la entrada")).toBeTruthy();
     expect(camara().onBarcodeScanned).toEqual(expect.any(Function));
   });
 
   it("si el back rechaza la validación muestra su mensaje", async () => {
-    marcarUtilizada.mockRejectedValue(errorHttp(422, "No se puede pasar de UTILIZADA a UTILIZADA"));
+    validarEntrada.mockRejectedValue(errorHttp(422, "Esta entrada ya fue utilizada"));
     await abrir();
-    await escanear("aiticketit:compra:7");
+    await escanear(QR_ENTRADA_2);
     await fireEvent.press(screen.getByTestId("escaner-validar"));
     expect(await screen.findByTestId("escaner-error")).toHaveTextContent(
-      "No se puede pasar de UTILIZADA a UTILIZADA",
+      "Esta entrada ya fue utilizada",
     );
   });
 });
 
 describe("EscanearEntrada: no se puede validar", () => {
   it.each([
-    ["UTILIZADA", "Esta entrada ya fue utilizada"],
-    ["PENDIENTE", "Esta compra todavía no está pagada"],
-    ["CANCELADA", "Esta compra está cancelada"],
-    ["REEMBOLSADA", "Esta compra está cancelada"],
-  ])("con la compra %s avisa el motivo, sin botón", async (estado, motivo) => {
-    obtenerCompra.mockResolvedValue(compraDetalle({ estado, acciones: SIN_ACCIONES }));
+    ["UTILIZADA", entrada(2, USADA), "Esta entrada ya fue utilizada"],
+    ["PENDIENTE", entrada(2), "Esta compra todavía no está pagada"],
+    ["CANCELADA", entrada(2), "Esta compra está cancelada"],
+    ["REEMBOLSADA", entrada(2), "Esta compra está cancelada"],
+  ])("con la compra %s avisa el motivo, sin botón", async (estado, segunda, motivo) => {
+    obtenerCompra.mockResolvedValue(conEntradas(estado, [entrada(1), segunda, entrada(3)]));
     await abrir();
-    await escanear("aiticketit:compra:7");
+    await escanear(QR_ENTRADA_2);
     expect(screen.getByTestId("escaner-motivo")).toHaveTextContent(new RegExp(motivo));
     expect(screen.queryByTestId("escaner-validar")).toBeNull();
   });
 
-  it("una entrada de otro evento no se busca más allá", async () => {
+  it("una entrada de otro evento no se puede validar", async () => {
     obtenerCompra.mockResolvedValue(compraDetalle({ evento: { id: 5, nombre: "Otro" } }));
     await abrir();
-    await escanear("aiticketit:compra:7");
+    await escanear(QR_ENTRADA_2);
     expect(screen.getByTestId("escaner-error")).toHaveTextContent(/Esa entrada es de otro evento/);
     expect(screen.queryByTestId("escaner-validar")).toBeNull();
   });
 
-  it("un QR que no es de la app no consulta al back", async () => {
+  it("un número de entrada que la compra no tiene avisa que no existe", async () => {
     await abrir();
-    await escanear("https://ejemplo.com");
-    expect(screen.getByTestId("escaner-error")).toHaveTextContent(
-      /Ese QR no es una entrada de AI Ticket It/,
-    );
-    expect(obtenerCompra).not.toHaveBeenCalled();
+    await escanear("aiticketit:compra:7:entrada:9");
+    expect(screen.getByTestId("escaner-error")).toHaveTextContent(/No existe la entrada/);
   });
+
+  it.each([["https://ejemplo.com"], ["aiticketit:compra:7"]])(
+    "el QR %s no es de la app y no consulta al back",
+    async (data) => {
+      await abrir();
+      await escanear(data);
+      expect(screen.getByTestId("escaner-error")).toHaveTextContent(
+        /Ese QR no es una entrada de AI Ticket It/,
+      );
+      expect(obtenerCompra).not.toHaveBeenCalled();
+    },
+  );
 
   it.each([
     [404, "No existe la compra"],
@@ -118,7 +151,7 @@ describe("EscanearEntrada: no se puede validar", () => {
   ])("con %i muestra el mensaje del back", async (status, mensaje) => {
     obtenerCompra.mockRejectedValue(errorHttp(status, mensaje));
     await abrir();
-    await escanear("aiticketit:compra:7");
+    await escanear(QR_ENTRADA_2);
     expect(screen.getByTestId("escaner-error")).toHaveTextContent(new RegExp(mensaje));
   });
 });

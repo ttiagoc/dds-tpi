@@ -182,6 +182,12 @@ describe("Compra", () => {
       expect(compra.puedeReseniarse()).toBe(true);
     });
 
+    it("marca como usadas todas las entradas (R4)", () => {
+      const compra = crearCompra({ estado: CONFIRMADA, cantidad: 3 });
+      compra.marcarUtilizada(ORGANIZADOR_ID, AHORA);
+      expect(compra.entradas.map((e) => e.fechaUso)).toEqual([AHORA, AHORA, AHORA]);
+    });
+
     it.each([PENDIENTE, UTILIZADA, CANCELADA, REEMBOLSADA])(
       "rechaza marcar utilizada desde %s",
       (estado) => {
@@ -191,6 +197,124 @@ describe("Compra", () => {
         );
       },
     );
+  });
+
+  describe("entradas (R16)", () => {
+    it("al crear genera una entrada sin usar por cada unidad", () => {
+      const compra = crearCompra({ cantidad: 3 });
+      expect(compra.entradas.map(({ numero, fechaUso }) => ({ numero, fechaUso }))).toEqual([
+        { numero: 1, fechaUso: null },
+        { numero: 2, fechaUso: null },
+        { numero: 3, fechaUso: null },
+      ]);
+    });
+
+    it("al reconstruir conserva las entradas recibidas", () => {
+      const compra = new Compra({
+        comprador: crearComprador(),
+        evento: crearEvento(),
+        tipoEntradaId: 1,
+        cantidad: 2,
+        estado: UTILIZADA,
+        fechaCompra: AHORA,
+        entradas: [
+          { numero: 1, fechaUso: AHORA },
+          { numero: 2, fechaUso: null },
+        ],
+      });
+      expect(compra.entradas[0].estaUsada()).toBe(true);
+      expect(compra.entradas[1].estaUsada()).toBe(false);
+    });
+
+    it("rechaza entradas que no coinciden con la cantidad", () => {
+      expect(
+        () =>
+          new Compra({
+            comprador: crearComprador(),
+            evento: crearEvento(),
+            tipoEntradaId: 1,
+            cantidad: 2,
+            fechaCompra: AHORA,
+            entradas: [{ numero: 1, fechaUso: null }],
+          }),
+      ).toThrow("Las entradas no coinciden con la cantidad de la compra");
+    });
+  });
+
+  describe("validarEntrada (R17)", () => {
+    it("la primera entrada usa esa entrada y pasa la compra a UTILIZADA", () => {
+      const compra = crearCompra({ estado: CONFIRMADA, cantidad: 2 });
+      compra.validarEntrada(1, ORGANIZADOR_ID, AHORA);
+      expect(compra.entradas[0].fechaUso).toEqual(AHORA);
+      expect(compra.entradas[1].fechaUso).toBeNull();
+      expect(compra.estado).toBe(UTILIZADA);
+      expect(compra.historial.at(-1)).toEqual({
+        estado: UTILIZADA,
+        quien: ORGANIZADOR_ID,
+        fechaHora: AHORA,
+      });
+    });
+
+    it("las siguientes se usan sin otro cambio de estado", () => {
+      const compra = crearCompra({ estado: CONFIRMADA, cantidad: 2 });
+      compra.validarEntrada(1, ORGANIZADOR_ID, AHORA);
+      const cambios = compra.historial.length;
+      compra.validarEntrada(2, ORGANIZADOR_ID, enDias(0.01));
+      expect(compra.entradas[1].fechaUso).toEqual(enDias(0.01));
+      expect(compra.estado).toBe(UTILIZADA);
+      expect(compra.historial).toHaveLength(cambios);
+    });
+
+    it("rechaza una entrada ya usada", () => {
+      const compra = crearCompra({ estado: CONFIRMADA, cantidad: 2 });
+      compra.validarEntrada(1, ORGANIZADOR_ID, AHORA);
+      expect(() => compra.validarEntrada(1, ORGANIZADOR_ID, AHORA)).toThrow(
+        new UnprocessableEntityError("Esta entrada ya fue utilizada"),
+      );
+    });
+
+    it.each([0, 3, 1.5])("con el número %p responde que no existe", (numero) => {
+      const compra = crearCompra({ estado: CONFIRMADA, cantidad: 2 });
+      expect(() => compra.validarEntrada(numero, ORGANIZADOR_ID, AHORA)).toThrow(
+        new NotFoundError("No existe la entrada"),
+      );
+    });
+
+    it.each([
+      [PENDIENTE, "La compra todavía no está pagada"],
+      [CANCELADA, "La compra está cancelada"],
+      [REEMBOLSADA, "La compra está cancelada"],
+    ])("rechaza validar una compra %s", (estado, mensaje) => {
+      const compra = crearCompra({ estado });
+      expect(() => compra.validarEntrada(1, ORGANIZADOR_ID, AHORA)).toThrow(
+        new UnprocessableEntityError(mensaje),
+      );
+      expect(compra.entradas[0].fechaUso).toBeNull();
+    });
+  });
+
+  describe("entradasPara", () => {
+    it("el organizador puede validar las entradas sin usar de una compra pagada", () => {
+      const compra = crearCompra({ estado: CONFIRMADA, cantidad: 2 });
+      compra.validarEntrada(1, ORGANIZADOR_ID, AHORA);
+      expect(compra.entradasPara(ORGANIZADOR_ID)).toEqual([
+        { numero: 1, fechaUso: AHORA, puedeValidarse: false },
+        { numero: 2, fechaUso: null, puedeValidarse: true },
+      ]);
+    });
+
+    it("el comprador nunca puede validarlas", () => {
+      const compra = crearCompra({ estado: CONFIRMADA });
+      expect(compra.entradasPara(COMPRADOR_ID).map((e) => e.puedeValidarse)).toEqual([
+        false,
+        false,
+      ]);
+    });
+
+    it.each([PENDIENTE, CANCELADA, REEMBOLSADA])("en %s nadie puede validarlas", (estado) => {
+      const compra = crearCompra({ estado });
+      expect(compra.entradasPara(ORGANIZADOR_ID).some((e) => e.puedeValidarse)).toBe(false);
+    });
   });
 
   describe("cancelar", () => {
