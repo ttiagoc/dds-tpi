@@ -27,7 +27,15 @@
       "expo-secure-store",
       "expo-font",
       "expo-splash-screen",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Usamos la cámara para escanear el QR de las entradas.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "scheme": "aiticketit"
   }

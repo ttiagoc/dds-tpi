@@ -14,12 +14,16 @@ import { NoLeidosProvider } from "../mensajes/NoLeidosContext";
 import { PreferenciaTemaProvider } from "../tema/PreferenciaTemaContext";
 import { TemaDeLaApp } from "../tema/TemaDeLaApp";
 
+const conEncabezado = (name, title) => (
+  <Stack.Screen key={name} name={name} options={{ headerShown: true, title }} />
+);
+
 function Navegacion() {
   const { usuario, cargando } = useAuth();
   if (cargando) return <Cargando />;
   const rol = usuario?.rol;
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, headerBackButtonDisplayMode: "minimal" }}>
       <Stack.Screen name="index" />
       <Stack.Protected guard={!usuario}>
         <Stack.Screen name="(auth)/login" />
@@ -29,26 +33,18 @@ function Navegacion() {
       </Stack.Protected>
       <Stack.Protected guard={rol === "ORGANIZADOR"}>
         <Stack.Screen name="(organizador)" />
-        <Stack.Screen
-          name="eventos/[id]/compras"
-          options={{ headerShown: true, title: "Compras" }}
-        />
-        <Stack.Screen name="eventos/nuevo" options={{ headerShown: true, title: "Nuevo evento" }} />
+        {conEncabezado("eventos/[id]/compras", "Compras")}
+        {conEncabezado("eventos/[id]/escanear", "Escanear entrada")}
+        {conEncabezado("eventos/nuevo", "Nuevo evento")}
       </Stack.Protected>
       <Stack.Protected guard={!!usuario}>
-        <Stack.Screen name="eventos/[id]/index" options={{ headerShown: true, title: "Evento" }} />
-        <Stack.Screen name="compras/[id]/index" options={{ headerShown: true, title: "Compra" }} />
+        {conEncabezado("eventos/[id]/index", "Evento")}
+        {conEncabezado("compras/[id]/index", "Compra")}
         <Stack.Screen name="compras/[id]/chat" options={{ title: "Chat" }} />
       </Stack.Protected>
       <Stack.Protected guard={rol === "COMPRADOR"}>
-        <Stack.Screen
-          name="eventos/[id]/comprar"
-          options={{ headerShown: true, title: "Comprar" }}
-        />
-        <Stack.Screen
-          name="compras/[id]/resenia"
-          options={{ headerShown: true, title: "Reseñar" }}
-        />
+        {conEncabezado("eventos/[id]/comprar", "Comprar")}
+        {conEncabezado("compras/[id]/resenia", "Reseñar")}
       </Stack.Protected>
     </Stack>
   );

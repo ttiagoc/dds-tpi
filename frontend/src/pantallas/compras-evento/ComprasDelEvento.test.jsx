@@ -48,6 +48,12 @@ describe("ComprasDelEvento: datos", () => {
     expect(router.push).toHaveBeenCalledWith("/compras/8");
   });
 
+  it("Escanear entrada abre el escáner del evento", async () => {
+    await abrir();
+    await fireEvent.press(screen.getByTestId("escanear-entrada"));
+    expect(router.push).toHaveBeenCalledWith("/eventos/1/escanear");
+  });
+
   it("al recuperar el foco vuelve a pedir", async () => {
     await abrir();
     await enfocar();
