@@ -8,6 +8,10 @@ function textoDeCancelacion({ estado, cantidad, total }) {
     : `${entradas}.`;
 }
 
+const esReserva = (compra) => compra.estado === "PENDIENTE";
+
+export const segun = (valor, compra) => (typeof valor === "function" ? valor(compra) : valor);
+
 export const ACCIONES_COMPRA = [
   {
     nombre: "resenar",
@@ -44,17 +48,19 @@ export const ACCIONES_COMPRA = [
   {
     nombre: "cancelar",
     permiso: "puedeCancelar",
-    etiqueta: "Cancelar compra",
+    etiqueta: (compra) => (esReserva(compra) ? "Liberar reserva" : "Pedir reembolso"),
     testID: "compra-cancelar",
-    modo: "outlined",
+    modo: (compra) => (esReserva(compra) ? "text" : "outlined"),
+    nota: (compra) =>
+      esReserva(compra) ? "Tus entradas quedan reservadas hasta que pagues." : null,
     destructiva: true,
     pedir: cancelarCompra,
     aviso: (compra) =>
-      compra.estado === "REEMBOLSADA" ? "Compra cancelada y reembolsada" : "Compra cancelada",
+      compra.estado === "REEMBOLSADA" ? "Compra cancelada y reembolsada" : "Reserva liberada",
     confirmacion: {
-      titulo: "¿Cancelar la compra?",
+      titulo: (compra) => (esReserva(compra) ? "¿Liberar la reserva?" : "¿Pedir el reembolso?"),
       texto: textoDeCancelacion,
-      boton: "Cancelar compra",
+      boton: (compra) => (esReserva(compra) ? "Liberar" : "Pedir reembolso"),
       testID: "confirmar-cancelacion",
     },
   },

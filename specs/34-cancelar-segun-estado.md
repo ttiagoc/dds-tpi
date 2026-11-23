@@ -1,6 +1,6 @@
 # Spec 34 — Cancelación distinta según el estado
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/cancelar-segun-estado`
 - **Casos de uso:** CU7, CU8
 - **Iteración:** It5c

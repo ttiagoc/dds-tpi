@@ -116,11 +116,27 @@ describe("DetalleCompra: pagar", () => {
 });
 
 describe("DetalleCompra: cancelar", () => {
+  it("una pendiente ofrece liberar la reserva y explica que está reservada", async () => {
+    obtenerCompra.mockResolvedValue(PENDIENTE);
+    await abrir();
+    expect(screen.getByTestId("compra-reserva")).toHaveTextContent(
+      "Tus entradas quedan reservadas hasta que pagues.",
+    );
+    expect(screen.getByTestId("compra-cancelar")).toHaveTextContent("Liberar reserva");
+    await fireEvent.press(screen.getByTestId("compra-cancelar"));
+    expect(screen.getByText("¿Liberar la reserva?")).toBeTruthy();
+    expect(screen.getByText("Se liberan las 2 entradas.")).toBeTruthy();
+    expect(screen.getByTestId("confirmar-cancelacion")).toHaveTextContent("Liberar");
+  });
+
   it("una confirmada pide confirmación con el reembolso y termina reembolsada", async () => {
     cancelarCompra.mockResolvedValue(REEMBOLSADA);
     await abrir();
+    expect(screen.getByTestId("compra-cancelar")).toHaveTextContent("Pedir reembolso");
+    expect(screen.queryByTestId("compra-reserva")).toBeNull();
     await fireEvent.press(screen.getByTestId("compra-cancelar"));
-    expect(screen.getByText("¿Cancelar la compra?")).toBeTruthy();
+    expect(screen.getByText("¿Pedir el reembolso?")).toBeTruthy();
+    expect(screen.getByTestId("confirmar-cancelacion")).toHaveTextContent("Pedir reembolso");
     expect(
       screen.getByText(/Se liberan las 2 entradas y se te reembolsan \$\s90\.000\./),
     ).toBeTruthy();
@@ -135,14 +151,14 @@ describe("DetalleCompra: cancelar", () => {
     expect(screen.queryByTestId("compra-cancelar")).toBeNull();
   });
 
-  it("una pendiente de una entrada avisa que se libera y queda cancelada", async () => {
+  it("una pendiente de una entrada avisa que se libera y queda la reserva liberada", async () => {
     obtenerCompra.mockResolvedValue({ ...PENDIENTE, cantidad: 1 });
     cancelarCompra.mockResolvedValue(CANCELADA);
     await abrir();
     await fireEvent.press(screen.getByTestId("compra-cancelar"));
     expect(screen.getByText("Se libera la entrada.")).toBeTruthy();
     await fireEvent.press(screen.getByTestId("confirmar-cancelacion"));
-    expect(await screen.findByTestId("compra-aviso")).toHaveTextContent(/^Compra cancelada$/);
+    expect(await screen.findByTestId("compra-aviso")).toHaveTextContent("Reserva liberada");
     expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Cancelada/);
   });
 
@@ -189,9 +205,9 @@ describe("DetalleCompra: marcar utilizada", () => {
       screen.getByText("El comprador va a poder reseñar la compra. No se puede deshacer."),
     ).toBeTruthy();
     await fireEvent.press(screen.getByRole("button", { name: "Volver" }));
-    expect(screen.queryByText("¿Cancelar la compra?")).toBeNull();
+    expect(screen.queryByText("¿Pedir el reembolso?")).toBeNull();
     await waitFor(() => expect(screen.queryByTestId("confirmar-utilizada")).toBeNull());
-    expect(screen.queryByText("¿Cancelar la compra?")).toBeNull();
+    expect(screen.queryByText("¿Pedir el reembolso?")).toBeNull();
     expect(marcarUtilizada).not.toHaveBeenCalled();
   });
 
