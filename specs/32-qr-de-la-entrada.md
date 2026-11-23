@@ -14,6 +14,8 @@ Hoy el comprador no tiene nada para mostrar en la puerta del evento, y el organi
 - Como organizador, quiero escanear el QR con la cámara y validar la entrada sin buscar la compra en la lista.
 
 ## Reglas
+> RQ1, RQ2 y el formato del QR los reemplaza la spec 33 (entradas individuales, un QR por entrada).
+
 Se mantiene R4 (`planes/02`): marcar utilizada solo lo hace el organizador del evento y desde CONFIRMADA. El back no cambia: sigue validando permiso (403) y estado (422).
 
 - **RQ1** El QR codifica el texto `aiticketit:compra:<id>`. Es una compra, no una entrada por persona: una compra de 3 entradas tiene un solo QR y se valida entera.

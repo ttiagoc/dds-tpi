@@ -46,7 +46,7 @@ EventoResumen + `descripcion`, `direccion`, `ubicacion: { latitud, longitud } | 
 `acciones` se calcula para el usuario que pide (el front no reimplementa reglas). `puedeReseniar` es `false` si la compra ya tiene reseña.
 
 ### CompraDetalle
-CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `resenia: { puntuacion, detalle } | null`.
+CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `resenia: { puntuacion, detalle } | null` + `entradas: [{ numero, fechaUso: string | null, puedeValidarse: boolean }]` (`puedeValidarse` solo para el organizador del evento, con la compra CONFIRMADA o UTILIZADA y la entrada sin usar; spec 33).
 
 ## Endpoints
 
@@ -122,7 +122,8 @@ Body `POST /eventos`:
 | GET | `/compras/:id` | 🔐 comprador dueño u organizador del evento | — | 200 CompraDetalle | 400, 401, 403, 404 |
 | POST | `/compras/:id/pago` | 🅒 dueño | — | 200 CompraDetalle | 400, 401, 403, 404, 422 transición inválida o evento ocurrido |
 | POST | `/compras/:id/cancelacion` | 🅒 dueño | — | 200 CompraDetalle (estado CANCELADA o REEMBOLSADA) | 400, 401, 403, 404, 422 |
-| POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle con las acciones del organizador. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404, 422 |
+| POST | `/compras/:id/uso` | 🅞 organizador del evento | — | 200 CompraDetalle con las acciones del organizador; marca todas las entradas. Detalle en `specs/06b-compras-organizador.md` | 400, 401, 403, 404, 422 |
+| POST | `/compras/:id/entradas/:numero/uso` | 🅞 organizador del evento | — | 200 CompraDetalle con las acciones del organizador. Detalle en `specs/33-entradas-individuales.md` | 400, 401, 403, 404 "No existe la compra" / "No existe la entrada", 422 (R17) |
 | POST | `/compras/:id/resenia` | 🅒 dueño | `{ puntuacion: 1-5 int, detalle: 1-500 }` `.strict()` | 201 `Resenia` = `{ id, compraId, puntuacion, detalle, fecha, evento:{id,nombre}, comprador:{nombre} }`. Detalle en `specs/07-resenias-favoritos.md` | 400, 401, 403, 404, 409 "Ya reseñaste esta compra", 422 "Solo podés reseñar una compra utilizada" (409 antes que 422) |
 
 ### Mensajes (chat)
@@ -155,7 +156,7 @@ Detalle en `specs/07-resenias-favoritos.md`.
 | cliente → server | `compra:salir` | `{ compraId }` | |
 | server → room `compra:<id>` | `mensaje:nuevo` | `Mensaje` (misma forma que REST) | tras `POST /compras/:id/mensajes`, a todo el room incluido el autor |
 | server → room `usuario:<id>` | `conversacion:actualizada` | `{ compraId, ultimoMensaje, noLeidos }` | al conectar, cada socket entra solo a `usuario:<id>`; tras `POST /compras/:id/mensajes` se emite a la otra parte con sus no leídos de esa compra (spec 20) |
-| server → room `compra:<id>` | `compra:estado` | `{ compraId, estado }` | tras pago, cancelación o uso; un solo evento con el estado final (cancelar una CONFIRMADA emite REEMBOLSADA). Detalle en `specs/08b-chat-socket.md` |
+| server → room `compra:<id>` | `compra:estado` | `{ compraId, estado }` | tras pago, cancelación, uso o validación de una entrada que cambie el estado; un solo evento con el estado final (cancelar una CONFIRMADA emite REEMBOLSADA). Detalle en `specs/08b-chat-socket.md` |
 
 ## Usuarios de seed (contraseña `Demo1234!`)
 
