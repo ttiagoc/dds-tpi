@@ -204,10 +204,10 @@ export const EVENTOS = [
 
 export const COMPRAS = [
   {
-    clave: "ana-piojos",
+    clave: "ana-electro",
     comprador: "ana",
-    evento: "piojos",
-    tipo: "Campo",
+    evento: "electro",
+    tipo: "General",
     cantidad: 2,
     haceDias: 1,
     estado: PENDIENTE,

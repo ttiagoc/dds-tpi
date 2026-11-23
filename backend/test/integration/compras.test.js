@@ -116,10 +116,10 @@ describe("GET /compras", () => {
     expect(res.body.compras.map((c) => c.evento.nombre)).toEqual([
       "Noche de Stand-up",
       "Noche de Tango",
-      "Los Piojos en River",
       "Clásico de Básquet",
       "Hamlet",
       "Festival Primavera Sonora",
+      "Fiesta Electrónica al Aire Libre",
       "Impro Total",
       "Rock en el Parque",
     ]);
@@ -186,10 +186,10 @@ describe("GET /compras/:id", () => {
 
 describe("POST /compras/:id/pago", () => {
   it("confirma la compra PENDIENTE de Ana y no deja pagarla dos veces", async () => {
-    const id = await idDeCompra(ANA, "Los Piojos en River");
+    const id = await idDeCompra(ANA, "Fiesta Electrónica al Aire Libre");
     const res = await accion(id, "pago");
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ estado: "CONFIRMADA", diasRestantes: 12 });
+    expect(res.body).toMatchObject({ estado: "CONFIRMADA", diasRestantes: 55 });
     expect(res.body.historial.map((c) => c.estado)).toEqual(["PENDIENTE", "CONFIRMADA"]);
 
     const otraVez = await accion(id, "pago");
@@ -198,8 +198,8 @@ describe("POST /compras/:id/pago", () => {
   });
 
   it("una compra de un evento que ya ocurrió responde 422", async () => {
-    const id = await idDeCompra(ANA, "Los Piojos en River");
-    (await evento("Los Piojos en River")).fecha = enDias(-1);
+    const id = await idDeCompra(ANA, "Fiesta Electrónica al Aire Libre");
+    (await evento("Fiesta Electrónica al Aire Libre")).fecha = enDias(-1);
     const res = await accion(id, "pago");
     expect(res.status).toBe(422);
     expect(res.body.message).toBe("No podés pagar una compra de un evento que ya ocurrió");
@@ -224,13 +224,16 @@ describe("POST /compras/:id/cancelacion", () => {
   });
 
   it("cancela la compra PENDIENTE de Ana sin reembolso y devuelve el cupo", async () => {
-    const campo = (await evento("Los Piojos en River")).tiposEntrada[0];
-    const antes = campo.disponibles();
-    const res = await accion(await idDeCompra(ANA, "Los Piojos en River"), "cancelacion");
+    const general = (await evento("Fiesta Electrónica al Aire Libre")).tiposEntrada[0];
+    const antes = general.disponibles();
+    const res = await accion(
+      await idDeCompra(ANA, "Fiesta Electrónica al Aire Libre"),
+      "cancelacion",
+    );
     expect(res.status).toBe(200);
     expect(res.body.estado).toBe("CANCELADA");
     expect(res.body.historial.map((c) => c.estado)).toEqual(["PENDIENTE", "CANCELADA"]);
-    expect(campo.disponibles()).toBe(antes + 2);
+    expect(general.disponibles()).toBe(antes + 2);
   });
 
   it("una compra de un evento que ya ocurrió responde 422", async () => {
@@ -257,7 +260,11 @@ describe.each(["pago", "cancelacion"])("errores comunes de POST /compras/:id/%s"
     ["como organizador", FENIX, 403, SIN_PERMISO],
     ["como otro comprador", BRUNO, 403, SIN_PERMISO],
   ])("%s responde %i", async (_caso, email, status, mensaje) => {
-    const res = await accion(await idDeCompra(ANA, "Los Piojos en River"), ruta, email);
+    const res = await accion(
+      await idDeCompra(ANA, "Fiesta Electrónica al Aire Libre"),
+      ruta,
+      email,
+    );
     expect(res.status).toBe(status);
     expect(res.body.message).toBe(mensaje);
   });
