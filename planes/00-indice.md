@@ -11,7 +11,6 @@
 | 05 | [Testing](05-testing.md) | Unit, integración, front, e2e |
 | 06 | [Roadmap](06-roadmap-iteraciones.md) | Iteraciones y criterios de aceptación |
 | 07 | [IA, skills y evidencia](07-ia-skills-y-evidencia.md) | Cómo se usa la IA y cómo se documenta |
-| 08 | [Video demo](08-video-demo.md) | Guion de la entrega |
 
 ## Estado
 

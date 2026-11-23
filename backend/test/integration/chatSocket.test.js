@@ -105,8 +105,8 @@ describe("mensaje:nuevo", () => {
   it("sin nadie en el room, el POST y el pago responden igual", async () => {
     const { token } = await conectarComo(ANA);
     expect((await escribir(token, await idDeCompra(PRIMAVERA))).status).toBe(201);
-    const piojos = await idDeCompra("Los Piojos en River");
-    expect((await postComo(token, `/compras/${piojos}/pago`)).status).toBe(200);
+    const electro = await idDeCompra("Fiesta Electrónica al Aire Libre");
+    expect((await postComo(token, `/compras/${electro}/pago`)).status).toBe(200);
   });
 });
 
@@ -186,7 +186,7 @@ describe("compra:unirse y compra:salir", () => {
 
 describe("compra:estado", () => {
   it("al pagar, Ana y Fénix reciben CONFIRMADA", async () => {
-    const id = await idDeCompra("Los Piojos en River");
+    const id = await idDeCompra("Fiesta Electrónica al Aire Libre");
     const ana = await unidoA(ANA, id);
     const fenix = await unidoA(FENIX, id);
     const llegaAFenix = esperarEvento(fenix.cliente, "compra:estado");

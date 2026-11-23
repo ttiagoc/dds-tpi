@@ -42,8 +42,8 @@ describe("POST /compras/:id/uso", () => {
     expect(deAna.body.acciones.puedeReseniar).toBe(true);
   });
 
-  it("la compra PENDIENTE de Ana a Los Piojos responde 422", async () => {
-    const res = await marcarUtilizada(await idDeCompra(ANA, "Los Piojos en River"));
+  it("la compra PENDIENTE de Ana a la Fiesta Electrónica responde 422", async () => {
+    const res = await marcarUtilizada(await idDeCompra(ANA, "Fiesta Electrónica al Aire Libre"));
     expect(res.status).toBe(422);
     expect(res.body.message).toBe("No se puede pasar de PENDIENTE a UTILIZADA");
   });
@@ -93,7 +93,7 @@ describe("POST /compras/:id/entradas/:numero/uso", () => {
   });
 
   it("una compra PENDIENTE responde 422", async () => {
-    const res = await validarEntrada(await idDeCompra(ANA, "Los Piojos en River"), 1);
+    const res = await validarEntrada(await idDeCompra(ANA, "Fiesta Electrónica al Aire Libre"), 1);
     expect(res.status).toBe(422);
     expect(res.body.message).toBe("La compra todavía no está pagada");
   });

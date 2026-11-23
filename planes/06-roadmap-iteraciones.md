@@ -86,7 +86,7 @@ Segunda tanda (specs 29-31), tras probar en el iPhone:
 - [x] `feature/direccion-con-mapa` (spec 31): dirección por campos, `GET /direcciones/ubicacion` y confirmación en el mapa.
 
 ## It6 — Entrega (29/11-1/12)
-- [ ] Guion final (`planes/08`), ensayo, grabación 5-10 min.
+- [ ] Ensayo y grabación del video demo, 5-10 min.
 - [ ] Conclusión armada desde `docs/ia/bitacora.md`.
 - [ ] Merge final a `main`, tag `entrega`.
 

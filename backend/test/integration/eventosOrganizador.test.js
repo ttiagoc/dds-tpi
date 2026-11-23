@@ -173,7 +173,8 @@ describe("GET /organizadores/yo/eventos", () => {
       cupo: 3020,
       recaudado: 2820000,
     });
-    expect(evento("Los Piojos en River")).toMatchObject({ vendidas: 2, cupo: 700, recaudado: 0 });
+    expect(evento("Los Piojos en River")).toMatchObject({ vendidas: 0, cupo: 700, recaudado: 0 });
+    expect(evento("Fiesta Electrónica al Aire Libre")).toMatchObject({ vendidas: 2, recaudado: 0 });
     expect(evento("Clásico de Básquet")).toMatchObject({ vendidas: 0, recaudado: 0 });
     const sumar = (campo) => res.body.eventos.reduce((suma, e) => suma + e[campo], 0);
     expect(res.body.resumen).toEqual({
