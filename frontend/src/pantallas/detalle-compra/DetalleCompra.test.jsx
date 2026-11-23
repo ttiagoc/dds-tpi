@@ -157,6 +157,39 @@ describe("DetalleCompra: reseña según el rol", () => {
   });
 });
 
+describe("DetalleCompra: QR de la entrada", () => {
+  it("el comprador ve el QR de su compra confirmada", async () => {
+    await abrir();
+    expect(screen.getByTestId("compra-qr")).toHaveTextContent(/Mostrá este código en la entrada/);
+    expect(screen.getByLabelText("Código QR de la compra 7")).toBeTruthy();
+    expect(screen.queryByTestId("compra-qr-pendiente")).toBeNull();
+  });
+
+  it("con la compra pendiente avisa que hay que pagarla", async () => {
+    obtenerCompra.mockResolvedValue(compraDetalle({ estado: "PENDIENTE" }));
+    await abrir();
+    expect(screen.getByTestId("compra-qr-pendiente")).toHaveTextContent(
+      /Pagá la compra para ver tu entrada/,
+    );
+    expect(screen.queryByTestId("compra-qr")).toBeNull();
+  });
+
+  it.each([["UTILIZADA"], ["CANCELADA"], ["REEMBOLSADA"]])(
+    "en %s no muestra nada",
+    async (estado) => {
+      obtenerCompra.mockResolvedValue(compraDetalle({ estado, diasRestantes: null }));
+      await abrir();
+      expect(screen.queryByTestId("compra-qr")).toBeNull();
+      expect(screen.queryByTestId("compra-qr-pendiente")).toBeNull();
+    },
+  );
+
+  it("el organizador no ve el QR", async () => {
+    await abrir(FENIX);
+    expect(screen.queryByTestId("compra-qr")).toBeNull();
+  });
+});
+
 const llegaEstado = (estado) =>
   act(async () => ultimoSocket().simular("compra:estado", { compraId: 7, estado }));
 

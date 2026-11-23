@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { Text } from "react-native-paper";
+import { router, useLocalSearchParams } from "expo-router";
+import { Button, Text } from "react-native-paper";
 import { listarComprasDelEvento } from "../../api/eventosApi";
 import { EstadoVacio } from "../../components/EstadoVacio";
 import { ListaDeCompras } from "../../components/ListaDeCompras";
@@ -26,6 +26,14 @@ function Encabezado({ extra, filtro }) {
   return (
     <View style={estilos.encabezado}>
       <Text variant="headlineSmall">{extra.evento.nombre}</Text>
+      <Button
+        mode="contained"
+        icon="qrcode-scan"
+        onPress={() => router.push(`/eventos/${extra.evento.id}/escanear`)}
+        testID="escanear-entrada"
+      >
+        Escanear entrada
+      </Button>
       {extra.disponibilidad.map((tipo) => (
         <TipoDisponible key={tipo.tipoEntradaId} tipo={tipo} />
       ))}

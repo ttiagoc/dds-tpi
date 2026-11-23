@@ -17,6 +17,7 @@ import { useSalaDeCompra } from "../../hooks/useSalaDeCompra";
 import { espaciado } from "../../tema/espaciado";
 import { formatearFecha, formatearPrecio, textoDiasRestantes } from "../../utils/formato";
 import { AccionesCompra } from "./AccionesCompra";
+import { QrDeEntrada } from "./QrDeEntrada";
 import { useAccionesCompra } from "./useAccionesCompra";
 
 function Estado({ compra }) {
@@ -128,6 +129,7 @@ function Contenido({ compra, carga }) {
     <>
       <Pantalla scroll>
         <Entrada compra={compra} />
+        <QrDeEntrada compra={compra} />
         <AccionesCompra compra={compra} acciones={acciones} />
         <SeccionResenia resenia={compra.resenia} />
         <Divider />

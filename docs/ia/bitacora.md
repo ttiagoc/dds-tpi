@@ -6,8 +6,8 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 
 | Métrica | Valor |
 |---|---|
-| Sesiones | 18 |
-| Features cerradas | 38 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
+| Sesiones | 19 |
+| Features cerradas | 39 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
 | Correcciones relevantes a la IA | 9 |
 | Skills creadas / mejoradas | 12 / 3 |
 
@@ -408,4 +408,17 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Selector de tema con claro por defecto — el usuario eligió el selector; la IA propuso el valor por defecto.
   - Búsqueda en el mapa con un botón y confirmación obligatoria; el back vuelve a geocodificar al publicar y no acepta coordenadas del cliente — el usuario eligió el botón; la IA propuso no confiar en el cliente.
 - **Aprendizaje:** dos supuestos de la IA sobre iOS (el margen seguro con la barra translúcida y la barra sobre el teclado numérico) pasaron los tests y fallaron en el dispositivo. La prueba en el celular encontró lo que la suite no podía ver. También se repitió un error ya registrado: dos archivos que difieren solo en mayúsculas (`PreferenciaTema.jsx` y `preferenciaTema.js`), que la IA detectó al correr los tests.
+
+## Sesión 19 — 2026-11-23 — QR de la entrada y escáner del organizador (It5c)
+
+- **Objetivo:** cubrir la validación de entradas en la puerta del evento, que el usuario echó en falta al probar la app en el celular.
+- **Avances:**
+  - Spec 32 y plan de pantallas actualizado. En DetalleCompra, el comprador ve el QR de su compra confirmada. El organizador tiene una pantalla nueva, Escanear entrada, que lee el QR con `expo-camera`, muestra la compra y la marca como utilizada con el endpoint existente. El back no cambió.
+  - Ajustes de la prueba en el dispositivo: el botón de volver muestra solo la flecha y se quitó el margen lateral de las filas de chips.
+  - Verificación: 547 tests del front en verde; lint y clones sin cambios (6).
+- **Decisiones:**
+  - El QR codifica el id de la compra y no un código propio — el back ya valida el permiso y el estado al marcarla utilizada, así que no hace falta cambiar el contrato — el usuario eligió entre las opciones que propuso la IA.
+  - Un QR por compra y no por persona — la compra es la unidad del dominio que cambia de estado — propuesta de la IA.
+  - Confirmar antes de validar y rechazar entradas de otro evento en el escáner — el back solo comprueba que el organizador sea dueño del evento de esa compra — la IA los agregó sin que se los pidieran y quedaron en la spec aprobada.
+  - Las compras sucesivas al mismo evento no se agrupan — cada una tiene su propio pago, estado y cancelación — consulta del usuario; la IA propuso, como alternativa, agruparlas solo en la vista.
 
