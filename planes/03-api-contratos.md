@@ -37,13 +37,13 @@ EventoResumen + `descripcion`, `direccion`, `ubicacion: { latitud, longitud } | 
 {
   "id": 7, "estado": "CONFIRMADA", "cantidad": 2, "total": 90000, "fechaCompra": "...",
   "diasRestantes": 12,
-  "evento": { "id": 1, "nombre": "...", "fecha": "...", "lugar": "...", "imagen": "..." },
+  "evento": { "id": 1, "nombre": "...", "fecha": "...", "lugar": "...", "imagen": "...", "organizador": { "id": 2, "nombre": "Fénix Producciones" } },
   "tipoEntrada": { "id": 1, "nombre": "Campo", "precio": 45000 },
   "comprador": { "id": 1, "nombre": "Ana Pérez" },
   "acciones": { "puedePagar": false, "puedeCancelar": true, "puedeMarcarUtilizada": false, "puedeReseniar": false }
 }
 ```
-`acciones` se calcula para el usuario que pide (el front no reimplementa reglas). `puedeReseniar` es `false` si la compra ya tiene reseña.
+`acciones` se calcula para el usuario que pide (el front no reimplementa reglas). `evento.organizador` lo usa el chat del comprador para mostrar con quién habla (spec 20, ajuste del 23/11). `puedeReseniar` es `false` si la compra ya tiene reseña.
 
 ### CompraDetalle
 CompraResumen + `historial: [{ estado, quien: { id, nombre }, fechaHora }]` + `resenia: { puntuacion, detalle } | null` + `entradas: [{ numero, fechaUso: string | null, puedeValidarse: boolean }]` (`puedeValidarse` solo para el organizador del evento, con la compra CONFIRMADA o UTILIZADA y la entrada sin usar; spec 33).

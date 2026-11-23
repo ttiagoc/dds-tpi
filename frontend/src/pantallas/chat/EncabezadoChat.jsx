@@ -9,10 +9,8 @@ export function EncabezadoChat({ compra }) {
   const { usuario } = useAuth();
   const { colors } = useTheme();
   const esOrganizador = usuario?.rol === "ORGANIZADOR";
-  const titulo = esOrganizador ? compra.comprador.nombre : compra.evento.nombre;
-  const detalle = esOrganizador
-    ? `${compra.evento.nombre} · #${compra.id}`
-    : `Compra #${compra.id}`;
+  const titulo = esOrganizador ? compra.comprador.nombre : compra.evento.organizador.nombre;
+  const detalle = `${compra.evento.nombre} · #${compra.id}`;
   return (
     <View style={estilos.encabezado} testID="chat-encabezado">
       <IconButton

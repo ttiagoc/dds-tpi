@@ -183,7 +183,10 @@ export default {
           nullable: true,
           description: "Solo en compras CONFIRMADA; null en el resto",
         },
-        evento: { type: "object", properties: propiedadesEvento },
+        evento: {
+          type: "object",
+          properties: { ...propiedadesEvento, organizador: nombreConId("Fénix Producciones") },
+        },
         tipoEntrada: {
           type: "object",
           properties: {

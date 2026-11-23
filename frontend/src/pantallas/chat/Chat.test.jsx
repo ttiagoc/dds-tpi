@@ -38,7 +38,6 @@ describe("Chat: conversación", () => {
     await abrir();
     expect(obtenerCompra).toHaveBeenCalledWith("7");
     expect(listarMensajes).toHaveBeenCalledWith(7);
-    expect(screen.getByText("Los Piojos en River")).toBeTruthy();
     const propia = screen.getByTestId("mensaje-1");
     expect(propia).toHaveTextContent(/¿A qué hora abren las puertas\?/);
     expect(propia).not.toHaveTextContent(/Ana Pérez/);
@@ -47,6 +46,13 @@ describe("Chat: conversación", () => {
     expect(ajena).toHaveTextContent(/Fénix Producciones/);
     expect(ajena).toHaveTextContent(/Abrimos a las 17 h/);
     expect(ajena).toHaveStyle({ alignSelf: "flex-start" });
+  });
+
+  it("para el comprador el encabezado muestra al organizador, no al evento, como título", async () => {
+    await abrir();
+    const titulo = screen.getByRole("header");
+    expect(titulo).toHaveTextContent("Fénix Producciones");
+    expect(screen.getByTestId("chat-encabezado")).toHaveTextContent(/Los Piojos en River · #7/);
   });
 
   it("el encabezado muestra al comprador, el evento y la compra para el organizador", async () => {

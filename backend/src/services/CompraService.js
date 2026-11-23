@@ -176,6 +176,7 @@ export class CompraService {
         fecha: evento.fecha.toISOString(),
         lugar: evento.lugar,
         imagen: evento.multimedia[0] ?? null,
+        organizador: { id: evento.organizador.id, nombre: evento.organizador.nombreCompleto() },
       },
       tipoEntrada: { id: tipo.id, nombre: tipo.nombre, precio: tipo.precio },
       comprador: { id: comprador.id, nombre: comprador.nombreCompleto() },
