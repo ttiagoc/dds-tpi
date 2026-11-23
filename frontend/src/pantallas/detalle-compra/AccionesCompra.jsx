@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { Button, Dialog, HelperText, Portal, Text, useTheme } from "react-native-paper";
 import { espaciado } from "../../tema/espaciado";
-import { ACCIONES_COMPRA, accionDeCompra, accionVisible } from "./catalogoAcciones";
+import { ACCIONES_COMPRA, accionDeCompra, accionVisible, segun } from "./catalogoAcciones";
 
 function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
   const { colors } = useTheme();
@@ -13,7 +13,7 @@ function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
   return (
     <Portal>
       <Dialog visible={confirmando.visible} onDismiss={onVolver}>
-        <Dialog.Title>{titulo}</Dialog.Title>
+        <Dialog.Title>{segun(titulo, compra)}</Dialog.Title>
         <Dialog.Content>
           <Text variant="bodyMedium">{texto(compra)}</Text>
         </Dialog.Content>
@@ -24,7 +24,7 @@ function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
             onPress={() => onConfirmar(accion.nombre)}
             testID={testID}
           >
-            {boton}
+            {segun(boton, compra)}
           </Button>
         </Dialog.Actions>
       </Dialog>
@@ -32,26 +32,49 @@ function DialogoConfirmacion({ compra, confirmando, onVolver, onConfirmar }) {
   );
 }
 
-function BotonAccion({ accion, enCurso, onAccion }) {
+function Nota({ texto }) {
   const { colors } = useTheme();
+  if (!texto) return null;
   return (
-    <Button
-      mode={accion.modo ?? "contained"}
-      icon={accion.icono}
-      textColor={accion.destructiva ? colors.error : undefined}
-      loading={enCurso === accion.nombre}
-      disabled={!!enCurso}
-      onPress={() => onAccion(accion)}
-      testID={accion.testID}
+    <Text
+      variant="bodySmall"
+      style={[estilos.nota, { color: colors.onSurfaceVariant }]}
+      testID="compra-reserva"
     >
-      {accion.etiqueta}
-    </Button>
+      {texto}
+    </Text>
   );
 }
 
-function Botones({ permitidas, enCurso, onAccion }) {
+function BotonAccion({ accion, compra, enCurso, onAccion }) {
+  const { colors } = useTheme();
+  return (
+    <>
+      <Nota texto={segun(accion.nota, compra)} />
+      <Button
+        mode={segun(accion.modo, compra) ?? "contained"}
+        icon={accion.icono}
+        textColor={accion.destructiva ? colors.error : undefined}
+        loading={enCurso === accion.nombre}
+        disabled={!!enCurso}
+        onPress={() => onAccion(accion)}
+        testID={accion.testID}
+      >
+        {segun(accion.etiqueta, compra)}
+      </Button>
+    </>
+  );
+}
+
+function Botones({ compra, permitidas, enCurso, onAccion }) {
   return ACCIONES_COMPRA.filter((accion) => accionVisible(accion, permitidas)).map((accion) => (
-    <BotonAccion key={accion.nombre} accion={accion} enCurso={enCurso} onAccion={onAccion} />
+    <BotonAccion
+      key={accion.nombre}
+      accion={accion}
+      compra={compra}
+      enCurso={enCurso}
+      onAccion={onAccion}
+    />
   ));
 }
 
@@ -64,6 +87,7 @@ export function AccionesCompra({ compra, acciones }) {
   return (
     <View style={estilos.acciones}>
       <Botones
+        compra={compra}
         permitidas={permitidas}
         enCurso={enCurso}
         onAccion={(accion) => {
@@ -92,4 +116,5 @@ export function AccionesCompra({ compra, acciones }) {
 
 const estilos = StyleSheet.create({
   acciones: { gap: espaciado.sm },
+  nota: { textAlign: "center" },
 });

@@ -101,13 +101,16 @@ Métodos:
 | mensajes | Mensaje[] |
 | lecturas | `{ [usuarioId]: mensajeId }` — marca "leído hasta" de cada participante (R11, spec 20) |
 | fechaCompra | Date |
+| entradas | `Entrada[]` = `{ numero (1..cantidad), fechaUso: Date \| null }`, se generan al crear (R16, spec 33) |
 
 Métodos:
 - `tipoEntrada()` → `evento.tipoEntrada(tipoEntradaId)`.
 - `actualizarEstado(nuevo, quien, ahora)` — **uso interno** de los métodos de acción; valida con `TRANSICIONES`, si no → `UnprocessableEntityError("No se puede pasar de X a Y")`. Agrega `CambioEstadoCompra`.
 - `pagar(quien, ahora)`
 - `cancelar(quien, ahora)` — PENDIENTE → CANCELADA; CONFIRMADA → CANCELADA → REEMBOLSADA. Libera cupo. Es el **único** camino a REEMBOLSADA (ver R2b).
-- `marcarUtilizada(quien, ahora)`
+- `marcarUtilizada(quien, ahora)` — también marca como usadas todas las entradas pendientes.
+- `validarEntrada(numero, quien, ahora)` — R17: usa una entrada; si la compra estaba CONFIRMADA, pasa a UTILIZADA.
+- `entradasPara(usuarioId)` → `[{ numero, fechaUso, puedeValidarse }]` (alimenta `entradas` de `CompraDetalle`).
 - `puedeCancelarse(ahora)` → `estado ∈ {PENDIENTE, CONFIRMADA} && !evento.yaOcurrio(ahora)`
 - `puedeReseniarse()` → `estado === UTILIZADA`
 - `sumaAlRecaudado()` → `true` si está CONFIRMADA o UTILIZADA (cuenta para `recaudado`, spec 05b).
@@ -149,7 +152,8 @@ export const TRANSICIONES = Object.freeze({
 | Pagar (simulado) | comprador dueño | PENDIENTE | CONFIRMADA | — |
 | Cancelar | comprador dueño | PENDIENTE | CANCELADA | libera cupo |
 | Cancelar | comprador dueño | CONFIRMADA | CANCELADA → REEMBOLSADA | libera cupo, 2 cambios en historial |
-| Marcar utilizada | organizador del evento | CONFIRMADA | UTILIZADA | habilita reseña |
+| Marcar utilizada | organizador del evento | CONFIRMADA | UTILIZADA | usa todas las entradas, habilita reseña |
+| Validar entrada | organizador del evento | CONFIRMADA o UTILIZADA | UTILIZADA | usa una entrada (R17); desde CONFIRMADA agrega el cambio al historial |
 
 Reglas:
 - **R1** Comprar: usuario COMPRADOR; evento no ocurrido; tipo existe; `hayCupoPara(cantidad)`. Sin cupo → 422.
@@ -167,6 +171,8 @@ Reglas:
 - **R13** Dirección del evento: requerida, al menos dos partes separadas por coma y la primera con número ("La dirección tiene que ser 'Calle y número, localidad, provincia'"). Spec 28.
 - **R14** Ubicación del evento: `null` o `{ latitud ∈ [-90, 90], longitud ∈ [-180, 180] }` ("La ubicación del evento no es válida").
 - **R15** Al crear, el back geocodifica la dirección con Georef (ADR-014): no encontrada → 422 "No encontramos esa dirección"; Georef sin respuesta → se crea con `ubicacion: null`.
+- **R16** Entradas: al crear la compra se generan `cantidad` entradas numeradas de 1 a `cantidad`, sin usar. Spec 33.
+- **R17** Validar una entrada: solo el organizador del evento (403); compra CONFIRMADA o UTILIZADA (PENDIENTE → 422 "La compra todavía no está pagada"; CANCELADA o REEMBOLSADA → 422 "La compra está cancelada"); número fuera de rango → 404 "No existe la entrada"; ya usada → 422 "Esta entrada ya fue utilizada". La primera entrada validada pasa la compra a UTILIZADA. Spec 33.
 - **R12** Conversaciones: compras con al menos un mensaje en las que participa el usuario (comprador: sus compras; organizador: las de sus eventos), por fecha del último mensaje desc y `compraId` desc.
 
 ## Casos borde a testear
