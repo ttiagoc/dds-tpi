@@ -1,9 +1,9 @@
-const PREFIJO = "aiticketit:compra:";
+const FORMATO = /^aiticketit:compra:([1-9]\d*):entrada:([1-9]\d*)$/;
 
-export const textoDelQr = (compraId) => `${PREFIJO}${compraId}`;
+export const textoDelQr = (compraId, numero) => `aiticketit:compra:${compraId}:entrada:${numero}`;
 
 export function leerQrDeEntrada(texto) {
-  if (typeof texto !== "string" || !texto.startsWith(PREFIJO)) return null;
-  const id = texto.slice(PREFIJO.length);
-  return /^[1-9]\d*$/.test(id) ? Number(id) : null;
+  const partes = typeof texto === "string" ? FORMATO.exec(texto) : null;
+  if (!partes) return null;
+  return { compraId: Number(partes[1]), numero: Number(partes[2]) };
 }

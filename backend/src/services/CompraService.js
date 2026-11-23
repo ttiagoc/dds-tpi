@@ -121,6 +121,15 @@ export class CompraService {
     );
   }
 
+  async validarEntrada(id, numero, usuario) {
+    return this.accion(
+      id,
+      usuario,
+      (compra) => compra.evento.esDe(usuario.id),
+      (compra, ahora) => compra.validarEntrada(numero, usuario.id, ahora),
+    );
+  }
+
   async accionDelComprador(id, usuario, ejecutar) {
     return this.accion(id, usuario, (compra) => compra.esDe(usuario.id), ejecutar);
   }
@@ -129,9 +138,10 @@ export class CompraService {
     const compra = await this.buscar(id);
     exigirPermiso(tienePermiso(compra));
     const ahora = this.reloj.ahora();
+    const estadoPrevio = compra.estado;
     ejecutar(compra, ahora);
     await this.guardar(compra);
-    this.notificador.estadoCompra(compra.id, compra.estado);
+    if (compra.estado !== estadoPrevio) this.notificador.estadoCompra(compra.id, compra.estado);
     return this.detalleConResenia(compra, usuario, ahora);
   }
 
@@ -183,6 +193,10 @@ export class CompraService {
         fechaHora: fechaHora.toISOString(),
       })),
       resenia: resenia ? { puntuacion: resenia.puntuacion, detalle: resenia.detalle } : null,
+      entradas: compra.entradasPara(usuario.id).map(({ fechaUso, ...entrada }) => ({
+        ...entrada,
+        fechaUso: fechaUso?.toISOString() ?? null,
+      })),
     };
   }
 }

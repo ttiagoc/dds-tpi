@@ -105,6 +105,13 @@ export function compraResumen(cambios = {}) {
   };
 }
 
+export const entrada = (numero, cambios = {}) => ({
+  numero,
+  fechaUso: null,
+  puedeValidarse: false,
+  ...cambios,
+});
+
 export function compraDetalle(cambios = {}) {
   return {
     ...compraResumen(),
@@ -121,6 +128,7 @@ export function compraDetalle(cambios = {}) {
       },
     ],
     resenia: null,
+    entradas: [entrada(1), entrada(2)],
     ...cambios,
   };
 }

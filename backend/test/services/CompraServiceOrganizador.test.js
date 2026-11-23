@@ -94,6 +94,34 @@ describe("CompraService.marcarUtilizada", () => {
   });
 });
 
+describe("CompraService.validarEntrada", () => {
+  it("usa la entrada, pasa la compra a UTILIZADA, guarda y devuelve las entradas", async () => {
+    compras = [compraDel(eventos[0], { id: 7, cantidad: 2 })];
+    const detalle = await service.validarEntrada(7, 1, usuarioFenix);
+    expect(detalle.estado).toBe(UTILIZADA);
+    expect(detalle.entradas).toEqual([
+      { numero: 1, fechaUso: AHORA.toISOString(), puedeValidarse: false },
+      { numero: 2, fechaUso: null, puedeValidarse: true },
+    ]);
+    expect(repos.compraRepository.save).toHaveBeenCalledWith(compras[0]);
+  });
+
+  it("rechaza con 403 si el evento es de otro organizador, sin guardar", async () => {
+    compras = [compraDel(eventos[0], { id: 7 })];
+    const promesa = service.validarEntrada(7, 1, usuarioKonex);
+    await expect(promesa).rejects.toBeInstanceOf(ForbiddenError);
+    expect(repos.compraRepository.save).not.toHaveBeenCalled();
+  });
+
+  it("rechaza con 404 un número de entrada inexistente, sin guardar", async () => {
+    compras = [compraDel(eventos[0], { id: 7, cantidad: 2 })];
+    const promesa = service.validarEntrada(7, 3, usuarioFenix);
+    await expect(promesa).rejects.toBeInstanceOf(NotFoundError);
+    await expect(promesa).rejects.toThrow("No existe la entrada");
+    expect(repos.compraRepository.save).not.toHaveBeenCalled();
+  });
+});
+
 describe("CompraService.listarDelEvento", () => {
   const PAGINA = { page: 1, limit: 20 };
   const ids = (resultado) => resultado.compras.map((c) => c.id);

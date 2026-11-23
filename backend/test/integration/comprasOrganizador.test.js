@@ -56,6 +56,50 @@ describe("POST /compras/:id/uso", () => {
   });
 });
 
+const validarEntrada = (id, numero, email = FENIX) =>
+  pedirComo(app, request(app).post(`/compras/${id}/entradas/${numero}/uso`), email);
+
+describe("POST /compras/:id/entradas/:numero/uso", () => {
+  it("Fénix valida las dos entradas de Ana por separado", async () => {
+    const id = await idDeCompra(ANA, PRIMAVERA);
+    const primera = await validarEntrada(id, 1);
+    expect(primera.status).toBe(200);
+    expect(primera.body.estado).toBe("UTILIZADA");
+    expect(primera.body.entradas.map((e) => e.puedeValidarse)).toEqual([false, true]);
+    const segunda = await validarEntrada(id, 2);
+    expect(segunda.status).toBe(200);
+    expect(segunda.body.entradas.every((e) => e.fechaUso !== null)).toBe(true);
+    const repetida = await validarEntrada(id, 2);
+    expect(repetida.status).toBe(422);
+    expect(repetida.body.message).toBe("Esta entrada ya fue utilizada");
+  });
+
+  it("Ana ve sus entradas en el detalle, sin poder validarlas", async () => {
+    const id = await idDeCompra(ANA, PRIMAVERA);
+    const res = await pedirComo(app, request(app).get(`/compras/${id}`), ANA);
+    expect(res.body.entradas).toEqual([
+      { numero: 1, fechaUso: null, puedeValidarse: false },
+      { numero: 2, fechaUso: null, puedeValidarse: false },
+    ]);
+  });
+
+  it("una compra PENDIENTE responde 422", async () => {
+    const res = await validarEntrada(await idDeCompra(ANA, "Los Piojos en River"), 1);
+    expect(res.status).toBe(422);
+    expect(res.body.message).toBe("La compra todavía no está pagada");
+  });
+
+  it("responde 404 sin compra o sin entrada y 400 con números inválidos", async () => {
+    const id = await idDeCompra(ANA, PRIMAVERA);
+    const sinEntrada = await validarEntrada(id, 9);
+    expect(sinEntrada.status).toBe(404);
+    expect(sinEntrada.body.message).toBe("No existe la entrada");
+    expect((await validarEntrada(999, 1)).body.message).toBe("No existe la compra");
+    expect((await validarEntrada(id, "abc")).status).toBe(400);
+    expect((await validarEntrada(id, 0)).status).toBe(400);
+  });
+});
+
 describe("GET /eventos/:id/compras", () => {
   it("Fénix ve la disponibilidad y las compras de Primavera Sonora, de la más nueva a la más vieja", async () => {
     const id = await idDeEvento(PRIMAVERA);
@@ -98,6 +142,10 @@ describe.each([
   [
     "GET /eventos/:id/compras",
     async (email) => comprasDelEvento(await idDeEvento(PRIMAVERA), {}, email),
+  ],
+  [
+    "POST /compras/:id/entradas/:numero/uso",
+    async (email) => validarEntrada(await idDeCompra(BRUNO, PRIMAVERA), 1, email),
   ],
 ])("permisos de %s", (_endpoint, pedir) => {
   it.each([

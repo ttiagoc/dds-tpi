@@ -87,17 +87,24 @@ function armarHistorial(estadoFinal, contexto) {
   }));
 }
 
+function armarEntradas({ estado, cantidad }, contexto) {
+  const fechaUso = estado === UTILIZADA ? momentoDe(UTILIZADA, contexto) : null;
+  return Array.from({ length: cantidad }, (_, i) => ({ numero: i + 1, fechaUso }));
+}
+
 function armarCompra(datos, { usuarios, eventos, ahora }) {
   const comprador = usuarios[datos.comprador];
   const evento = eventos[datos.evento];
   const fechaCompra = desplazar(ahora, -datos.haceDias * DIA);
+  const contexto = { comprador, evento, fechaCompra, ahora };
   const compra = new Compra({
     comprador,
     evento,
     tipoEntradaId: evento.tiposEntrada.find((t) => t.nombre === datos.tipo).id,
     cantidad: datos.cantidad,
     estado: datos.estado,
-    historial: armarHistorial(datos.estado, { comprador, evento, fechaCompra, ahora }),
+    historial: armarHistorial(datos.estado, contexto),
+    entradas: armarEntradas(datos, contexto),
     fechaCompra,
   });
   if (OCUPAN_CUPO.includes(compra.estado)) compra.tipoEntrada().reservar(compra.cantidad);

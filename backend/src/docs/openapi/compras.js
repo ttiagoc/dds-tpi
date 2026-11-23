@@ -16,6 +16,7 @@ import {
   nombreConId,
   propiedadesEvento,
   conAuth,
+  numeroDeEntrada,
 } from "./comun.js";
 
 const COMPRADOR = { rol: "COMPRADOR" };
@@ -118,7 +119,18 @@ export default {
         {
           summary: "Marcar una compra como utilizada",
           description:
-            'Solo el organizador del evento (403 si es de otro). Pasa de CONFIRMADA a UTILIZADA y habilita la reseña; se permite antes de la fecha del evento. Desde otro estado responde 422 (por ejemplo, "No se puede pasar de PENDIENTE a UTILIZADA").',
+            'Solo el organizador del evento (403 si es de otro). Pasa de CONFIRMADA a UTILIZADA, marca como usadas todas las entradas y habilita la reseña; se permite antes de la fecha del evento. Desde otro estado responde 422 (por ejemplo, "No se puede pasar de PENDIENTE a UTILIZADA").',
+        },
+        "ORGANIZADOR",
+      ),
+    },
+    "/compras/{id}/entradas/{numero}/uso": {
+      parameters: [idCompra, numeroDeEntrada],
+      post: accion(
+        {
+          summary: "Validar una entrada de la compra",
+          description:
+            'Solo el organizador del evento (403 si es de otro). Usa esa entrada; la primera validada pasa la compra de CONFIRMADA a UTILIZADA (R17). 404 "No existe la entrada" si el número está fuera de rango; 422 "La compra todavía no está pagada", "La compra está cancelada" o "Esta entrada ya fue utilizada". Solo emite `compra:estado` si la compra cambió de estado.',
         },
         "ORGANIZADOR",
       ),
@@ -211,6 +223,22 @@ export default {
         properties: {
           puntuacion: { type: "integer", example: 5 },
           detalle: texto("Un show inolvidable"),
+        },
+      },
+      entradas: {
+        type: "array",
+        description: "Una por unidad comprada (R16)",
+        items: {
+          type: "object",
+          properties: {
+            numero: { type: "integer", example: 1 },
+            fechaUso: { ...fecha, nullable: true },
+            puedeValidarse: {
+              ...booleano,
+              description:
+                "Solo true para el organizador del evento, con la compra CONFIRMADA o UTILIZADA y la entrada sin usar",
+            },
+          },
         },
       },
     }),

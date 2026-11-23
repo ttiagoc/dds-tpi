@@ -22,6 +22,7 @@ const OPERACIONES_DE_PLANES_03 = [
   "POST /compras/{id}/pago",
   "POST /compras/{id}/cancelacion",
   "POST /compras/{id}/uso",
+  "POST /compras/{id}/entradas/{numero}/uso",
   "POST /compras/{id}/resenia",
   "GET /compras/{id}/mensajes",
   "POST /compras/{id}/mensajes",

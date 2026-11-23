@@ -11,6 +11,7 @@ import {
   listarMensajes,
   listarMisCompras,
   marcarUtilizada,
+  validarEntrada,
   obtenerCompra,
   pagarCompra,
   reseniarCompra,
@@ -136,6 +137,13 @@ describe("marcarUtilizada", () => {
   it("hace POST /compras/:id/uso y devuelve data", async () => {
     expect(await marcarUtilizada(7)).toBe("respuesta");
     expect(cliente.post).toHaveBeenCalledWith("/compras/7/uso");
+  });
+});
+
+describe("validarEntrada", () => {
+  it("hace POST /compras/:id/entradas/:numero/uso y devuelve data", async () => {
+    expect(await validarEntrada(7, 2)).toBe("respuesta");
+    expect(cliente.post).toHaveBeenCalledWith("/compras/7/entradas/2/uso");
   });
 });
 

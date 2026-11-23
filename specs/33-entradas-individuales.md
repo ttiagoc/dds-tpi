@@ -1,6 +1,6 @@
 # Spec 33 — Entradas individuales con un QR cada una
 
-- **Estado:** aprobada
+- **Estado:** implementada
 - **Rama:** `feature/entradas-individuales`
 - **Casos de uso:** CU1, CU2, CU9
 - **Iteración:** It5c
@@ -37,7 +37,7 @@ Si la compra cambia de estado, se emite `compra:estado` como con el uso actual.
 ## Pantallas
 - **DetalleCompra (comprador)**: "Ver QR" (una entrada) o "Ver las N entradas" (`compra-ver-qr`), visible con la compra CONFIRMADA o UTILIZADA. El modal tiene una lista horizontal paginada (`FlatList` con `pagingEnabled`, `compra-qr-entradas`): cada página muestra "Entrada 2 de 3", el QR y, si ya se usó, el QR atenuado con "Usada" (`entrada-<n>-usada`). Abajo, puntos que indican la página (`compra-qr-pagina`). Se mantiene el brillo al máximo.
 - **DetalleCompra (ambos roles)**: con más de una entrada y alguna usada, debajo del resumen: "Entradas usadas: 1 de 2" (`compra-entradas-usadas`).
-- **EscanearEntrada**: lee compra y número; muestra comprador, "Entrada 2 de 3 · General" y el estado. "Validar entrada" llama al endpoint nuevo. Si `puedeValidarse` es `false`, se muestra el motivo: "Esta entrada ya fue utilizada", "Esta compra todavía no está pagada" o "Esta compra está cancelada". Después de validar: "Entrada validada" y, si quedan entradas sin usar, "Quedan N entradas de esta compra".
+- **EscanearEntrada**: lee compra y número; muestra comprador, "Entrada 2 de 3 · General" y el estado. "Validar entrada" llama al endpoint nuevo. Si `puedeValidarse` es `false`, se muestra el motivo: "Esta entrada ya fue utilizada", "Esta compra todavía no está pagada" o "Esta compra está cancelada". Después de validar: "Entrada validada" y, si quedan entradas sin usar, "Quedan N entradas de esta compra" ("Queda 1 entrada de esta compra" si es una).
 
 ## Criterios de aceptación
 ```gherkin
@@ -49,7 +49,7 @@ Escenario: deslizar entre las entradas
 Escenario: validar la primera entrada
   Dado que soy Fénix y escaneo la entrada 1 de esa compra
   Cuando toco "Validar entrada"
-  Entonces la entrada 1 queda usada, la compra pasa a UTILIZADA y veo "Quedan 1 entradas de esta compra"
+  Entonces la entrada 1 queda usada, la compra pasa a UTILIZADA y veo "Queda 1 entrada de esta compra"
 
 Escenario: validar la segunda después
   Dado que la entrada 1 ya se usó
