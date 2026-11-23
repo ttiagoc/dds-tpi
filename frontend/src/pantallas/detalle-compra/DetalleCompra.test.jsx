@@ -33,6 +33,9 @@ describe("DetalleCompra: datos", () => {
     expect(screen.getByTestId("compra-estado")).toHaveTextContent(/Confirmada/);
     expect(screen.getByTestId("dias-restantes")).toHaveTextContent("Faltan 12 días");
     expect(screen.getByTestId("compra-evento")).toHaveTextContent(/Los Piojos en River/);
+    expect(screen.getByTestId("compra-organizador")).toHaveTextContent(
+      "Organiza Fénix Producciones",
+    );
     expect(screen.getByText(/Campo × 2/)).toBeTruthy();
     expect(screen.getByText(/\$\s45\.000 c\/u/)).toBeTruthy();
     expect(screen.getByTestId("compra-total")).toHaveTextContent(/Total: \$\s90\.000/);

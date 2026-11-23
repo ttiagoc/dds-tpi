@@ -84,3 +84,6 @@ Escenario: sin conversaciones
 
 ## Notas de IA
 La IA propuso guardar la marca de lectura en el server (y no en el celular) para que el contador sea el mismo en web y en el teléfono; el usuario eligió eso y la pestaña para los dos roles.
+
+## Ajuste (23/11, rama `fix/chat-con-organizador`)
+El usuario notó que, en el chat del comprador, el título era el nombre del evento ("como si estuviera hablando con un evento"). `CompraResumen.evento` suma `organizador: { id, nombre }` (`planes/03`). El encabezado del chat muestra a la contraparte en los dos roles: el comprador ve al organizador y debajo "<evento> · #<compra>". DetalleCompra muestra "Organiza <nombre>" (`compra-organizador`).

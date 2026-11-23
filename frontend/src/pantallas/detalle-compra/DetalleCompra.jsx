@@ -52,6 +52,11 @@ function Evento({ evento }) {
         <View style={estilos.datos}>
           <Text variant="titleLarge">{evento.nombre}</Text>
           <FechaYLugar fecha={evento.fecha} lugar={evento.lugar} />
+          {evento.organizador && (
+            <Text variant="bodySmall" testID="compra-organizador">
+              {`Organiza ${evento.organizador.nombre}`}
+            </Text>
+          )}
         </View>
       </View>
     </TouchableRipple>

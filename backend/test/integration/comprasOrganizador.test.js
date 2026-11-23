@@ -74,6 +74,15 @@ describe("POST /compras/:id/entradas/:numero/uso", () => {
     expect(repetida.body.message).toBe("Esta entrada ya fue utilizada");
   });
 
+  it("el detalle de la compra trae al organizador del evento", async () => {
+    const id = await idDeCompra(ANA, PRIMAVERA);
+    const res = await pedirComo(app, request(app).get(`/compras/${id}`), ANA);
+    expect(res.body.evento.organizador).toEqual({
+      id: expect.any(Number),
+      nombre: "Fénix Producciones",
+    });
+  });
+
   it("Ana ve sus entradas en el detalle, sin poder validarlas", async () => {
     const id = await idDeCompra(ANA, PRIMAVERA);
     const res = await pedirComo(app, request(app).get(`/compras/${id}`), ANA);

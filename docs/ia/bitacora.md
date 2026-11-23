@@ -7,7 +7,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 | Métrica | Valor |
 |---|---|
 | Sesiones | 19 |
-| Features cerradas | 39 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
+| Features cerradas | 43 (It1 a It4 cerradas, It5b de rediseño, It5c de ajustes) |
 | Correcciones relevantes a la IA | 9 |
 | Skills creadas / mejoradas | 12 / 3 |
 
@@ -26,6 +26,7 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
 12. Verificaciones visuales sobre un servidor desactualizado: la versión web se levantó en modo CI, que no vigila los archivos, y las primeras capturas mostraban el código anterior al cambio; la IA lo detectó al comparar las capturas con lo implementado.
 13. Cambios de contrato que no llegan a la validación: el contrato pasó a aceptar rutas relativas de imágenes, pero la validación del cuerpo seguía exigiendo URLs absolutas; los tests no cubrían el flujo real de subir una foto y publicar, y el error lo encontró el usuario en el celular.
 14. Supuestos de plataforma que los tests no pueden verificar: dar por hecho que el margen seguro incluye la barra de navegación translúcida de iOS 26 y que una barra sobre el teclado numérico aparece en Expo Go. Los dos pasaron la suite y fallaron en el iPhone.
+15. Codificación al editar con el shell: PowerShell 5.1 leyó archivos UTF-8 sin BOM como ANSI y los reescribió con los acentos rotos; el error llegó a un commit antes de detectarse.
 
 ---
 
@@ -421,4 +422,19 @@ Registro por sesión. Es la base de la conclusión del video: qué aportó la IA
   - Un QR por compra y no por persona — la compra es la unidad del dominio que cambia de estado — propuesta de la IA.
   - Confirmar antes de validar y rechazar entradas de otro evento en el escáner — el back solo comprueba que el organizador sea dueño del evento de esa compra — la IA los agregó sin que se los pidieran y quedaron en la spec aprobada.
   - Las compras sucesivas al mismo evento no se agrupan — cada una tiene su propio pago, estado y cancelación — consulta del usuario; la IA propuso, como alternativa, agruparlas solo en la vista.
+
+### Sesión 19 (continuación) — entradas individuales y ajustes tras otra prueba
+- **Avances:**
+  - El QR se muestra en un modal y sube el brillo al máximo mientras está abierto (`expo-brightness`); al cerrarlo, el brillo vuelve al valor anterior.
+  - Spec 33: entradas individuales en el dominio (R16, R17), con un QR por entrada y un endpoint de validación por entrada. El comprador desliza entre sus entradas y el organizador las valida por separado.
+  - Spec 34: la cancelación se presenta como "Liberar reserva" si la compra está pendiente y como "Pedir reembolso" si está pagada.
+  - Las imágenes del seed se reemplazaron por fotos reales de Unsplash, revisadas una por una.
+  - El chat del comprador muestra al organizador como contraparte; para eso, `CompraResumen.evento` suma `organizador`.
+  - Verificación: 977 tests del back, 562 del front, lint y clones sin cambios (6). No se corrieron los flujos e2e: el puerto del back estaba ocupado por el servidor de desarrollo.
+- **Decisiones:**
+  - Entradas en el dominio en lugar de un carrusel con el mismo QR — con el carrusel, validar cualquier entrada habría marcado la compra entera — la IA desaconsejó el carrusel y el usuario eligió las entradas.
+  - La compra pasa a UTILIZADA con la primera entrada validada — así la reseña se habilita aunque alguien no vaya, y no se puede cancelar con gente ya adentro — propuesta de la IA, aceptada.
+  - El back manda `puedeValidarse` por entrada para que el escáner no reimplemente la regla — propuesta de la IA.
+  - El aviso de cambio de estado por socket se emite solo si el estado cambió — validar una segunda entrada no cambia nada — ajuste de la IA al reutilizar el flujo de acciones.
+- **Aprendizaje:** al marcar las specs como aprobadas con PowerShell 5.1, la IA leyó los archivos UTF-8 como ANSI y los guardó con los acentos rotos; quedó en un commit y se corrigió en el siguiente. Para editar archivos de texto conviene usar la herramienta de edición, no comandos del shell.
 

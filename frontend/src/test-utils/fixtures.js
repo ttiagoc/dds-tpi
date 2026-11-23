@@ -92,6 +92,7 @@ export function compraResumen(cambios = {}) {
       fecha: "2026-12-20T23:00:00.000Z",
       lugar: "Estadio River Plate",
       imagen: "https://imagenes.test/piojos.jpg",
+      organizador: { id: 2, nombre: "Fénix Producciones" },
     },
     tipoEntrada: { id: 10, nombre: "Campo", precio: 45000 },
     comprador: { id: 1, nombre: "Ana Pérez" },
