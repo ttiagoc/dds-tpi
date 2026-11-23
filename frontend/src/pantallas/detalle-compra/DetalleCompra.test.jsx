@@ -1,6 +1,7 @@
 import { act, screen, fireEvent, waitFor } from "@testing-library/react-native";
 import { ultimoSocket } from "socket.io-client";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import * as Brightness from "expo-brightness";
 import DetalleCompra from "./DetalleCompra";
 import { obtenerCompra } from "../../api/comprasApi";
 import { renderConProviders, ANA, FENIX } from "../../test-utils/renderConProviders";
@@ -12,6 +13,11 @@ import {
 } from "../../test-utils/detalleCompra";
 
 jest.mock("../../api/comprasApi");
+jest.mock("expo-brightness", () => ({
+  isAvailableAsync: jest.fn(() => Promise.resolve(true)),
+  getBrightnessAsync: jest.fn(() => Promise.resolve(0.5)),
+  setBrightnessAsync: jest.fn(() => Promise.resolve()),
+}));
 jest.mock("expo-router", () => require("../../test-utils/mockRouter").mockRouter());
 
 beforeEach(() => {
@@ -158,11 +164,17 @@ describe("DetalleCompra: reseña según el rol", () => {
 });
 
 describe("DetalleCompra: QR de la entrada", () => {
-  it("el comprador ve el QR de su compra confirmada", async () => {
+  it("el comprador abre el QR en un modal con el brillo al máximo y lo cierra", async () => {
     await abrir();
+    expect(screen.queryByTestId("compra-qr")).toBeNull();
+    expect(screen.queryByTestId("compra-qr-pendiente")).toBeNull();
+    await fireEvent.press(screen.getByTestId("compra-ver-qr"));
     expect(screen.getByTestId("compra-qr")).toHaveTextContent(/Mostrá este código en la entrada/);
     expect(screen.getByLabelText("Código QR de la compra 7")).toBeTruthy();
-    expect(screen.queryByTestId("compra-qr-pendiente")).toBeNull();
+    await waitFor(() => expect(Brightness.setBrightnessAsync).toHaveBeenLastCalledWith(1));
+    await fireEvent.press(screen.getByTestId("compra-qr-cerrar"));
+    await waitFor(() => expect(screen.queryByTestId("compra-qr")).toBeNull());
+    expect(Brightness.setBrightnessAsync).toHaveBeenLastCalledWith(0.5);
   });
 
   it("con la compra pendiente avisa que hay que pagarla", async () => {
@@ -171,7 +183,7 @@ describe("DetalleCompra: QR de la entrada", () => {
     expect(screen.getByTestId("compra-qr-pendiente")).toHaveTextContent(
       /Pagá la compra para ver tu entrada/,
     );
-    expect(screen.queryByTestId("compra-qr")).toBeNull();
+    expect(screen.queryByTestId("compra-ver-qr")).toBeNull();
   });
 
   it.each([["UTILIZADA"], ["CANCELADA"], ["REEMBOLSADA"]])(
@@ -179,14 +191,14 @@ describe("DetalleCompra: QR de la entrada", () => {
     async (estado) => {
       obtenerCompra.mockResolvedValue(compraDetalle({ estado, diasRestantes: null }));
       await abrir();
-      expect(screen.queryByTestId("compra-qr")).toBeNull();
+      expect(screen.queryByTestId("compra-ver-qr")).toBeNull();
       expect(screen.queryByTestId("compra-qr-pendiente")).toBeNull();
     },
   );
 
-  it("el organizador no ve el QR", async () => {
+  it("el organizador no ve el botón del QR", async () => {
     await abrir(FENIX);
-    expect(screen.queryByTestId("compra-qr")).toBeNull();
+    expect(screen.queryByTestId("compra-ver-qr")).toBeNull();
   });
 });
 

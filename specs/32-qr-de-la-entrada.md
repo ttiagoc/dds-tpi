@@ -34,20 +34,23 @@ No hay endpoints nuevos ni cambios de contrato. Se usan:
 | POST | `/compras/:id/uso` | marcar utilizada (R4) |
 
 ## Pantallas
-- **DetalleCompra**: tarjeta "Tu entrada" con el QR (`react-native-qrcode-svg` sobre `react-native-svg`, los dos funcionan en Expo Go) y el texto "Mostrá este código en la entrada". Colores del tema (QR oscuro sobre fondo claro también en tema oscuro, para que se pueda leer).
+- **DetalleCompra**: botón "Ver QR" (`compra-ver-qr`) que abre un `Modal` de Paper (`compra-qr`) con el título "Tu entrada", el QR (`react-native-qrcode-svg` sobre `react-native-svg`, los dos funcionan en Expo Go), el texto "Mostrá este código en la entrada" y "Cerrar" (`compra-qr-cerrar`). Colores del tema (QR oscuro sobre fondo claro también en tema oscuro, para que se pueda leer).
+- **Brillo** (`useBrilloMaximo`, con `expo-brightness`): mientras el modal está abierto, el brillo de la app sube al máximo; al cerrarlo vuelve al valor anterior. Si la app pasa a segundo plano se restaura, y al volver se sube de nuevo. Si el dispositivo no permite cambiar el brillo (web), no hace nada.
 - **ComprasDelEvento**: botón "Escanear entrada" (`escanear-entrada`) arriba de la lista. Abre la ruta nueva `eventos/[id]/escanear`.
 - **EscanearEntrada** (`eventos/[id]/escanear`, solo organizador, título "Escanear entrada"): `CameraView` de `expo-camera` con `barcodeScannerSettings={{ barcodeTypes: ["qr"] }}`. Al leer un QR se pausa el escaneo y se muestra el resultado (RQ3-RQ5). "Validar entrada" llama a `POST /compras/:id/uso` y muestra "Entrada validada" con un ícono. "Escanear otra" retoma la cámara.
   - Permiso de cámara denegado: "Necesitamos la cámara para escanear entradas" con un botón "Dar permiso".
   - Web: no hay escáner; se ve "El escáner está disponible en el celular" (`EscanearEntrada.web.jsx`).
   - Al volver a ComprasDelEvento la lista se recarga.
-- testIDs: `compra-qr`, `compra-qr-pendiente`, `escanear-entrada`, `escaner-camara`, `escaner-resultado`, `escaner-validar`, `escaner-validada`, `escaner-otra`, `escaner-error`, `escaner-sin-permiso`.
+- testIDs: `compra-ver-qr`, `compra-qr`, `compra-qr-cerrar`, `compra-qr-pendiente`, `escanear-entrada`, `escaner-camara`, `escaner-resultado`, `escaner-validar`, `escaner-validada`, `escaner-otra`, `escaner-error`, `escaner-sin-permiso`.
 
 ## Criterios de aceptación
 ```gherkin
 Escenario: el comprador ve el QR de su compra confirmada
   Dado que soy Ana y tengo la compra 7 CONFIRMADA
-  Cuando abro su detalle
-  Entonces veo el QR con "aiticketit:compra:7"
+  Cuando abro su detalle y toco "Ver QR"
+  Entonces veo un modal con el QR "aiticketit:compra:7" y el brillo sube al máximo
+  Cuando toco "Cerrar"
+  Entonces el modal se cierra y el brillo vuelve a como estaba
 
 Escenario: compra pendiente
   Dado que tengo una compra PENDIENTE
