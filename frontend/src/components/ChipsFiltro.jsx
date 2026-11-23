@@ -114,7 +114,7 @@ export function ChipsFiltro({ opciones, seleccionada, onElegir, prefijoTestID, a
 }
 
 const estilos = StyleSheet.create({
-  fila: { gap: espaciado.sm, paddingHorizontal: TAMANIO_FLECHA },
+  fila: { gap: espaciado.sm },
   chip: { borderRadius: radios.pill },
   flecha: { position: "absolute", top: 0, bottom: 0, justifyContent: "center" },
   izquierda: { left: -espaciado.xs },
